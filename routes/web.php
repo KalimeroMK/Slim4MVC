@@ -9,7 +9,6 @@ use App\Middleware\AuthMiddleware;
 return function ($app) {
     $app->get('/', function ($request, $response) {
         $response->getBody()->write('Hello from Slim 4!');
-
         return $response;
     });
 
