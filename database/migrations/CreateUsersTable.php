@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Migrations;
 
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -22,5 +24,4 @@ class CreateUsersTable extends BaseMigration
     {
         Capsule::schema()->dropIfExists('users');
     }
-
 }

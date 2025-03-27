@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Middleware;
 
+use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -15,8 +18,8 @@ class AuthMiddleware implements MiddlewareInterface
     {
         $authHeader = $request->getHeaderLine('Authorization');
 
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            return (new \Slim\Psr7\Response())->withStatus(401)->withJson(['error' => 'Unauthorized']);
+        if (! $authHeader || ! preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            return (new \Slim\Psr7\Response)->withStatus(401)->withJson(['error' => 'Unauthorized']);
         }
 
         $token = $matches[1];
@@ -24,8 +27,8 @@ class AuthMiddleware implements MiddlewareInterface
         try {
             $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
             $request = $request->withAttribute('user', $decoded);
-        } catch (\Exception $e) {
-            return (new \Slim\Psr7\Response())->withStatus(401)->withJson(['error' => 'Invalid token']);
+        } catch (Exception $e) {
+            return (new \Slim\Psr7\Response)->withStatus(401)->withJson(['error' => 'Invalid token']);
         }
 
         return $handler->handle($request);

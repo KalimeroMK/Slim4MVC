@@ -6,8 +6,7 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 
 1. Clone the repository to your local machine:
     ```bash
-    git clone <repository link>
-    cd <folder name>
+    git clone https://github.com/KalimeroMK/Slim4MVC
     ```
 
 2. Ensure you have Docker and Docker Compose installed on your system. For installation, check [Docker's Documentation](https://docs.docker.com/get-docker/).
@@ -19,19 +18,23 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 
 4. This will start the Docker container for the application and the database. The project will be available at [http://localhost:81](http://localhost:81).
 
-## Creating and Running Migrations
+## Creating model and migration 
 
-The project uses Illuminate Database for running migrations. Follow these steps to create and run migrations:
-
-1. **Creating a New Migration:**
+1. **Creating a New Model:**
    To create a new migration, use the following command:
     ```bash
-    php run_migrations.php
+    php cli.php make-model ModelName
     ```
+   This will create a new model file in App\Models\ModelName
 
+2. **Creating a New Migration:**
+
+   ```bash
+    php cli.php make-model ModelName -m
+    ```
    This will create a new migration file. You can edit it and add new migrations for your database.
 
-2. **Running Migrations:**
+3. **Running Migrations:**
    To run database migrations, use the same command:
     ```bash
     php run_migrations.php

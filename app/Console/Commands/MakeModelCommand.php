@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Symfony\Component\Console\Command\Command;
@@ -32,53 +34,54 @@ class MakeModelCommand extends Command
 
         // Generate Migration if -m is passed
         if ($createMigration) {
-            $this->createMigration($modelName, $output, $projectRoot);
+            $this->createMigration($modelName, $output);
         }
 
-        $output->writeln("<info>Model created successfully!</info>");
+        $output->writeln('<info>Model created successfully!</info>');
 
         return Command::SUCCESS;
     }
 
-    protected function createModel(string $modelName, OutputInterface $output, string $projectRoot)
+    protected function createModel(string $modelName, OutputInterface $output, string $projectRoot): void
     {
-        $modelDir = $projectRoot . '/Models/';
-        $modelPath = $modelDir . $modelName . '.php';
+        $modelDir = $projectRoot.'/Models/';
+        $modelPath = $modelDir.$modelName.'.php';
 
-        if (!is_dir($modelDir)) {
+        if (! is_dir($modelDir)) {
             mkdir($modelDir, 0777, true);
         }
         $projectRoot = dirname(__DIR__, 3);
 
         // Load stub and replace placeholder
-        $stubPath = $projectRoot . '/stubs/model.stub';
+        $stubPath = $projectRoot.'/stubs/model.stub';
         if (file_exists($stubPath)) {
             $modelTemplate = file_get_contents($stubPath);
             $modelTemplate = str_replace('{{className}}', $modelName, $modelTemplate);
         } else {
             $output->writeln("<error>Stub file not found: $stubPath</error>");
+
             return;
         }
 
         file_put_contents($modelPath, $modelTemplate);
-        $output->writeln("<info>Model created: </info>" . realpath($modelPath));
+        $output->writeln('<info>Model created: </info>'.realpath($modelPath));
     }
 
     protected function createMigration(string $modelName, OutputInterface $output): void
     {
         $projectRoot = dirname(__DIR__, 3);
 
-        $migrationDir = $projectRoot . '/database/migrations/';
-        $className = 'Create' . ucfirst($modelName) . 'Table';
-        $tableName = strtolower($modelName) . 's'; // Converts "User" → "users"
-        $migrationPath = $migrationDir . $className . '.php';
+        $migrationDir = $projectRoot.'/database/migrations/';
+        $className = 'Create'.ucfirst($modelName).'Table';
+        $tableName = mb_strtolower($modelName).'s';
+        $migrationPath = $migrationDir.$className.'.php';
 
-        if (!is_dir($migrationDir)) {
+        if (! is_dir($migrationDir)) {
             mkdir($migrationDir, 0777, true);
         }
 
         // Load stub and replace placeholders
-        $stubPath = $projectRoot . '/stubs/migration.stub';
+        $stubPath = $projectRoot.'/stubs/migration.stub';
         if (file_exists($stubPath)) {
             $migrationTemplate = file_get_contents($stubPath);
             $migrationTemplate = str_replace(
@@ -88,10 +91,11 @@ class MakeModelCommand extends Command
             );
         } else {
             $output->writeln("<error>Stub file not found: $stubPath</error>");
+
             return;
         }
 
         file_put_contents($migrationPath, $migrationTemplate);
-        $output->writeln("<info>Migration created: </info>" . realpath($migrationPath));
+        $output->writeln('<info>Migration created: </info>'.realpath($migrationPath));
     }
 }

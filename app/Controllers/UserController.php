@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\User;
@@ -11,7 +13,7 @@ class UserController
     public function update(Request $request, Response $response, array $args)
     {
         $user = User::find($args['id']);
-        if (!$user) {
+        if (! $user) {
             return $response->withJson(['error' => 'User not found'], 404);
         }
 

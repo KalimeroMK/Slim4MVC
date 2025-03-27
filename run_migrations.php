@@ -1,9 +1,11 @@
 <?php
 
-require __DIR__ . '/vendor/autoload.php';  // Ensure Composer autoload is included
+declare(strict_types=1);
 
-use Illuminate\Database\Capsule\Manager as Capsule;
+require __DIR__.'/vendor/autoload.php';  // Ensure Composer autoload is included
+
 use Database\Migrations\CreateUsersTable;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 // Function to check if the migration table exists
 function migrationTableExists(): bool
@@ -63,7 +65,7 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 // Check and create migrations table if it doesn't exist
-if (!migrationTableExists()) {
+if (! migrationTableExists()) {
     createMigrationsTable();
     echo "Migrations table created.\n";
 }
@@ -79,7 +81,7 @@ foreach ($migrations as $migrationClass) {
     $migrationName = $migrationClass;  // Use the class name as the migration name
 
     // Check if the migration has already been run
-    if (!migrationAlreadyRun($migrationName)) {
+    if (! migrationAlreadyRun($migrationName)) {
         try {
             // Run the migration
             $migration = new $migrationClass;
@@ -90,7 +92,7 @@ foreach ($migrations as $migrationClass) {
 
             echo "Migration {$migrationName} applied.\n";
         } catch (Exception $e) {
-            echo "Error while applying migration {$migrationName}: " . $e->getMessage() . "\n";
+            echo "Error while applying migration {$migrationName}: ".$e->getMessage()."\n";
         }
     } else {
         echo "Migration {$migrationName} has already been run.\n";

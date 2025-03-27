@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\User;
@@ -27,21 +29,21 @@ class AuthController
         $data = $request->getParsedBody();
         $user = User::where('email', $data['email'])->first();
 
-        if (!$user || !password_verify($data['password'], $user->password)) {
+        if (! $user || ! password_verify($data['password'], $user->password)) {
             return $response->withJson(['error' => 'Invalid credentials'], 401);
         }
 
         $payload = [
             'id' => $user->id,
             'email' => $user->email,
-            'exp' => time() + 60 * 60 * 24 //
+            'exp' => time() + 60 * 60 * 24, //
         ];
 
         $token = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
 
         return $response->withJson([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 }

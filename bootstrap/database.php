@@ -1,22 +1,24 @@
 <?php
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-use Dotenv\Dotenv;
+declare(strict_types=1);
 
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+use Dotenv\Dotenv;
+use Illuminate\Database\Capsule\Manager as Capsule;
+
+$dotenv = Dotenv::createImmutable(__DIR__.'/../');
 $dotenv->load();
 
 $capsule = new Capsule;
 
 $capsule->addConnection([
-    'driver'    => $_ENV['DB_CONNECTION'],
-    'host'      => $_ENV['DB_HOST'],
-    'database'  => $_ENV['DB_DATABASE'],
-    'username'  => $_ENV['DB_USERNAME'],
-    'password'  => $_ENV['DB_PASSWORD'],
-    'charset'   => 'utf8',
+    'driver' => $_ENV['DB_CONNECTION'],
+    'host' => $_ENV['DB_HOST'],
+    'database' => $_ENV['DB_DATABASE'],
+    'username' => $_ENV['DB_USERNAME'],
+    'password' => $_ENV['DB_PASSWORD'],
+    'charset' => 'utf8',
     'collation' => 'utf8_unicode_ci',
-    'prefix'    => '',
+    'prefix' => '',
 ]);
 
 $capsule->setAsGlobal();

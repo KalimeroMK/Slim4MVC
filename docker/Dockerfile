@@ -1,5 +1,5 @@
 # Stage 1: Build dependencies
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.4-fpm-alpine AS builder
 
 # Install system dependencies
 RUN apk add --no-cache \
