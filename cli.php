@@ -16,7 +16,7 @@ $app = AppFactory::create();
 
 // Load routes from routes/web.php
 (require __DIR__ . '/routes/web.php')($app); // Execute the closure and pass the app
-
+(require __DIR__ . '/routes/api.php')($app); // Execute the closure and pass the app
 // Create console application
 $application = new Application();
 
