@@ -10,6 +10,6 @@ $app = AppFactory::create();
 
 (require __DIR__.'/../routes/web.php')($app);
 (require __DIR__.'/../routes/api.php')($app);
-
+(require __DIR__.'/../bootstrap/database.php');
 
 $app->run();
