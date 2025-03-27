@@ -1,0 +1,67 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use Psr\Http\Message\RequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
+
+class {{controllerName}}Controller
+{
+    // Display a listing of the resource
+    public function index(Request $request, Response $response)
+    {
+        // Add your logic here for listing resources
+        $response->getBody()->write('Displaying a list of {{controllerName}} resources');
+        return $response;
+    }
+
+    // Show the form for creating a new resource
+    public function create(Request $request, Response $response)
+    {
+        // Add your logic here for showing the form to create a new resource
+        $response->getBody()->write('Displaying form to create {{controllerName}} resource');
+        return $response;
+    }
+
+    // Store a newly created resource in storage
+    public function store(Request $request, Response $response)
+    {
+        // Add your logic here for storing a new resource
+        $response->getBody()->write('{{controllerName}} resource created');
+        return $response;
+    }
+
+    // Display the specified resource
+    public function show(Request $request, Response $response, array $args)
+    {
+        // Add your logic here for showing a specific resource
+        $response->getBody()->write('Displaying {{controllerName}} resource with ID: ' . $args['id']);
+        return $response;
+    }
+
+    // Show the form for editing the specified resource
+    public function edit(Request $request, Response $response, array $args)
+    {
+        // Add your logic here for showing the form to edit a resource
+        $response->getBody()->write('Displaying form to edit {{controllerName}} resource with ID: ' . $args['id']);
+        return $response;
+    }
+
+    // Update the specified resource in storage
+    public function update(Request $request, Response $response, array $args)
+    {
+        // Add your logic here for updating a resource
+        $response->getBody()->write('{{controllerName}} resource with ID: ' . $args['id'] . ' updated');
+        return $response;
+    }
+
+    // Remove the specified resource from storage
+    public function destroy(Request $request, Response $response, array $args)
+    {
+        // Add your logic here for deleting a resource
+        $response->getBody()->write('{{controllerName}} resource with ID: ' . $args['id'] . ' deleted');
+        return $response;
+    }
+}

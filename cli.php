@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\CreateControllerCommand;
 use App\Console\Commands\ListRoutesCommand;
+use App\Console\Commands\MakeModelCommand;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Console\Application;
 
@@ -20,6 +22,9 @@ $application = new Application();
 
 // Register the ListRoutesCommand and pass $app to it
 $application->add(new ListRoutesCommand($app));
+$application->add(new CreateControllerCommand);
+$application->add(new MakeModelCommand());
+
 
 // Run the console application
 $application->run();

@@ -42,6 +42,18 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 
    If the migration has already been run, the system will skip it without an error.
 
+4. **Creating controllers:**
+   To create controller you can use:
+    ```bash
+     php cli.php make:controller ControllerName
+    ```
+   
+5. **List routes:**
+   To list all you can use:
+    ```bash
+     php cli.php list-routes
+    ```
+
 ### Project Structure
 
 The project has the following structure:
