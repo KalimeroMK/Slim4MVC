@@ -6,10 +6,10 @@ namespace App\Controllers;
 
 use App\Models\User;
 use Firebase\JWT\JWT;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 use Random\RandomException;
 
 class AuthController
@@ -62,13 +62,13 @@ class AuthController
         $email = $data['email'];
 
         // Validate email format
-        if (!v::email()->validate($email)) {
+        if (! v::email()->validate($email)) {
             return $response->withJson(['error' => 'Invalid email address'], 400);
         }
 
         $user = User::where('email', $email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $response->withJson(['error' => 'Email not found'], 404);
         }
 
@@ -95,7 +95,7 @@ class AuthController
         // Validate the reset token
         $user = User::where('password_reset_token', $resetToken)->first();
 
-        if (!$user) {
+        if (! $user) {
             return $response->withJson(['error' => 'Invalid or expired reset token'], 400);
         }
 
@@ -113,7 +113,7 @@ class AuthController
         $mail = new PHPMailer(true);
 
         try {
-            //Server settings
+            // Server settings
             $mail->isSMTP();
             $mail->Host = getenv('MAIL_HOST'); // SMTP server from .env
             $mail->SMTPAuth = true;
@@ -122,21 +122,21 @@ class AuthController
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = getenv('MAIL_PORT'); // SMTP port from .env
 
-            //Recipients
+            // Recipients
             $mail->setFrom(getenv('MAIL_FROM_ADDRESS'), getenv('MAIL_FROM_NAME'));
             $mail->addAddress($email); // User email to send the reset link
 
-            //Content
+            // Content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = 'https://yourapp.com/reset-password?token=' . $resetToken;
-            $mail->Body    = 'To reset your password, please click the following link: <a href="' . $resetLink . '">Reset Password</a>';
+            $resetLink = getenv('MAIL_PORT').'/reset-password?token='.$resetToken;
+            $mail->Body = 'To reset your password, please click the following link: <a href="'.$resetLink.'">Reset Password</a>';
 
             // Send the email
             $mail->send();
         } catch (Exception $e) {
             // Log error if mail fails
-            error_log('Message could not be sent. Mailer Error: ' . $mail->ErrorInfo);
+            error_log('Message could not be sent. Mailer Error: '.$mail->ErrorInfo);
         }
     }
 }
