@@ -1,0 +1,45 @@
+services:
+  app:
+    container_name: slim_app
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - slim
+  db:
+    container_name: slim_db
+    image: mariadb:latest
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: slim
+      MYSQL_USER: slim
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - slim
+  nginx:
+    image: nginx:latest
+    container_name: nginx_slim
+    restart: unless-stopped
+    ports:
+      - "81:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - slim
+networks:
+  slim:
+    driver: bridge
+volumes:
+  db_data:
