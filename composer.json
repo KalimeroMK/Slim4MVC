@@ -41,6 +41,8 @@
     "sort-packages": true
   },
   "require-dev": {
-    "laravel/pint": "^1.21"
+    "laravel/pint": "^1.21",
+    "rector/rector": "2.0.9"
+
   }
 }

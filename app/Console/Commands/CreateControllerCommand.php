@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputArgument;
 
 class CreateControllerCommand extends Command
 {
@@ -29,8 +31,9 @@ class CreateControllerCommand extends Command
         $stubPath = $projectRoot.'/stubs/controller.stub';
 
         // Ensure the stub file exists
-        if (!file_exists($stubPath)) {
-            $output->writeln("<error>Stub file not found!</error>");
+        if (! file_exists($stubPath)) {
+            $output->writeln('<error>Stub file not found!</error>');
+
             return Command::FAILURE;
         }
 
@@ -40,11 +43,12 @@ class CreateControllerCommand extends Command
         // Define the file path for the controller
         $projectRoot = dirname(__DIR__, 3);
 
-        $filePath = $projectRoot . '/app/Controllers/' . $controllerName . 'Controller.php';
+        $filePath = $projectRoot.'/app/Controllers/'.$controllerName.'Controller.php';
 
         // Check if the controller already exists
         if (file_exists($filePath)) {
-            $output->writeln("<error>Controller already exists!</error>");
+            $output->writeln('<error>Controller already exists!</error>');
+
             return Command::FAILURE;
         }
 

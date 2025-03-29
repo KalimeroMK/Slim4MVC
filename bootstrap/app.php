@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 use DI\Container;
 use Slim\Factory\AppFactory;
 use Support\Blade;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
 $container = new Container;
 
-$container->set(Blade::class, function () {
-    $views = __DIR__ . '/../resources/views';
-    $cache = __DIR__ . '/../storage/cache/';
+$container->set(Blade::class, function (): Blade {
+    $views = __DIR__.'/../resources/views';
+    $cache = __DIR__.'/../storage/cache/';
+
     return new Blade($views, $cache);
 });
-$settings = require __DIR__ . '/../bootstrap/settings.php';
+$settings = require __DIR__.'/../bootstrap/settings.php';
 $settings($container);
 
 AppFactory::setContainer($container);

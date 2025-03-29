@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-
 $projectRoot = dirname(__DIR__, 1);
 $envPath = $projectRoot.'/.env';
 $dotenv = Dotenv::createUnsafeImmutable($projectRoot);

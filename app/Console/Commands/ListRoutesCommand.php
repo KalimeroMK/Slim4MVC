@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Slim\App;
@@ -11,7 +13,7 @@ class ListRoutesCommand extends Command
 {
     protected static $defaultName = 'list-routes';
 
-    private $app;
+    private App $app;
 
     public function __construct(App $app)
     {
@@ -32,7 +34,7 @@ class ListRoutesCommand extends Command
         $routes = $routeCollector->getRoutes();
 
         // Output the list of routes
-        $output->writeln("Registered Routes:");
+        $output->writeln('Registered Routes:');
 
         foreach ($routes as $route) {
             $methods = implode(', ', $route->getMethods());
