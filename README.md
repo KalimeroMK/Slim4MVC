@@ -23,14 +23,14 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 1. **Creating a New Model:**
    To create a new migration, use the following command:
     ```bash
-    php cli.php make-model ModelName
+    php slim make-model ModelName
     ```
    This will create a new model file in App\Models\ModelName
 
 2. **Creating a New Migration:**
 
    ```bash
-    php cli.php make-model ModelName -m
+    php slim make-model ModelName -m
     ```
    This will create a new migration file. You can edit it and add new migrations for your database.
 
@@ -45,13 +45,13 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 4. **Creating controllers:**
    To create controller you can use:
     ```bash
-     php cli.php make:controller ControllerName
+     php slim make:controller ControllerName
     ```
    
 5. **List routes:**
    To list all you can use:
     ```bash
-     php cli.php list-routes
+     php slim list-routes
     ```
 
 ### Project Structure

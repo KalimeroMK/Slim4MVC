@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Controllers\AuthController;
-use App\Controllers\UserController;
-use App\Middleware\AuthMiddleware;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\AuthMiddleware;
 
 return function ($app) {
     // Add the api/v1 prefix to the routes

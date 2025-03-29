@@ -11,13 +11,13 @@ class CreateControllerCommand extends Command
 {
     protected static $defaultName = 'make:controller';
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Creates a new controller.')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the controller');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Get controller name from the argument
         $controllerName = $input->getArgument('name');
