@@ -2,22 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Validation\Factory;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class UserController
+class UserController extends BaseController
 {
-    protected mixed $validator;
-
-    public function __construct(Factory $validator)
-    {
-        $this->validator = $validator;
-    }
 
     public function index(Request $request, Response $response): Response
     {

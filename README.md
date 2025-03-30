@@ -172,6 +172,35 @@ $app->get('/', function ($req, $res) {
   return $res;
 });
 ```
+### Validation
+
+```php
+public function register(Request $request, Response $response)
+{
+    $data = $request->getParsedBody();
+
+    $rules = [
+        'name' => 'required|string',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:8',
+        'password_confirmation' => 'required|same:password',
+    ];
+
+    $validation = $this->validator->make($data, $rules);
+
+    if ($validation->fails()) {
+        return $response->withJson(['errors' => $validation->errors()->all()], 400);
+    }
+
+    $user = new User();
+    $user->email = $data['email'];
+    $user->password = password_hash($data['password'], PASSWORD_BCRYPT);
+    $user->save();
+
+    return $response->withJson(['status' => 'success']);
+}
+```
+
 
 ## Docker Configuration
 
