@@ -43,7 +43,7 @@ class CreateControllerCommand extends Command
         // Define the file path for the controller
         $projectRoot = dirname(__DIR__, 3);
 
-        $filePath = $projectRoot.'/app/Controllers/'.$controllerName.'Controller.php';
+        $filePath = $projectRoot.'/app/Http/Controllers/'.$controllerName.'Controller.php';
 
         // Check if the controller already exists
         if (file_exists($filePath)) {
