@@ -64,6 +64,13 @@ The project has the following structure:
 │   │   ├── Controllers/
 │   │   ├── Middleware/
 │   ├── Models/
+│   ├── View/
+│   │   ├── Blade.php
+│   │   ├── BladeFactory.php
+│   │   ├── BladeAssetsHelper.php
+│   │   ├── BladeViewHelper.php
+│   ├── Support/
+│   │   ├── Helpers.php
 │   ├── config.php
 │── bootstrap/
 │   ├── app.php
@@ -71,7 +78,7 @@ The project has the following structure:
 │── public/
 │   ├── index.php
 │── database/
-│   ├── migrations
+│   ├── migrations/
 │── routes/
 │   ├── web.php
 │── resources/

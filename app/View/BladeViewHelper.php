@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Psr\Http\Message\ResponseInterface as Response;
-use Support\Blade;
+use View\Blade;
 
 if (! function_exists('view')) {
     function view(Response $response, $template, $with = []): Response

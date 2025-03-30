@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Support;
+namespace View;
 
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
@@ -13,26 +13,26 @@ use Illuminate\View\Engines\EngineResolver;
 use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 
-class Blade
+class BladeFactory
 {
     protected $factory;
 
-    public function __construct(string $views, string $cache)
+    public function __construct()
     {
-        $this->setupBlade($views, $cache);
+        $this->setupBlade();
     }
 
-    public function make(string $template, array $data = []): string
+    public function render(string $view, array $data = []): string
     {
-        return $this->factory->make($template, $data)->render();
+        return $this->factory->make($view, $data)->render();
     }
 
-    private function setupBlade(string $views, string $cache): void
+    private function setupBlade(): void
     {
         $files = new Filesystem();
         $config = new Repository([
-            'view.paths' => [$views],
-            'view.compiled' => $cache,
+            'view.paths' => [__DIR__.'/../resources/views'],
+            'view.compiled' => __DIR__.'/../storage/cache',
         ]);
 
         $compiler = new BladeCompiler($files, $config->get('view.compiled'));

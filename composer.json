@@ -29,12 +29,12 @@
   "autoload": {
     "psr-4": {
       "App\\": "app/",
-      "Support\\": "support",
+      "Support\\": "app/View",
       "Database\\Migrations\\": "database/migrations/"
     },
     "files": [
-      "support/BladeViewHelper.php",
-      "support/BladeAssetHelper.php"
+      "app/View/BladeViewHelper.php",
+      "app/View/BladeAssetHelper.php"
 
     ]
   },
