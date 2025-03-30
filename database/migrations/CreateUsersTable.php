@@ -17,6 +17,7 @@ class CreateUsersTable
             $table->string('email')->unique();
             $table->string('password');
             $table->string('password_reset_token')->nullable();
+            $table->string('email_verified_at')->nullable();
             $table->timestamps();
         });
     }
