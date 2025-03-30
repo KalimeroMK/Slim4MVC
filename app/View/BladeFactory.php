@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace View;
+namespace App\View;
 
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
@@ -31,8 +31,8 @@ class BladeFactory
     {
         $files = new Filesystem();
         $config = new Repository([
-            'view.paths' => [__DIR__.'/../resources/views'],
-            'view.compiled' => __DIR__.'/../storage/cache',
+            'view.paths' => [__DIR__.'/../../resources/views'],
+            'view.compiled' => __DIR__.'/../../storage/cache',
         ]);
 
         $compiler = new BladeCompiler($files, $config->get('view.compiled'));

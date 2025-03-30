@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace View;
+namespace App\View;
 
 use Illuminate\Config\Repository;
 use Illuminate\Events\Dispatcher;
