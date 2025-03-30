@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Firebase\JWT\JWT;
-use Illuminate\Validation\Factory;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Container\ContainerExceptionInterface;
@@ -29,6 +28,9 @@ class AuthController
         $this->validator = $container->get('validator');
     }
 
+    /**
+     * @return mixed
+     */
     public function register(Request $request, Response $response)
     {
         $data = $request->getParsedBody();
@@ -54,7 +56,9 @@ class AuthController
         return $response->withJson(['status' => 'success']);
     }
 
-    // Login method
+    /**
+     * @return mixed
+     */
     public function login(Request $request, Response $response)
     {
         $data = $request->getParsedBody();
@@ -78,9 +82,9 @@ class AuthController
         ]);
     }
 
-    // Password recovery method
-
     /**
+     * @return mixed
+     *
      * @throws RandomException
      */
     public function passwordRecovery(Request $request, Response $response)
@@ -112,7 +116,9 @@ class AuthController
         return $response->withJson(['message' => 'Password recovery email sent'], 200);
     }
 
-    // Reset password method
+    /**
+     * @return mixed
+     */
     public function resetPassword(Request $request, Response $response)
     {
         $data = $request->getParsedBody();
@@ -134,7 +140,6 @@ class AuthController
         return $response->withJson(['message' => 'Password successfully reset'], 200);
     }
 
-    // Helper method to send the password reset email
     private function sendPasswordResetEmail(string $email, string $resetToken): void
     {
         $mail = new PHPMailer(true);
