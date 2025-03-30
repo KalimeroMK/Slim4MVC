@@ -1,6 +1,6 @@
 # Slim 4 MVC Starter Kit with Docker
 
-This project is created with the Slim 4 framework uses Docker for configuration and development and flows MVC pattern . It includes support for migrations using Illuminate Database.
+This project is created with the Slim 4 framework, uses Docker for configuration and development, and follows the MVC pattern. It includes support for migrations using Illuminate Database.
 
 ## Setting Up the Project
 
@@ -18,14 +18,14 @@ This project is created with the Slim 4 framework uses Docker for configuration 
 
 4. This will start the Docker container for the application and the database. The project will be available at [http://localhost:81](http://localhost:81).
 
-## Creating model and migration 
+## Creating model and migration
 
 1. **Creating a New Model:**
    To create a new migration, use the following command:
     ```bash
     php slim make-model ModelName
     ```
-   This will create a new model file in App\Models\ModelName
+   This will create a new model file in `app/Models/ModelName.php`.
 
 2. **Creating a New Migration:**
 
@@ -43,13 +43,13 @@ This project is created with the Slim 4 framework uses Docker for configuration 
    If the migration has already been run, the system will skip it without an error.
 
 4. **Creating controllers:**
-   To create controller you can use:
+   To create a controller, you can use:
     ```bash
      php slim make:controller ControllerName
     ```
-   
+
 5. **List routes:**
-   To list all you can use:
+   To list all routes, you can use:
     ```bash
      php slim list-routes
     ```
@@ -60,8 +60,9 @@ The project has the following structure:
 
 ```
 │── app/
-│   ├── Controllers/
-│   ├── Middleware/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   ├── Middleware/
 │   ├── Models/
 │   ├── config.php
 │── bootstrap/
@@ -73,8 +74,84 @@ The project has the following structure:
 │   ├── migrations
 │── routes/
 │   ├── web.php
+│── resources/
+│   ├── views/
+│── storage/
+│   ├── cache/
 │── .env
 │── composer.json
+```
+
+## Blade Templating
+
+This project uses Blade templating engine similar to Laravel. To render a Blade view, you can use the `view` function in your controllers.
+
+Example:
+```php
+public function index(Request $request, Response $response): Response
+{
+    $data = [
+        'title' => 'Welcome',
+        'content' => 'Welcome to Slim 4 with Blade!',
+    ];
+
+    return view($response, 'welcome', $data);
+}
+```
+
+## CSRF Protection
+
+To handle CSRF protection, this project uses the Slim CSRF package. The CSRF middleware is automatically added to your routes.
+
+Example route with CSRF middleware:
+```php
+$app->post('/your-endpoint', 'YourController:yourMethod')->add('csrf');
+```
+
+## Session Management
+
+This project uses a session helper class for session management. You can register the session helper globally or instantiate it in your routes.
+
+### Using Session Helper in Routes
+
+```php
+$app->get('/', function ($req, $res) {
+  // or $this->get('session') if registered
+  $session = new \SlimSession\Helper();
+
+  // Check if variable exists
+  $exists = $session->exists('my_key');
+  $exists = isset($session->my_key);
+  $exists = isset($session['my_key']);
+
+  // Get variable value
+  $my_value = $session->get('my_key', 'default');
+  $my_value = $session->my_key;
+  $my_value = $session['my_key'];
+
+  // Set variable value
+  $this->get('session')->set('my_key', 'my_value');
+  $session->my_key = 'my_value';
+  $session['my_key'] = 'my_value';
+
+  // Merge value recursively
+  $this->get('session')->merge('my_key', ['first' => 'value']);
+  $session->merge('my_key', ['second' => ['a' => 'A']]);
+  $letter_a = $session['my_key']['second']['a']; // "A"
+
+  // Delete variable
+  $session->delete('my_key');
+  unset($session->my_key);
+  unset($session['my_key']);
+
+  // Destroy session
+  $session::destroy();
+
+  // Get session id
+  $id = $this->session::id();
+
+  return $res;
+});
 ```
 
 ## Docker Configuration
