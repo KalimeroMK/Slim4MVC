@@ -1,4 +1,4 @@
-# Slim 4 MVC Starter Kit with Docker
+# Slim 4 MVC Starter Kit with Eloquent and Laravel Migrations
 
 This project is created with the Slim 4 framework, uses Docker for configuration and development, and follows the MVC pattern. It includes support for migrations using Illuminate Database.
 
@@ -111,6 +111,18 @@ $app->post('/your-endpoint', 'YourController:yourMethod')->add('csrf');
 ## Session Management
 
 This project uses a session helper class for session management. You can register the session helper globally or instantiate it in your routes.
+
+### Registering Session Helper Globally
+
+```php
+$container = new \DI\Container();
+
+// Register globally to app
+$container->set('session', function () {
+  return new \SlimSession\Helper();
+});
+\Slim\Factory\AppFactory::setContainer($container);
+```
 
 ### Using Session Helper in Routes
 

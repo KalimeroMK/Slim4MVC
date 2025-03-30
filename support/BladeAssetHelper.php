@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 if (! function_exists('asset')) {
-    function asset($path): string
+    function asset(string $path): string
     {
-        return '/public/'.ltrim($path, '/');
+        return '/' . ltrim($path, '/'); 
     }
 }

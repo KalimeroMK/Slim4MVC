@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\StaticFileMiddleware;
 use DI\Container;
 use Slim\Csrf\Guard;
 use Slim\Factory\AppFactory;
@@ -33,5 +34,6 @@ $app->add(
 (require __DIR__.'/../bootstrap/database.php');
 (require __DIR__.'/../routes/web.php')($app);
 (require __DIR__.'/../routes/api.php')($app);
+$app->add(new StaticFileMiddleware());
 
 $app->run();
