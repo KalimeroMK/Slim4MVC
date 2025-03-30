@@ -21,7 +21,7 @@ $app = AppFactory::create();
 
 $responseFactory = $app->getResponseFactory();
 
-$container->set('csrf', function () use ($responseFactory) {
+$container->set('csrf', function () use ($responseFactory): Guard {
     return new Guard($responseFactory);
 });
 $app->add(

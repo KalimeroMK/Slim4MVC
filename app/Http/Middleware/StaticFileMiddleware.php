@@ -17,13 +17,13 @@ class StaticFileMiddleware implements MiddlewareInterface
     {
         $uri = $request->getUri()->getPath();
 
-        if (!str_starts_with($uri, '/public/')) {
+        if (! str_starts_with($uri, '/public/')) {
             return $handler->handle($request);
         }
 
-        $file = __DIR__ . '/../../public' . str_replace('/public', '', $uri);
+        $file = __DIR__.'/../../public'.str_replace('/public', '', $uri);
 
-        if (!file_exists($file)) {
+        if (! file_exists($file)) {
             throw new HttpNotFoundException($request);
         }
 
@@ -31,6 +31,7 @@ class StaticFileMiddleware implements MiddlewareInterface
         $stream = new Stream($fh);
 
         $response = new \Slim\Psr7\Response();
+
         return $response
             ->withBody($stream)
             ->withHeader('Content-Type', mime_content_type($file))
