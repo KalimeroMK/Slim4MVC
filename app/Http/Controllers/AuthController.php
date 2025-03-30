@@ -6,25 +6,52 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Firebase\JWT\JWT;
+use Illuminate\Validation\Factory;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Random\RandomException;
 
 class AuthController
 {
-    // Register method
+    protected mixed $validator;
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->validator = $container->get('validator');
+    }
+
     public function register(Request $request, Response $response)
     {
         $data = $request->getParsedBody();
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-        ]);
 
-        return $response->withJson(['message' => 'User created', 'user' => $user], 201);
+        $rules = [
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
+            'password_confirmation' => 'required|same:password',
+        ];
+
+        $validation = $this->validator->make($data, $rules);
+
+        if ($validation->fails()) {
+            return $response->withJson(['errors' => $validation->errors()->all()], 400);
+        }
+
+        $user = new User();
+        $user->email = $data['email'];
+        $user->password = password_hash($data['password'], PASSWORD_BCRYPT);
+        $user->save();
+
+        return $response->withJson(['status' => 'success']);
     }
 
     // Login method
