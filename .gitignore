@@ -1,4 +1,4 @@
 /vendor/
 .idea
 .env
-/app/storage/cache/
+/storage/cache/
