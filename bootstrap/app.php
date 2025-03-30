@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use DI\Container;
+use Slim\Csrf\Guard;
 use Slim\Factory\AppFactory;
 use Slim\Middleware\Session;
 
@@ -17,6 +18,11 @@ AppFactory::setContainer($container);
 
 $app = AppFactory::create();
 
+$responseFactory = $app->getResponseFactory();
+
+$container->set('csrf', function () use ($responseFactory) {
+    return new Guard($responseFactory);
+});
 $app->add(
     new Session([
         'name' => 'dummy_session',
