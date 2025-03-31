@@ -1,4 +1,4 @@
-# Slim 4 MVC Starter Kit with Eloquent and Laravel Migrations
+# Slim 4 MVC Starter Kit with Eloquent ORM
 
 This project is created with the Slim 4 framework, uses Docker for configuration and development, and follows the MVC pattern. It includes support for migrations using Illuminate Database.
 
