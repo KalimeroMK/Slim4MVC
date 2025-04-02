@@ -9,12 +9,26 @@ use App\Models\User;
 use Firebase\JWT\JWT;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Random\RandomException;
 
-class AuthController extends BaseController
+class AuthController
 {
+    protected mixed $validator;
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->validator = $container->get('validator');
+    }
+
 
     /**
      * @return mixed

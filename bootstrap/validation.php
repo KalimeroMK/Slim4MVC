@@ -19,7 +19,7 @@ return function ($container, Capsule $capsule): void {
     $presenceVerifier = new DatabasePresenceVerifier($capsule->getDatabaseManager());
     $validationFactory->setPresenceVerifier($presenceVerifier);
 
-    $container->set('validator', function () use ($validationFactory): \Illuminate\Validation\Factory {
+    $container->set('validator', function () use ($validationFactory): Factory {
         return $validationFactory;
     });
 };

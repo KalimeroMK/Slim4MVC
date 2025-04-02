@@ -6,12 +6,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class UserController extends BaseController
+class UserController
 {
+    protected mixed $validator;
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->validator = $container->get('validator');
+    }
     public function index(Request $request, Response $response): Response
     {
         $users = User::all();

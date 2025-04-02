@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1c46b56af9472008783b87b15fca94e1",
+    "content-hash": "0bc66db5d172c571e7c69618b1413f28",
     "packages": [
         {
             "name": "brick/math",
@@ -682,7 +682,7 @@
         },
         {
             "name": "illuminate/bus",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/bus.git",
@@ -735,7 +735,7 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
@@ -791,7 +791,7 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -837,7 +837,7 @@
         },
         {
             "name": "illuminate/config",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/config.git",
@@ -885,7 +885,7 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -936,7 +936,7 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -984,16 +984,16 @@
         },
         {
             "name": "illuminate/database",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "a88e2fb138b83f15699a12cd5efdb36df0fd7aef"
+                "reference": "55200b85a3ff7588addc2fd4902ae1f9a7dce252"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/a88e2fb138b83f15699a12cd5efdb36df0fd7aef",
-                "reference": "a88e2fb138b83f15699a12cd5efdb36df0fd7aef",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/55200b85a3ff7588addc2fd4902ae1f9a7dce252",
+                "reference": "55200b85a3ff7588addc2fd4902ae1f9a7dce252",
                 "shasum": ""
             },
             "require": {
@@ -1049,11 +1049,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-03-29T17:44:28+00:00"
+            "time": "2025-03-31T14:05:51+00:00"
         },
         {
             "name": "illuminate/events",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/events.git",
@@ -1108,7 +1108,7 @@
         },
         {
             "name": "illuminate/filesystem",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/filesystem.git",
@@ -1175,7 +1175,7 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -1221,7 +1221,7 @@
         },
         {
             "name": "illuminate/pipeline",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pipeline.git",
@@ -1269,16 +1269,16 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "884946c2f30b57cf4f94de19e9a0a95e0b0149b8"
+                "reference": "241fc61bd52a86841ce54c254a8859574c92ff72"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/884946c2f30b57cf4f94de19e9a0a95e0b0149b8",
-                "reference": "884946c2f30b57cf4f94de19e9a0a95e0b0149b8",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/241fc61bd52a86841ce54c254a8859574c92ff72",
+                "reference": "241fc61bd52a86841ce54c254a8859574c92ff72",
                 "shasum": ""
             },
             "require": {
@@ -1342,11 +1342,11 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-03-27T19:06:10+00:00"
+            "time": "2025-04-01T14:17:57+00:00"
         },
         {
             "name": "illuminate/translation",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/translation.git",
@@ -1397,7 +1397,7 @@
         },
         {
             "name": "illuminate/validation",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/validation.git",
@@ -1459,7 +1459,7 @@
         },
         {
             "name": "illuminate/view",
-            "version": "v12.4.1",
+            "version": "v12.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/view.git",
@@ -1510,6 +1510,56 @@
                 "source": "https://github.com/laravel/framework"
             },
             "time": "2025-03-27T17:07:51+00:00"
+        },
+        {
+            "name": "kitchenu/slim-debugbar",
+            "version": "v0.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kitchenu/Slim-DebugBar.git",
+                "reference": "f9aaf6a4017c8027ee0615e61988f763481a5f19"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kitchenu/Slim-DebugBar/zipball/f9aaf6a4017c8027ee0615e61988f763481a5f19",
+                "reference": "f9aaf6a4017c8027ee0615e61988f763481a5f19",
+                "shasum": ""
+            },
+            "require": {
+                "maximebf/debugbar": "^1.12.0",
+                "php": ">=5.5.0",
+                "psr/http-message": "^1.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kitchenu\\Debugbar\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kitchenu"
+                }
+            ],
+            "description": "PHP Debugbar integration for Slim 3",
+            "keywords": [
+                "debug",
+                "debugbar",
+                "framework",
+                "slim"
+            ],
+            "support": {
+                "issues": "https://github.com/kitchenu/Slim-DebugBar/issues",
+                "source": "https://github.com/kitchenu/Slim-DebugBar/tree/master"
+            },
+            "time": "2016-07-14T16:08:06+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -1571,6 +1621,75 @@
                 "source": "https://github.com/laravel/serializable-closure"
             },
             "time": "2025-03-19T13:51:03+00:00"
+        },
+        {
+            "name": "maximebf/debugbar",
+            "version": "v1.23.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-debugbar/php-debugbar.git",
+                "reference": "4b3d5f1afe09a7db5a9d3282890f49f6176d6542"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-debugbar/php-debugbar/zipball/4b3d5f1afe09a7db5a9d3282890f49f6176d6542",
+                "reference": "4b3d5f1afe09a7db5a9d3282890f49f6176d6542",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8",
+                "psr/log": "^1|^2|^3",
+                "symfony/var-dumper": "^4|^5|^6|^7"
+            },
+            "require-dev": {
+                "dbrekelmans/bdi": "^1",
+                "phpunit/phpunit": "^8|^9",
+                "symfony/panther": "^1|^2.1",
+                "twig/twig": "^1.38|^2.7|^3.0"
+            },
+            "suggest": {
+                "kriswallsmith/assetic": "The best way to manage assets",
+                "monolog/monolog": "Log using Monolog",
+                "predis/predis": "Redis storage"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.23-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "DebugBar\\": "src/DebugBar/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Maxime Bouroumeau-Fuseau",
+                    "email": "maxime.bouroumeau@gmail.com",
+                    "homepage": "http://maximebf.com"
+                },
+                {
+                    "name": "Barry vd. Heuvel",
+                    "email": "barryvdh@gmail.com"
+                }
+            ],
+            "description": "Debug bar in the browser for php application",
+            "homepage": "https://github.com/maximebf/php-debugbar",
+            "keywords": [
+                "debug",
+                "debugbar"
+            ],
+            "support": {
+                "issues": "https://github.com/php-debugbar/php-debugbar/issues",
+                "source": "https://github.com/php-debugbar/php-debugbar/tree/v1.23.6"
+            },
+            "abandoned": "php-debugbar/php-debugbar",
+            "time": "2025-02-13T12:22:36+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -2212,16 +2331,16 @@
         },
         {
             "name": "psr/http-message",
-            "version": "2.0",
+            "version": "1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-message.git",
-                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71"
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message/zipball/402d35bcb92c70c026d1a6a9883f06b2ead23d71",
-                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
+                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
                 "shasum": ""
             },
             "require": {
@@ -2230,7 +2349,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0.x-dev"
+                    "dev-master": "1.1.x-dev"
                 }
             },
             "autoload": {
@@ -2245,7 +2364,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "https://www.php-fig.org/"
+                    "homepage": "http://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for HTTP messages",
@@ -2259,9 +2378,9 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-message/tree/2.0"
+                "source": "https://github.com/php-fig/http-message/tree/1.1"
             },
-            "time": "2023-04-04T09:54:51+00:00"
+            "time": "2023-04-04T09:50:52+00:00"
         },
         {
             "name": "psr/http-server-handler",
@@ -4217,6 +4336,89 @@
             "time": "2024-09-25T14:20:29+00:00"
         },
         {
+            "name": "symfony/var-dumper",
+            "version": "v7.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/var-dumper.git",
+                "reference": "82b478c69745d8878eb60f9a049a4d584996f73a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/82b478c69745d8878eb60f9a049a4d584996f73a",
+                "reference": "82b478c69745d8878eb60f9a049a4d584996f73a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.2",
+                "symfony/polyfill-mbstring": "~1.0"
+            },
+            "conflict": {
+                "symfony/console": "<6.4"
+            },
+            "require-dev": {
+                "ext-iconv": "*",
+                "symfony/console": "^6.4|^7.0",
+                "symfony/http-kernel": "^6.4|^7.0",
+                "symfony/process": "^6.4|^7.0",
+                "symfony/uid": "^6.4|^7.0",
+                "twig/twig": "^3.12"
+            },
+            "bin": [
+                "Resources/bin/var-dump-server"
+            ],
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "Resources/functions/dump.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Component\\VarDumper\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides mechanisms for walking through any arbitrary PHP variable",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "debug",
+                "dump"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/var-dumper/tree/v7.2.3"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-01-17T11:39:41+00:00"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.1",
             "source": {
@@ -4621,13 +4823,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.2",
         "ext-fileinfo": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }
