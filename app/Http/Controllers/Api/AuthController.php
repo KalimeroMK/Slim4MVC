@@ -88,6 +88,7 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request, Response $response): Response
     {
+
         if (($errorResponse = $this->validateRequest($request, ResetPasswordRequest::class)) instanceof Response) {
             return $errorResponse;
         }
@@ -107,21 +108,34 @@ class AuthController extends Controller
         $mail = new PHPMailer(true);
 
         try {
+            // SMTP Configuration
             $mail->isSMTP();
             $mail->Host = $_ENV['MAIL_HOST'];
             $mail->SMTPAuth = true;
             $mail->Username = $_ENV['MAIL_USERNAME'];
             $mail->Password = $_ENV['MAIL_PASSWORD'];
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = (int) $_ENV['MAIL_PORT'];
+            $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
+            $mail->Port = (int) ($_ENV['MAIL_PORT']);
 
-            $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+            $mail->setFrom(
+                $_ENV['MAIL_FROM_ADDRESS'],
+                $_ENV['MAIL_FROM_NAME']
+            );
+
             $mail->addAddress($email);
 
+            // Email content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = $_ENV['APP_URL'].'/reset-password?token='.$resetToken;
-            $mail->Body = 'To reset your password, please click: <a href="'.$resetLink.'">Reset Password</a>';
+
+            // Safe APP_URL handling with fallback
+            $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:81';
+            $resetLink = rtrim($appUrl, '/').'/reset-password?token='.$resetToken;
+
+            $mail->Body = sprintf(
+                'To reset your password, please click: <a href="%s">Reset Password</a>',
+                $resetLink
+            );
 
             $mail->send();
         } catch (Exception $e) {
