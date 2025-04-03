@@ -24,6 +24,7 @@ class UserController
     {
         $this->validator = $container->get('validator');
     }
+
     public function index(Request $request, Response $response): Response
     {
         $users = User::all();

@@ -1,43 +1,55 @@
 <?php
 
-declare (strict_types = 1);
+// bootstrap/app.php
 
-require __DIR__ . '/../vendor/autoload.php';
+declare(strict_types=1);
 
-use DI\Container;
+require __DIR__.'/../vendor/autoload.php';
+
+use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use Slim\Csrf\Guard;
 use Slim\Factory\AppFactory;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
-/**
- * Start session.
- */
-$session = new Session();
+// Initialize PHP-DI container
+$containerBuilder = new ContainerBuilder();
+$containerBuilder->useAutowiring(true);
+$container = $containerBuilder->build();
+
+// Start session
+$storage = new NativeSessionStorage();
+$session = new Session($storage);
 $session->start();
+$container->set(Session::class, fn (): Session => $session);
 
-$container = new Container;
-$container->set('session', $session);
-
-// Create an instance of Capsule and load the database configuration
+// Configure database
 $capsule = new Capsule;
-require __DIR__ . '/../bootstrap/database.php';
+require __DIR__.'/../bootstrap/database.php';
 
-// Load the validation configuration
-$validation = require __DIR__ . '/../bootstrap/validation.php';
+// Configure validation
+$validation = require __DIR__.'/../bootstrap/validation.php';
 $validation($container, $capsule);
 
-// Set the container in AppFactory
-AppFactory::setContainer($container);
+// Configure Blade templating
+(require __DIR__.'/../bootstrap/blade.php')($container);
 
-// Create Slim App instance
-$app = AppFactory::create();
-$responseFactory = $app->getResponseFactory();
-$container->set('csrf', function () use ($responseFactory) {
-    return new Guard($responseFactory);
-});
-// Add routes and other services
-(require __DIR__ . '/../routes/web.php')($app);
-(require __DIR__ . '/../routes/api.php')($app);
+// Set the container in Slim
+AppFactory::setContainer($container);
+$app = AppFactory::createFromContainer($container);
+
+// Load middleware
+(require __DIR__.'/../bootstrap/middleware.php')($app, $container);
+
+// Load routes
+(require __DIR__.'/../routes/web.php')($app);
+(require __DIR__.'/../routes/api.php')($app);
+
+$_SERVER['app'] = &$app;
+
+function app()
+{
+    return $_SERVER['app'];
+}
 
 $app->run();

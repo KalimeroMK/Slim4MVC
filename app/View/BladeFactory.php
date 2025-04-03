@@ -32,7 +32,7 @@ class BladeFactory
         $files = new Filesystem();
         $config = new Repository([
             'view.paths' => [__DIR__.'/../../resources/views'],
-            'view.compiled' => __DIR__.'/../../storage/cache',
+            'view.compiled' => __DIR__.'/../../storage/cache/view',
         ]);
 
         $compiler = new BladeCompiler($files, $config->get('view.compiled'));

@@ -11,13 +11,11 @@
   "require": {
     "php": ">=8.2",
     "ext-fileinfo": "*",
-    "bryanjhv/slim-session": "~4.0",
     "firebase/php-jwt": "^6.11",
     "illuminate/config": "^v12.3.0",
     "illuminate/database": "^12.0",
     "illuminate/validation": "^12.4",
     "illuminate/view": "^12.0",
-    "kitchenu/slim-debugbar": "^0.4.0",
     "php-di/slim-bridge": "^3.4",
     "phpmailer/phpmailer": "^6.9",
     "slim/csrf": "^1.5",
@@ -25,13 +23,11 @@
     "slim/psr7": "^1.5",
     "slim/slim": "^4.0",
     "symfony/console": "^6.0",
-    "vlucas/phpdotenv": "^5.6",
-    "zeuxisoo/slim-whoops": "0.7.*"
-  },
+    "vlucas/phpdotenv": "^5.6"},
   "autoload": {
     "psr-4": {
       "App\\": "app/",
-      "Support\\": "app/View",
+      "App\\View\\": "app/View/",
       "Database\\Migrations\\": "database/migrations/"
     },
     "files": [

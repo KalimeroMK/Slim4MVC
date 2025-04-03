@@ -1,81 +1,99 @@
 <?php
 
+declare(strict_types=1);
+
 /* Global helper functions */
+
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
-if (!function_exists('base_path'))
-{
+if (! function_exists('old')) {
+    function old($key)
+    {
+        $input = app()->resolve('old_input');
+
+        $field = collect($input)->filter(fn ($value, $field): bool => $key === $field);
+
+        if (isset($field[$key])) {
+            return $field[$key];
+        }
+
+        return null;
+    }
+}
+if (! function_exists('base_path')) {
     function base_path($path = ''): string
     {
-        return  __DIR__ . "/../{$path}";
+        return __DIR__."/../{$path}";
     }
 }
 
-if (!function_exists('config_path'))
-{
+if (! function_exists('env')) {
+    function env($key, $default = false): bool
+    {
+        $value = getenv($key);
+
+        throw_when(! $value && ! $default, "{$key} is not a defined .env variable and has not default value");
+
+        return $value || $default;
+    }
+}
+
+if (! function_exists('config_path')) {
     function config_path($path = ''): string
     {
         return base_path("config/{$path}");
     }
 }
 
-if (!function_exists('app_path'))
-{
+if (! function_exists('app_path')) {
     function app_path($path = ''): string
     {
         return base_path("app/{$path}");
     }
 }
 
-if (!function_exists('database_path'))
-{
+if (! function_exists('database_path')) {
     function database_path($path = ''): string
     {
         return base_path("database/{$path}");
     }
 }
 
-if (!function_exists('throw_when'))
-{
-    function throw_when(bool $fails, string $message, string $exception = Exception::class)
+if (! function_exists('throw_when')) {
+    function throw_when(bool $fails, string $message, string $exception = Exception::class): void
     {
-        if (!$fails) return;
+        if (! $fails) {
+            return;
+        }
 
         throw new $exception($message);
     }
 }
 
-if (!function_exists('config'))
-{
-    function config($path = null)
+if (! function_exists('config')) {
+    function config($path = null): mixed
     {
         $config = [];
         $folder = scandir(config_path());
         $config_files = array_slice($folder, 2, count($folder));
 
-        foreach ($config_files as $file)
-        {
+        foreach ($config_files as $file) {
             throw_when(
                 Str::after($file, '.') !== 'php',
                 'Config files must be .php files'
             );
-            data_set($config, Str::before($file, '.php') , require config_path($file));
+            data_set($config, Str::before($file, '.php'), require config_path($file));
         }
 
         return data_get($config, $path);
     }
 }
 
-if (!function_exists('data_get')) {
+if (! function_exists('data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
-     *
-     * @param  mixed                  $target
-     * @param  int|array|string|null  $key
-     * @param  mixed|null             $default
-     * @return mixed
      */
     function data_get(mixed $target, int|array|string|null $key, mixed $default = null): mixed
     {
@@ -115,15 +133,9 @@ if (!function_exists('data_get')) {
     }
 }
 
-if (!function_exists('data_set')) {
+if (! function_exists('data_set')) {
     /**
      * Set an item on an array or object using dot notation.
-     *
-     * @param  mixed         $target
-     * @param  array|string  $key
-     * @param  mixed         $value
-     * @param  bool          $overwrite
-     * @return mixed
      */
     function data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true): mixed
     {
@@ -134,7 +146,7 @@ if (!function_exists('data_set')) {
                 $target = [];
             }
 
-            if ($segments) {
+            if ($segments !== []) {
                 foreach ($target as &$inner) {
                     data_set($inner, $segments, $value, $overwrite);
                 }
@@ -144,7 +156,7 @@ if (!function_exists('data_set')) {
                 }
             }
         } elseif (Arr::accessible($target)) {
-            if ($segments) {
+            if ($segments !== []) {
                 if (! Arr::exists($target, $segment)) {
                     $target[$segment] = [];
                 }
@@ -154,7 +166,7 @@ if (!function_exists('data_set')) {
                 $target[$segment] = $value;
             }
         } elseif (is_object($target)) {
-            if ($segments) {
+            if ($segments !== []) {
                 if (! isset($target->{$segment})) {
                     $target->{$segment} = [];
                 }
@@ -166,7 +178,7 @@ if (!function_exists('data_set')) {
         } else {
             $target = [];
 
-            if ($segments) {
+            if ($segments !== []) {
                 data_set($target[$segment], $segments, $value, $overwrite);
             } elseif ($overwrite) {
                 $target[$segment] = $value;
@@ -175,17 +187,5 @@ if (!function_exists('data_set')) {
 
         return $target;
     }
-}
 
-if (!function_exists('csrf_html'))
-{
-    function csrf_html($csrf): void
-    {
-        $html = '';
-        foreach($csrf as $key => $value)
-        {
-            $html .= '<input type="hidden" name="' . $key . '" value="' . $value . '">';
-        }
-        echo $html;
-    };
 }

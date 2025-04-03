@@ -29,7 +29,6 @@ class AuthController
         $this->validator = $container->get('validator');
     }
 
-
     /**
      * @return mixed
      */
