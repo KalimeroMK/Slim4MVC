@@ -10,5 +10,4 @@ use Slim\App;
 return function (App $app): void {
     $app->get('/', [HomeController::class, 'index']);
     $app->get('/register', [AuthController::class, 'show'])->add(CsrfMiddleware::class);
-
 };

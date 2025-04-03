@@ -4,68 +4,53 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\v;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\PasswordRecoveryRequest;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Models\User;
+use App\Trait\ValidatesRequests;
 use Firebase\JWT\JWT;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
-use Psr\Container\ContainerExceptionInterface;
-use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Random\RandomException;
 
-class AuthController
+class AuthController extends Controller
 {
-    protected mixed $validator;
+    use ValidatesRequests;
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function __construct(ContainerInterface $container)
+    public function register(Request $request, Response $response): Response
     {
-        $this->validator = $container->get('validator');
-    }
-
-    /**
-     * @return mixed
-     */
-    public function register(Request $request, Response $response)
-    {
-        $data = $request->getParsedBody();
-
-        $rules = [
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:8',
-            'password_confirmation' => 'required|same:password',
-        ];
-
-        $validation = $this->validator->make($data, $rules);
-
-        if ($validation->fails()) {
-            return $response->withJson(['errors' => $validation->errors()->all()], 400);
+        if (($errorResponse = $this->validateRequest($request, RegisterRequest::class)) instanceof Response) {
+            return $errorResponse;
         }
 
-        $user = new User();
-        $user->email = $data['email'];
-        $user->password = password_hash($data['password'], PASSWORD_BCRYPT);
-        $user->save();
+        $validated = $this->validatedData($request, RegisterRequest::class);
 
-        return $response->withJson(['status' => 'success']);
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => password_hash($validated['password'], PASSWORD_BCRYPT),
+        ]);
+
+        return $response->withJson([
+            'status' => 'success',
+            'user' => $user,
+        ]);
     }
 
-    /**
-     * @return mixed
-     */
-    public function login(Request $request, Response $response)
+    public function login(Request $request, Response $response): Response
     {
-        $data = $request->getParsedBody();
-        $user = User::where('email', $data['email'])->first();
+        if (($errorResponse = $this->validateRequest($request, LoginRequest::class)) instanceof Response) {
+            return $errorResponse;
+        }
 
-        if (! $user || ! password_verify($data['password'], $user->password)) {
+        $validated = $this->validatedData($request, LoginRequest::class);
+        $user = User::where('email', $validated['email'])->first();
+
+        if (! $user || ! password_verify($validated['password'], $user->password)) {
             return $response->withJson(['error' => 'Invalid credentials'], 401);
         }
 
@@ -83,62 +68,38 @@ class AuthController
         ]);
     }
 
-    /**
-     * @return mixed
-     *
-     * @throws RandomException
-     */
-    public function passwordRecovery(Request $request, Response $response)
+    public function passwordRecovery(Request $request, Response $response): Response
     {
-        $data = $request->getParsedBody();
-        $email = $data['email'];
-
-        // Validate email format
-        if (! v::email()->validate($email)) {
-            return $response->withJson(['error' => 'Invalid email address'], 400);
+        if (($errorResponse = $this->validateRequest($request, PasswordRecoveryRequest::class)) instanceof Response) {
+            return $errorResponse;
         }
 
-        $user = User::where('email', $email)->first();
+        $validated = $this->validatedData($request, PasswordRecoveryRequest::class);
+        $user = User::where('email', $validated['email'])->first();
 
-        if (! $user) {
-            return $response->withJson(['error' => 'Email not found'], 404);
-        }
-
-        // Generate password reset token
-        $resetToken = bin2hex(random_bytes(16)); // Secure random token
-
-        // Save the token in the database (you should also add an expiration date for the token)
+        $resetToken = bin2hex(random_bytes(16));
         $user->password_reset_token = $resetToken;
         $user->save();
 
-        // Send the reset link via email
         $this->sendPasswordResetEmail($user->email, $resetToken);
 
-        return $response->withJson(['message' => 'Password recovery email sent'], 200);
+        return $response->withJson(['message' => 'Password recovery email sent']);
     }
 
-    /**
-     * @return mixed
-     */
-    public function resetPassword(Request $request, Response $response)
+    public function resetPassword(Request $request, Response $response): Response
     {
-        $data = $request->getParsedBody();
-        $resetToken = $data['token'];
-        $newPassword = $data['password'];
-
-        // Validate the reset token
-        $user = User::where('password_reset_token', $resetToken)->first();
-
-        if (! $user) {
-            return $response->withJson(['error' => 'Invalid or expired reset token'], 400);
+        if (($errorResponse = $this->validateRequest($request, ResetPasswordRequest::class)) instanceof Response) {
+            return $errorResponse;
         }
 
-        // Update password
-        $user->password = password_hash($newPassword, PASSWORD_DEFAULT);
-        $user->password_reset_token = null; // Clear the reset token
+        $validated = $this->validatedData($request, ResetPasswordRequest::class);
+        $user = User::where('password_reset_token', $validated['token'])->first();
+
+        $user->password = password_hash($validated['password'], PASSWORD_DEFAULT);
+        $user->password_reset_token = null;
         $user->save();
 
-        return $response->withJson(['message' => 'Password successfully reset'], 200);
+        return $response->withJson(['message' => 'Password successfully reset']);
     }
 
     private function sendPasswordResetEmail(string $email, string $resetToken): void
@@ -146,30 +107,25 @@ class AuthController
         $mail = new PHPMailer(true);
 
         try {
-            // Server settings
             $mail->isSMTP();
-            $mail->Host = getenv('MAIL_HOST'); // SMTP server from .env
+            $mail->Host = $_ENV['MAIL_HOST'];
             $mail->SMTPAuth = true;
-            $mail->Username = getenv('MAIL_USERNAME'); // SMTP username from .env
-            $mail->Password = getenv('MAIL_PASSWORD'); // SMTP password from .env
+            $mail->Username = $_ENV['MAIL_USERNAME'];
+            $mail->Password = $_ENV['MAIL_PASSWORD'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = getenv('MAIL_PORT'); // SMTP port from .env
+            $mail->Port = (int) $_ENV['MAIL_PORT'];
 
-            // Recipients
-            $mail->setFrom(getenv('MAIL_FROM_ADDRESS'), getenv('MAIL_FROM_NAME'));
-            $mail->addAddress($email); // User email to send the reset link
+            $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+            $mail->addAddress($email);
 
-            // Content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $resetLink = getenv('MAIL_PORT').'/reset-password?token='.$resetToken;
-            $mail->Body = 'To reset your password, please click the following link: <a href="'.$resetLink.'">Reset Password</a>';
+            $resetLink = $_ENV['APP_URL'].'/reset-password?token='.$resetToken;
+            $mail->Body = 'To reset your password, please click: <a href="'.$resetLink.'">Reset Password</a>';
 
-            // Send the email
             $mail->send();
         } catch (Exception $e) {
-            // Log error if mail fails
-            error_log('Message could not be sent. Mailer Error: '.$mail->ErrorInfo);
+            error_log('Mail Error: '.$mail->ErrorInfo);
         }
     }
 }
