@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AuthWebMiddleware;
+use App\Http\Middleware\ClearFlashDataMiddleware;
 
 return function ($app, $container): void {
 
@@ -20,4 +21,6 @@ return function ($app, $container): void {
     $container->set(AuthWebMiddleware::class, function () use ($container): AuthWebMiddleware {
         return new AuthWebMiddleware($container->get(App\Support\Auth::class));
     });
+    $app->add(new ClearFlashDataMiddleware());
+
 };

@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use Illuminate\Validation\Factory as ValidatorFactory;
+use Illuminate\Validation\Validator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Response;
@@ -16,25 +18,27 @@ abstract class FormRequest
 
     protected array $messages = [];
 
+    protected Validator $validator;
+
     public function __construct(
         protected ServerRequestInterface $request,
-        protected $validator // Illuminate Validator instance
-    ) {}
+        protected ValidatorFactory $validatorFactory
+    ) {
+        $this->validator = $this->validatorFactory->make(
+            $this->data(),
+            $this->rules(),
+            $this->messages()
+        );
+    }
 
     abstract protected function rules(): array;
 
     final public function validate(): ?ResponseInterface
     {
-        $validator = $this->validator->make(
-            $this->data(),
-            $this->rules(),
-            $this->messages()
-        );
-
-        if ($validator->fails()) {
+        if ($this->validator->fails()) {
             $response = new Response();
             $response->getBody()->write(json_encode([
-                'errors' => $validator->errors()->all(),
+                'errors' => $this->validator->errors()->all(),
             ]));
 
             return $response->withStatus(422)
@@ -44,9 +48,14 @@ abstract class FormRequest
         return null;
     }
 
+    final public function validator()
+    {
+        return $this->validator;
+    }
+
     final public function validated(): array
     {
-        return $this->data();
+        return $this->validator->validated();
     }
 
     protected function data(): array

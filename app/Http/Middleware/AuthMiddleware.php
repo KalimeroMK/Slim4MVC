@@ -22,11 +22,9 @@ class AuthMiddleware implements MiddlewareInterface
     public function process(Request $request, Handler $handler): Response
     {
         if (! $this->auth->check()) {
-            // Create response and set status and headers for JSON response
             $response = new \Slim\Psr7\Response();
             $response->getBody()->write(json_encode(['error' => 'Unauthorized']));
 
-            // Return the response with JSON header and status code
             return $response->withHeader('Content-Type', 'application/json')->withStatus(401);
         }
 

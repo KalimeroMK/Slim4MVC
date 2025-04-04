@@ -4,12 +4,14 @@
     <div class="container">
         <h1>Registration</h1>
         <div class="form-signup">
-            @if(isset($errors))
-                @foreach($errors->all() as $error)
-                    <div class="alert alert-danger text-center" role="alert">
-                        {{ $error }}
-                    </div>
-                @endforeach
+            @if(!empty($errors) && count($errors) > 0)
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach($errors as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
             <form method="POST" action="/register">
                 @csrf
@@ -26,7 +28,7 @@
                     <label for="password">Password</label>
                 </div>
                 <div class="form-floating">
-                    <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Confirm Password" required />
+                    <input class="form-control" id="password_confirmation" type="password" name="password_confirmation" placeholder="Confirm Password" required />
                     <label for="confirm_password">Confirm Password</label>
                 </div>
                 <button class="w-100 btn btn-lg btn-primary" type="submit">Register</button>

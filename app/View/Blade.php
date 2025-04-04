@@ -73,6 +73,10 @@ class Blade
     protected function shareDefaults(): void
     {
         $this->share('_session', $_SESSION ?? []);
+        $this->share('errors', $_SESSION['errors'] ?? []);
+        $this->share('old', $_SESSION['old'] ?? []);
+
+        $this->share('_token', $_SESSION['csrf_token'] ?? '');
 
         foreach ($this->sharedData as $key => $value) {
             $this->factory->share($key, $value);
