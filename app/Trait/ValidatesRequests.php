@@ -1,7 +1,5 @@
 <?php
 
-// app/Trait/ValidatesRequests.php
-
 declare(strict_types=1);
 
 namespace App\Trait;
@@ -36,9 +34,20 @@ trait ValidatesRequests
 
         if ($validationResponse = $formRequest->validate()) {
             if ($isApi) {
-                return $validationResponse;
+                // For API requests, return JSON response with validation errors
+                $response = new Response();
+                $response->getBody()->write(json_encode([
+                    'success' => false,
+                    'errors' => $formRequest->validator()->errors()->messages(),
+                    'message' => 'Validation failed',
+                ]));
+
+                return $response
+                    ->withHeader('Content-Type', 'application/json')
+                    ->withStatus(422);
             }
 
+            // For web requests, flash errors and redirect back
             SessionHelper::flashErrors($formRequest->validator()->errors()->all());
             SessionHelper::flashOldInput($request->getParsedBody() ?? []);
 
@@ -81,5 +90,25 @@ trait ValidatesRequests
         return $response
             ->withHeader('Location', $url)
             ->withStatus(302);
+    }
+
+    /**
+     * Create a JSON error response for API
+     */
+    protected function jsonError(
+        string $message,
+        array $errors = [],
+        int $status = 400
+    ): ResponseInterface {
+        $response = new Response();
+        $response->getBody()->write(json_encode([
+            'success' => false,
+            'message' => $message,
+            'errors' => $errors,
+        ]));
+
+        return $response
+            ->withHeader('Content-Type', 'application/json')
+            ->withStatus($status);
     }
 }

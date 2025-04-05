@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\Auth;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Slim\Psr7\Response as SlimResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 class AuthWebMiddleware implements MiddlewareInterface
 {
-    private Session $session;
+    private Auth $auth;
 
-    public function __construct(Session $session)
+    public function __construct(Auth $auth)
     {
-        $this->session = $session;
+        $this->auth = $auth;
     }
 
     public function process(Request $request, Handler $handler): Response
     {
-        if (! $this->session->has('user')) {
+        if (! $this->auth->check()) {
             $response = new SlimResponse();
 
             return $response

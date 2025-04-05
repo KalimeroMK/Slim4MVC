@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "80756573b63006f28b2e1a5471a06914",
+    "content-hash": "03b115af529555399b0c66a6a98be7e6",
     "packages": [
         {
             "name": "brick/math",
@@ -1217,7 +1217,7 @@
         },
         {
             "name": "illuminate/translation",
-            "version": "v12.6.0",
+            "version": "v12.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/translation.git",
@@ -1268,7 +1268,7 @@
         },
         {
             "name": "illuminate/validation",
-            "version": "v12.6.0",
+            "version": "v12.7.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/validation.git",
@@ -4433,13 +4433,13 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-fileinfo": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

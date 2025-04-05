@@ -30,11 +30,16 @@ class Auth
         if (! $user || ! password_verify($password, $user->password)) {
             return false;
         }
+        $this->session->migrate(true);
 
+        // Store user data in session
         $this->session->set('user', [
             'id' => $user->id,
             'email' => $user->email,
+            'name' => $user->name,
         ]);
+
+        $this->session->save();
 
         return true;
     }

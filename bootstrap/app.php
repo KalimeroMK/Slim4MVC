@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 // Initialize PHP-DI container
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->useAutowiring(true);
+$containerBuilder->addDefinitions(require __DIR__.'/../bootstrap/dependencies.php');
 $container = $containerBuilder->build();
 
 // Start session

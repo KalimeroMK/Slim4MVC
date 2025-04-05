@@ -1,24 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="content">
-        <h1>Восстановление пароля</h1>
-        <div class="form-signin">
-            @if(count($errors) > 0)
-                @foreach($errors as $error)
-                    <div class="alert alert-danger text-center" role="alert">
-                        {{ $error }}
+    <div class="container" style="margin-top: 10%">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+                <img src="{{ asset('img/slim.png') }}" class="img-fluid"
+                     alt="Sample image">
+            </div>
+            @include('partials.error')
+            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                <form method="POST" action="/forgot-password">
+                    @csrf
+                    <!-- Email input -->
+                    <div class="form-outline mb-4">
+                        <input type="email" name="email" id="form3Example3" class="form-control form-control-lg"
+                               placeholder="Enter a valid email address" />
                     </div>
-                @endforeach
-            @endif
-            <form method="POST" action="/reset-password">
-                {{ csrf_html($csrf) }}
-                <div class="form-floating">
-                    <input class="form-control" id="email" type="email" name="email" placeholder="Email" required />
-                    <label for="email">Email</label>
-                </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Восстановить</button>
-            </form>
+
+
+                    <div class="text-center text-lg-start mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg"
+                                style="padding-left: 2.5rem; padding-right: 2.5rem;">Reset</button>
+
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 @endsection

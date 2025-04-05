@@ -1,37 +1,49 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="content">
-        <h1>Авторизация</h1>
-        <div class="form-signin">
-            @if(count($errors) > 0)
-                @foreach($errors as $error)
-                    <div class="alert alert-danger text-center" role="alert">
-                        {{ $error }}
-                    </div>
-                @endforeach
-            @endif
-            <form method="POST" action="/login">
-                {{ csrf_html($csrf) }}
-                <div class="form-floating">
-                    <input class="form-control" id="email" type="email" name="email" placeholder="Email" required />
-                    <label for="email">Email</label>
+        <div class="container" style="margin-top: 10%">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-md-9 col-lg-6 col-xl-5">
+                    <img src="{{ asset('img/slim.png') }}" class="img-fluid"
+                         alt="Sample image">
                 </div>
-                <div class="form-floating">
-                    <input class="form-control" id="password" type="password" name="password" placeholder="Пароль" required />
-                    <label for="password">Пароль</label>
+                @include('partials.error')
+                <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                    <form method="POST" action="/login">
+                        @csrf
+                        <!-- Email input -->
+                        <div class="form-outline mb-4">
+                            <input type="email" name="email" id="form3Example3" class="form-control form-control-lg"
+                                   placeholder="Enter a valid email address" />
+                        </div>
+
+                        <!-- Password input -->
+                        <div class="form-outline mb-3">
+                            <input type="password" name="password" id="form3Example4" class="form-control
+                            form-control-lg"
+                                   placeholder="Enter password" />
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Checkbox -->
+                            <div class="form-check mb-0">
+                                <input class="form-check-input me-2" type="checkbox" value="" id="form2Example3" />
+                                <label class="form-check-label" for="form2Example3">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="/forgot-password" class="text-body">Forgot password?</a>
+                        </div>
+
+                        <div class="text-center text-lg-start mt-4 pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg"
+                                    style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
+                            <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/register"
+                                                                                              class="link-danger">Register</a></p>
+                        </div>
+
+                    </form>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="remember_me" value="1" id="remember_me">
-                    <label class="form-check-label" for="remember_me">
-                        Запомнить меня
-                    </label>
-                </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Войти</button>
-                <div class="text-center mt-2">
-                    <a href="/reset-password">Забыли пароль?</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
 @endsection

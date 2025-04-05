@@ -1,12 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="content">
-        <h1>Восстановление пароля</h1>
-        <div class="form-signin">
-            <div class="alert alert-success" role="alert">
-                Ссылка на восстановление пароля отправлена на email. Проверьте почту и следуйте инструкции из письма.
-            </div>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="text-center text-black-50">
+            <h1 class="display-4">Welcome to Slim 4 MVC</h1>
+            <p class="lead">Password reset link accessory send</p>
+            <img src="{{ asset('img/slim.png') }}" alt="logo">
         </div>
     </div>
 @endsection

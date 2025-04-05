@@ -1,14 +1,18 @@
 <?php
 
-// app/Http/Controllers/AuthController.php
-
 declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\DTO\Auth\LoginDTO;
+use App\DTO\Auth\PasswordRecoveryDTO;
+use App\DTO\Auth\RegisterDTO;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\Auth\PasswordRecoveryRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Models\User;
+use App\Interface\Auth\PasswordRecoveryActionInterface;
+use App\Interface\Auth\RegisterActionInterface;
+use App\Interface\Auth\WebLoginActionInterface;
 use App\Support\Auth;
 use App\Trait\ValidatesRequests;
 use Psr\Container\ContainerExceptionInterface;
@@ -16,29 +20,36 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Random\RandomException;
+use RuntimeException;
 
 class AuthController extends Controller
 {
     use ValidatesRequests;
 
-    /**
-     * @var Auth|mixed
-     */
-    private mixed $auth;
-
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function __construct(ContainerInterface $container)
-    {
+    public function __construct(
+        ContainerInterface $container,
+        private readonly RegisterActionInterface $registerAction,
+        private readonly WebLoginActionInterface $webLoginAction,
+        private readonly PasswordRecoveryActionInterface $passwordRecoveryAction
+    ) {
         parent::__construct($container);
-        $this->auth = $container->get(Auth::class);
     }
 
+    // Show Forms
     public function showRegisterForm(Request $request, Response $response): Response
     {
         return view('auth.register', $response);
+    }
+
+    public function showLoginForm(Request $request, Response $response): Response
+    {
+        return view('auth.login', $response);
+    }
+
+    public function showPasswordResetForm(Request $request, Response $response, $token): Response
+    {
+        return view('auth.send-reset-password-link', $response, ['token' => $token]);
     }
 
     /**
@@ -47,26 +58,16 @@ class AuthController extends Controller
      */
     public function register(Request $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, RegisterRequest::class)) instanceof \Psr\Http\Message\ResponseInterface) {
+        if (($errorResponse = $this->validateRequest($request, RegisterRequest::class)) instanceof Response) {
             return $errorResponse;
         }
 
         $validated = $this->validatedData($request, RegisterRequest::class);
+        $dto = new RegisterDTO($validated['name'], $validated['email'], $validated['password']);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => password_hash($validated['password'], PASSWORD_BCRYPT),
-        ]);
+        $this->registerAction->execute($dto);
 
-        $this->auth->attempt($user->email, $validated['password']);
-
-        return $this->redirect('/dashboard');
-    }
-
-    public function showLoginForm(Request $request, Response $response): Response
-    {
-        return view('auth.login', $response);
+        return $this->redirect('/login');
     }
 
     /**
@@ -75,31 +76,44 @@ class AuthController extends Controller
      */
     public function login(Request $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, LoginRequest::class)) instanceof Response) {
-            return $errorResponse;
+        $validated = $this->validatedData($request, LoginRequest::class);
+        $dto = new LoginDTO(
+            $validated['email'],
+            $validated['password']
+        );
+
+        try {
+            $this->webLoginAction->execute($dto);
+
+            return $this->redirect('/dashboard');
+        } catch (RuntimeException $e) {
+            return $this->redirect('/login?error=invalid_credentials');
         }
-
-        $credentials = $this->validatedData($request, LoginRequest::class);
-
-        if (! Auth::attempt($credentials['email'], $credentials['password'])) {
-            $_SESSION['error'] = 'Invalid credentials';
-
-            return $response
-                ->withHeader('Location', '/login')
-                ->withStatus(302);
-        }
-
-        return $response
-            ->withHeader('Location', '/dashboard')
-            ->withStatus(302);
     }
 
     public function logout(Request $request, Response $response): Response
     {
         Auth::logout();
 
-        return $response
-            ->withHeader('Location', '/')
-            ->withStatus(302);
+        return $this->redirect('/');
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     * @throws RandomException
+     */
+    public function sendPasswordResetLink(Request $request, Response $response): Response
+    {
+        if (($errorResponse = $this->validateRequest($request, PasswordRecoveryRequest::class)) instanceof Response) {
+            return $errorResponse;
+        }
+
+        $validated = $this->validatedData($request, PasswordRecoveryRequest::class);
+
+        $dto = new PasswordRecoveryDTO($validated['email']);
+        $this->passwordRecoveryAction->execute($dto);
+
+        return view('auth.send-reset-password-link-success', $response);
     }
 }
