@@ -36,7 +36,7 @@ trait SendPassword
 
             // Safe APP_URL handling with fallback
             $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:81';
-            $resetLink = rtrim($appUrl, '/').'/reset-password?token='.$resetToken;
+            $resetLink = rtrim($appUrl, '/').'/reset-password/'.$resetToken;
 
             $mail->Body = sprintf(
                 'To reset your password, please click: <a href="%s">Reset Password</a>',

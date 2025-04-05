@@ -1,22 +1,34 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="content">
-        <h1>Сброс пароля</h1>
-        <div class="form-signin">
-           @include('partials.error')
-            <form method="POST" action="/reset-password/">
-                @csrf
-                <div class="form-floating">
-                    <input class="form-control" id="password" type="password" name="password" placeholder="Новый пароль" required />
-                    <label for="password">Новый пароль</label>
-                </div>
-                <div class="form-floating">
-                    <input class="form-control" id="confirm_password" type="password" name="confirm_password" placeholder="Новый пароль ещё раз" required />
-                    <label for="confirm_password">Новый пароль ещё раз</label>
-                </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Сбросить</button>
-            </form>
+    <div class="container" style="margin-top: 10%">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+                <img src="{{ asset('img/slim.png') }}" class="img-fluid"
+                     alt="Sample image">
+            </div>
+            @include('partials.error')
+            <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                <form method="POST" action="/reset-password">
+                    @csrf
+                    <!-- Email input -->
+                    <div class="form-outline mb-4">
+                        <input type="password" name="password" id="form3Example3" class="form-control form-control-lg"
+                               placeholder="Enter new password" /><br>
+                        <input type="password" name="password_confirmation" id="form3Example3" class="form-control form-control-lg"
+                               placeholder="Confirm new password" />
+                        <input type="hidden" name="token" value="{{ $token }}" />
+                    </div>
+
+
+                    <div class="text-center text-lg-start mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg"
+                                style="padding-left: 2.5rem; padding-right: 2.5rem;">Reset</button>
+
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 @endsection

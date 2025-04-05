@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Auth\ResetPasswordAction;
 use App\DTO\Auth\LoginDTO;
 use App\DTO\Auth\PasswordRecoveryDTO;
 use App\DTO\Auth\RegisterDTO;
+use App\DTO\Auth\ResetPasswordDTO;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\PasswordRecoveryRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Interface\Auth\PasswordRecoveryActionInterface;
 use App\Interface\Auth\RegisterActionInterface;
 use App\Interface\Auth\WebLoginActionInterface;
@@ -31,7 +34,8 @@ class AuthController extends Controller
         ContainerInterface $container,
         private readonly RegisterActionInterface $registerAction,
         private readonly WebLoginActionInterface $webLoginAction,
-        private readonly PasswordRecoveryActionInterface $passwordRecoveryAction
+        private readonly PasswordRecoveryActionInterface $passwordRecoveryAction,
+        private readonly ResetPasswordAction $resetPasswordAction
     ) {
         parent::__construct($container);
     }
@@ -47,9 +51,14 @@ class AuthController extends Controller
         return view('auth.login', $response);
     }
 
-    public function showPasswordResetForm(Request $request, Response $response, $token): Response
+    public function showPasswordResetForm(Request $request, Response $response): Response
     {
-        return view('auth.send-reset-password-link', $response, ['token' => $token]);
+        return view('auth.send-reset-password-link', $response);
+    }
+
+    public function showPasswordUpdateForm(Request $request, Response $response, array $token): Response
+    {
+        return view('auth.reset-password', $response, $token);
     }
 
     /**
@@ -115,5 +124,24 @@ class AuthController extends Controller
         $this->passwordRecoveryAction->execute($dto);
 
         return view('auth.send-reset-password-link-success', $response);
+    }
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function updatePassword(Request $request, Response $response): Response
+    {
+        if (($errorResponse = $this->validateRequest($request, ResetPasswordRequest::class)) instanceof Response) {
+            return $errorResponse;
+        }
+
+        $validated = $this->validatedData($request, ResetPasswordRequest::class);
+
+        $dto = new ResetPasswordDTO($validated['token'], $validated['password']);
+
+        $this->resetPasswordAction->execute($dto);
+
+        return $this->redirect('/login');
     }
 }

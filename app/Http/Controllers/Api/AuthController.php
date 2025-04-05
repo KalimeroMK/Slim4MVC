@@ -106,7 +106,7 @@ class AuthController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function resetPassword(Request $request, Response $response): Response
+    public function updatePassword(Request $request, Response $response): Response
     {
 
         $validationResponse = $this->validateRequest($request, ResetPasswordRequest::class, true);
