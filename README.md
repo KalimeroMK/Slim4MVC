@@ -60,31 +60,74 @@ The project has the following structure:
 
 ```
 │── app/
+│   ├── Actions/                  # Business logic classes
+│   │   ├── Auth/
+│   │   │   ├── LoginAction.php
+│   │   │   ├── RegisterAction.php
+│   │   │   └── PasswordRecoveryAction.php
+│   │   └── ...other domains
+│   ├── DTO/                      # Data Transfer Objects
+│   │   ├── Auth/
+│   │   │   ├── LoginDTO.php
+│   │   │   ├── RegisterDTO.php
+│   │   │   └── PasswordRecoveryDTO.php
+│   │   └── ...other domains
 │   ├── Http/
-│   │   ├── Controllers/
+│   │   ├── Controllers/          # Thin controllers
+│   │   │   ├── Api/
+│   │   │   │   └── AuthController.php
+│   │   │   ├── Web/
+│   │   │   │   └── AuthController.php
+│   │   │   └── ...other controllers
 │   │   ├── Middleware/
-│   ├── Models/
-│   ├── View/
+│   │   └── Requests/             # Form request validation
+│   │       ├── Auth/
+│   │       │   ├── LoginRequest.php
+│   │       │   └── RegisterRequest.php
+│   │       └── ...other requests
+│   ├── Interfaces/               # Contracts
+│   │   ├── Auth/
+│   │   │   ├── LoginActionInterface.php
+│   │   │   └── RegisterActionInterface.php
+│   │   └── ...other interfaces
+│   ├── Models/                   # Eloquent models
+│   ├── Providers/                # Service providers
+│   ├── Support/
+│   │   ├── Helpers.php
+│   │   └── ...other utilities
+│   ├── View/                     # Blade integration
 │   │   ├── Blade.php
 │   │   ├── BladeFactory.php
 │   │   ├── BladeAssetsHelper.php
-│   │   ├── BladeViewHelper.php
-│   ├── Support/
-│   │   ├── Helpers.php
-│   ├── config.php
+│   │   └── BladeViewHelper.php
+│   └── config.php
 │── bootstrap/
 │   ├── app.php
 │   ├── database.php
-│── public/
-│   ├── index.php
+│   ├── ...other utilities
 │── database/
 │   ├── migrations/
-│── routes/
-│   ├── web.php
+│   └── seeders/
+│── public/
+│   └── index.php
 │── resources/
-│   ├── views/
+│   ├── views/                    # Blade templates
+│   │   ├── auth/
+│   │   │   ├── login.blade.php
+│   │   │   └── register.blade.php
+│   │   └── ...other views
+│   └── assets/                   # Frontend assets
+│── routes/
+│   ├── api.php
+│   ├── web.php
+│   └── console.php
 │── storage/
 │   ├── cache/
+│   ├── logs/
+│   └── sessions/
+│── tests/                        # Test suites
+│   ├── Feature/
+│   └── Unit/
 │── .env
 │── composer.json
 ```
@@ -112,96 +155,8 @@ To handle CSRF protection, this project uses the Slim CSRF package. The CSRF mid
 
 Example route with CSRF middleware:
 ```php
-$app->post('/your-endpoint', 'YourController:yourMethod')->add('csrf');
+@csrf 
 ```
-
-## Session Management
-
-This project uses a session helper class for session management. You can register the session helper globally or instantiate it in your routes.
-
-### Registering Session Helper Globally
-
-```php
-$container = new \DI\Container();
-
-// Register globally to app
-$container->set('session', function () {
-  return new \SlimSession\Helper();
-});
-\Slim\Factory\AppFactory::setContainer($container);
-```
-
-### Using Session Helper in Routes
-
-```php
-$app->get('/', function ($req, $res) {
-  // or $this->get('session') if registered
-  $session = new \SlimSession\Helper();
-
-  // Check if variable exists
-  $exists = $session->exists('my_key');
-  $exists = isset($session->my_key);
-  $exists = isset($session['my_key']);
-
-  // Get variable value
-  $my_value = $session->get('my_key', 'default');
-  $my_value = $session->my_key;
-  $my_value = $session['my_key'];
-
-  // Set variable value
-  $this->get('session')->set('my_key', 'my_value');
-  $session->my_key = 'my_value';
-  $session['my_key'] = 'my_value';
-
-  // Merge value recursively
-  $this->get('session')->merge('my_key', ['first' => 'value']);
-  $session->merge('my_key', ['second' => ['a' => 'A']]);
-  $letter_a = $session['my_key']['second']['a']; // "A"
-
-  // Delete variable
-  $session->delete('my_key');
-  unset($session->my_key);
-  unset($session['my_key']);
-
-  // Destroy session
-  $session::destroy();
-
-  // Get session id
-  $id = $this->session::id();
-
-  return $res;
-});
-```
-### Validation
-
-```php
-public function register(Request $request, Response $response)
-{
-    $data = $request->getParsedBody();
-
-    $rules = [
-        'name' => 'required|string',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:8',
-        'password_confirmation' => 'required|same:password',
-    ];
-
-    $validation = $this->validator->make($data, $rules);
-
-    if ($validation->fails()) {
-        return $response->withJson(['errors' => $validation->errors()->all()], 400);
-    }
-
-    $user = new User();
-    $user->email = $data['email'];
-    $user->password = password_hash($data['password'], PASSWORD_BCRYPT);
-    $user->save();
-
-    return $response->withJson(['status' => 'success']);
-}
-```
-
-
 ## Docker Configuration
 
 ### `docker-compose.yml`
