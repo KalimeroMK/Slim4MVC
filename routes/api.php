@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PermissionController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\AuthMiddleware;
 
@@ -13,10 +15,25 @@ return function ($app): void {
     $app->post('/api/v1/password-recovery', [AuthController::class, 'passwordRecovery']);
     $app->post('/api/v1/reset-password', [AuthController::class, 'updatePassword']);
 
-    // User routes (protected by AuthMiddleware)
-    $app->group('/api/v1', function ($group): void { // Correct usage of $group
-        $group->get('/users', [UserController::class, 'index']); // Correct controller method
-        $group->put('/user/{id}', [UserController::class, 'update']);
-        $group->delete('/user/{id}', [UserController::class, 'destroy']);
+    $app->group('/api/roles', function ($group) {
+        $group->get('', [RoleController::class, 'index']);
+        $group->post('', [RoleController::class, 'store']);
+        $group->get('/{id}', [RoleController::class, 'show']);
+        $group->put('/{id}', [RoleController::class, 'update']);
+        $group->patch('/{id}', [RoleController::class, 'update']);
+        $group->delete('/{id}', [RoleController::class, 'destroy']);
+    })->add(AuthMiddleware::class);
+
+    // Permission management routes
+    $app->group('/api/permissions', function ($group) {
+        $group->get('', [PermissionController::class, 'index']);
+        $group->post('', [PermissionController::class, 'store']);
+        $group->get('/{id}', [PermissionController::class, 'show']);
+        $group->put('/{id}', [PermissionController::class, 'update']);
+        $group->patch('/{id}', [PermissionController::class, 'update']);
+        $group->delete('/{id}', [PermissionController::class, 'destroy']);
+
+        // Additional permission-specific routes
+        $group->get('/{id}/roles', [PermissionController::class, 'roles']);
     })->add(AuthMiddleware::class);
 };

@@ -2,99 +2,163 @@
 
 declare(strict_types=1);
 
-require __DIR__.'/vendor/autoload.php';  // Ensure Composer autoload is included
+require __DIR__.'/vendor/autoload.php';
 
+use Database\Migrations\CreatePermissionTable;
+use Database\Migrations\CreateRoleTable;
 use Database\Migrations\CreateUsersTable;
+use Database\Migrations\CreateRoleUserTable;
+use Database\Migrations\CreatePermissionRoleTable;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-// Function to check if the migration table exists
+// 1. Setup Eloquent
+$capsule = new Capsule;
+$capsule->addConnection([
+    'driver' => $_ENV['DB_CONNECTION'],
+    'host' => $_ENV['DB_HOST'],
+    'database' => $_ENV['DB_DATABASE'],
+    'username' => $_ENV['DB_USERNAME'],
+    'password' => $_ENV['DB_PASSWORD'],
+    'charset' => 'utf8',
+    'collation' => 'utf8_unicode_ci',
+    'prefix' => '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+
+// 2. Helpers
+function now() { return date('Y-m-d H:i:s'); }
+
 function migrationTableExists(): bool
 {
     return Capsule::schema()->hasTable('migrations');
 }
 
-// Function to create the migrations table if it doesn't exist
 function createMigrationsTable(): void
 {
     Capsule::schema()->create('migrations', function ($table) {
         $table->increments('id');
-        $table->string('migration');
+        $table->string('migration')->unique();
         $table->integer('batch');
         $table->timestamps();
     });
 }
 
-// Function to check if the migration has already been run
-function migrationAlreadyRun($migrationName): bool
+function migrationAlreadyRun(string $migrationName): bool
 {
     return Capsule::table('migrations')->where('migration', $migrationName)->exists();
 }
 
-// Function to store migration name in the migrations table
-function storeMigration($migrationName): void
+function storeMigration(string $migrationName, int $batch = 1): void
 {
     Capsule::table('migrations')->insert([
         'migration' => $migrationName,
-        'batch' => 1,  // Default batch number, you can increment if necessary
+        'batch' => $batch,
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 }
 
-// Method to get current time (optional)
-function now()
+function deleteMigrationRecord(string $migrationName): void
 {
-    return date('Y-m-d H:i:s');
+    Capsule::table('migrations')->where('migration', $migrationName)->delete();
 }
 
-// Initialize Capsule (Eloquent ORM) for database connection
-$capsule = new Capsule;
-$capsule->addConnection([
-    'driver' => 'mysql',
-    'host' => 'slim_db',
-    'database' => 'slim',
-    'username' => 'slim',
-    'password' => 'secret',
-    'charset' => 'utf8mb4',
-    'collation' => 'utf8mb4_unicode_ci',
-    'prefix' => '',
-]);
-
-// Set Capsule as the global database manager
-$capsule->setAsGlobal();
-$capsule->bootEloquent();
-
-// Check and create migrations table if it doesn't exist
-if (! migrationTableExists()) {
-    createMigrationsTable();
-    echo "Migrations table created.\n";
-}
-
-// Array of migrations to run
+// 3. All migration classes (ordered!)
 $migrations = [
     CreateUsersTable::class,
-    // Add other migrations here
+    CreateRoleTable::class,
+    CreateRoleUserTable::class,
+    CreatePermissionTable::class,
+    CreatePermissionRoleTable::class,
 ];
 
-// Run Migrations
-foreach ($migrations as $migrationClass) {
-    $migrationName = $migrationClass;  // Use the class name as the migration name
+// 4. Run Command
+$command = $argv[1] ?? 'migrate';
 
-    // Check if the migration has already been run
-    if (! migrationAlreadyRun($migrationName)) {
-        try {
-            // Run the migration
-            $migration = new $migrationClass;
-            $migration->up();
+if (!migrationTableExists()) {
+    createMigrationsTable();
+    echo "✅ Migrations table created.\n";
+}
 
-            // After running the migration, store it in the migrations table
-            storeMigration($migrationName);
+switch ($command) {
+    case 'migrate':
+        $currentBatch = (int) Capsule::table('migrations')->max('batch') + 1;
 
-            echo "Migration {$migrationName} applied.\n";
-        } catch (Exception $e) {
-            echo "Error while applying migration {$migrationName}: ".$e->getMessage()."\n";
+        foreach ($migrations as $migrationClass) {
+            if (migrationAlreadyRun($migrationClass)) {
+                echo "⏭️  Skipping already run: {$migrationClass}\n";
+                continue;
+            }
+
+            try {
+                (new $migrationClass)->up();
+                storeMigration($migrationClass, $currentBatch);
+                echo "✅ Migrated: {$migrationClass}\n";
+            } catch (Exception $e) {
+                echo "❌ Error: {$e->getMessage()}\n";
+            }
         }
-    } else {
-        echo "Migration {$migrationName} has already been run.\n";
-    }
+        break;
+
+    case 'rollback':
+        $lastBatch = (int) Capsule::table('migrations')->max('batch');
+
+        if ($lastBatch === 0) {
+            echo "ℹ️  No migrations to rollback.\n";
+            break;
+        }
+
+        $batchMigrations = Capsule::table('migrations')->where('batch', $lastBatch)->get();
+
+        foreach ($batchMigrations as $migration) {
+            $className = $migration->migration;
+            if (class_exists($className)) {
+                try {
+                    (new $className)->down();
+                    deleteMigrationRecord($className);
+                    echo "🔁 Rolled back: {$className}\n";
+                } catch (Exception $e) {
+                    echo "❌ Error during rollback: {$e->getMessage()}\n";
+                }
+            } else {
+                echo "⚠️  Class not found: {$className}\n";
+            }
+        }
+        break;
+
+    case 'refresh':
+        echo "♻️  Refreshing all migrations...\n";
+        foreach (array_reverse($migrations) as $migrationClass) {
+            if (migrationAlreadyRun($migrationClass)) {
+                try {
+                    (new $migrationClass)->down();
+                    deleteMigrationRecord($migrationClass);
+                    echo "🔁 Rolled back: {$migrationClass}\n";
+                } catch (Exception $e) {
+                    echo "❌ Error during refresh rollback: {$e->getMessage()}\n";
+                }
+            }
+        }
+
+        // Run all migrations again
+        $batch = 1;
+        foreach ($migrations as $migrationClass) {
+            try {
+                (new $migrationClass)->up();
+                storeMigration($migrationClass, $batch);
+                echo "✅ Migrated: {$migrationClass}\n";
+            } catch (Exception $e) {
+                echo "❌ Error during refresh migrate: {$e->getMessage()}\n";
+            }
+        }
+        break;
+
+    default:
+        echo "❓ Unknown command: {$command}\n";
+        echo "Usage:\n";
+        echo "  php migrate.php migrate   # Run pending migrations\n";
+        echo "  php migrate.php rollback  # Rollback last batch\n";
+        echo "  php migrate.php refresh   # Rollback all and re-run\n";
+        break;
 }

@@ -23,23 +23,27 @@ This project is created with the Slim 4 framework, uses Docker for configuration
 1. **Creating a New Model:**
    To create a new migration, use the following command:
     ```bash
-    php slim make-model ModelName
+    php slim make:model ModelName
     ```
    This will create a new model file in `app/Models/ModelName.php`.
 
 2. **Creating a New Migration:**
 
    ```bash
-    php slim make-model ModelName -m
+    php slim make:model ModelName -m
     ```
    This will create a new migration file. You can edit it and add new migrations for your database.
 
 3. **Running Migrations:**
    To run database migrations, use the same command:
     ```bash
-    php run_migrations.php
-    ```
+   php migrate.php              
 
+    ```
+   ```
+      php migrate.php rollback  //for rollback
+      php migrate.php refresh  //for refresh 
+   ```
    If the migration has already been run, the system will skip it without an error.
 
 4. **Creating controllers:**
