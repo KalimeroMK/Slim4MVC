@@ -43,7 +43,8 @@ class Mailer
 
             return $mail->send();
         } catch (Exception $e) {
-            error_log("MailService error: " . $mail->ErrorInfo);
+            error_log('MailService error: '.$mail->ErrorInfo);
+
             return false;
         }
     }

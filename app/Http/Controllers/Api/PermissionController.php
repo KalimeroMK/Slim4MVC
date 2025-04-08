@@ -12,8 +12,8 @@ use App\Actions\Permission\UpdatePermissionAction;
 use App\DTO\Permission\CreatePermissionDTO;
 use App\DTO\Permission\UpdatePermissionDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Role\CreatePermissionRequest;
-use App\Http\Requests\Role\UpdatePermissionRequest;
+use App\Http\Requests\Permission\CreatePermissionRequest;
+use App\Http\Requests\Permission\UpdatePermissionRequest;
 use App\Trait\ValidatesRequests;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -38,6 +38,7 @@ class PermissionController extends Controller
     public function index(Request $request, Response $response): Response
     {
         $permissions = $this->listAction->execute();
+
         return $response->withJson(['data' => $permissions]);
     }
 
@@ -51,12 +52,14 @@ class PermissionController extends Controller
         $dto = new CreatePermissionDTO($validated['name'], $validated['description'] ?? null);
 
         $permission = $this->createAction->execute($dto);
+
         return $response->withJson(['data' => $permission], 201);
     }
 
     public function show(Request $request, Response $response, int $id): Response
     {
         $permission = $this->getAction->execute($id);
+
         return $response->withJson(['data' => $permission]);
     }
 
@@ -70,18 +73,21 @@ class PermissionController extends Controller
         $dto = new UpdatePermissionDTO($id, $validated['name'] ?? null, $validated['description'] ?? null);
 
         $permission = $this->updateAction->execute($dto);
+
         return $response->withJson(['data' => $permission]);
     }
 
     public function destroy(Request $request, Response $response, int $id): Response
     {
         $this->deleteAction->execute($id);
+
         return $response->withJson(['message' => 'Permission deleted successfully']);
     }
 
     public function roles(Request $request, Response $response, int $id): Response
     {
         $roles = $this->rolesAction->execute($id);
+
         return $response->withJson(['data' => $roles]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Interface\Role;
 
 use App\DTO\Role\UpdateRoleDTO;

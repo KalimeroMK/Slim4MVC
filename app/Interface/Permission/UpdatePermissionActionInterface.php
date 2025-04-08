@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Interface\Role;
+declare(strict_types=1);
+
+namespace App\Interface\Permission;
 
 use App\DTO\Role\UpdateRoleDTO;
 use RuntimeException;

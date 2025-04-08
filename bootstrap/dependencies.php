@@ -27,9 +27,8 @@ return [
     PasswordRecoveryActionInterface::class => \DI\autowire(PasswordRecoveryAction::class),
     ResetPasswordActionInterface::class => \DI\autowire(ResetPasswordAction::class),
     WebLoginActionInterface::class => \DI\autowire(WebLoginAction::class),
-    CreateRoleActionInterface::class=> \DI\autowire((CreateRoleDTO::class)),
-    UpdateRoleActionInterface::class=> \DI\autowire((UpdateRoleDTO::class)),
-    CreatePermissionActionInterface::class=> \DI\autowire((CreatePermissionDTO::class)),
-
+    CreateRoleActionInterface::class => \DI\autowire((CreateRoleDTO::class)),
+    UpdateRoleActionInterface::class => \DI\autowire((UpdateRoleDTO::class)),
+    CreatePermissionActionInterface::class => \DI\autowire((CreatePermissionDTO::class)),
 
 ];

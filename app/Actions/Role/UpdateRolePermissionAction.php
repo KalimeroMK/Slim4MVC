@@ -16,9 +16,10 @@ final class UpdateRolePermissionAction implements CreatePermissionActionInterfac
     {
         $role = Role::findOrFail($dto->id);
         $role->update($dto->name);
-        if (!empty($dto->permissions)) {
+        if (! empty($dto->permissions)) {
             $role->givePermissionTo($dto->permissions);
         }
+
         return $role->fresh()->load('permissions');
     }
 }
