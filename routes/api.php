@@ -14,7 +14,7 @@ return function ($app): void {
     $app->post('/api/v1/password-recovery', [AuthController::class, 'passwordRecovery']);
     $app->post('/api/v1/reset-password', [AuthController::class, 'updatePassword']);
 
-    $app->group('/api/roles', function ($group): void {
+    $app->group('/api/v1/roles', function ($group): void {
         $group->get('', [RoleController::class, 'index']);
         $group->post('', [RoleController::class, 'store']);
         $group->get('/{id}', [RoleController::class, 'show']);
@@ -24,7 +24,7 @@ return function ($app): void {
     })->add(AuthMiddleware::class);
 
     // Permission management routes
-    $app->group('/api/permissions', function ($group): void {
+    $app->group('/api/v1/permissions', function ($group): void {
         $group->get('', [PermissionController::class, 'index']);
         $group->post('', [PermissionController::class, 'store']);
         $group->get('/{id}', [PermissionController::class, 'show']);

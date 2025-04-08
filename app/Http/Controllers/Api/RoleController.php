@@ -8,7 +8,7 @@ use App\Actions\Role\CreateRoleAction;
 use App\Actions\Role\DeleteRoleAction;
 use App\Actions\Role\GetRoleAction;
 use App\Actions\Role\ListRolesAction;
-use App\Actions\Role\UpdateRolePermissionAction;
+use App\Actions\Role\UpdateRoleAction;
 use App\DTO\Role\CreateRoleDTO;
 use App\DTO\Role\UpdateRoleDTO;
 use App\Http\Controllers\Controller;
@@ -28,7 +28,7 @@ class RoleController extends Controller
     public function __construct(
         ContainerInterface $container,
         private readonly CreateRoleAction $createRoleAction,
-        private readonly UpdateRolePermissionAction $updateRoleAction,
+        private readonly UpdateRoleAction $updateRoleAction,
         private readonly DeleteRoleAction $deleteRoleAction,
         private readonly GetRoleAction $getRoleAction,
         private readonly ListRolesAction $listRolesAction
@@ -77,9 +77,9 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function show(Request $request, Response $response, int $id): Response
+    public function show(Request $request, Response $response, $id): Response
     {
-        $role = $this->getRoleAction->execute($id);
+        $role = $this->getRoleAction->execute((int) $id);
 
         return $response->withJson([
             'status' => 'success',
@@ -91,7 +91,7 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function update(Request $request, Response $response, int $id): Response
+    public function update(Request $request, Response $response, $id): Response
     {
         if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class, true)) instanceof Response) {
             return $errorResponse;
@@ -99,7 +99,7 @@ class RoleController extends Controller
 
         $validated = $this->validatedData($request, UpdatePermissionRequest::class);
         $dto = new UpdateRoleDTO(
-            $id,
+            (int) $id,
             $validated['name'] ?? null,
         );
 
@@ -115,9 +115,9 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function destroy(Request $request, Response $response, int $id): Response
+    public function destroy(Request $request, Response $response, $id): Response
     {
-        $this->deleteRoleAction->execute($id);
+        $this->deleteRoleAction->execute((int) $id);
 
         return $response->withJson([
             'status' => 'success',

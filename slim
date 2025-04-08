@@ -6,6 +6,7 @@ declare(strict_types=1);
 use App\Console\Commands\CreateControllerCommand;
 use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
+use App\Console\Commands\SeedDatabaseCommand;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Console\Application;
 
@@ -25,6 +26,7 @@ $application = new Application();
 $application->add(new ListRoutesCommand($app));
 $application->add(new CreateControllerCommand);
 $application->add(new MakeModelCommand());
+$application->add(new SeedDatabaseCommand());
 
 
 // Run the console application

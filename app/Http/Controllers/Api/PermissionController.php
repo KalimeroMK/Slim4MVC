@@ -15,7 +15,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Permission\CreatePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
 use App\Trait\ValidatesRequests;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -42,6 +44,10 @@ class PermissionController extends Controller
         return $response->withJson(['data' => $permissions]);
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function store(Request $request, Response $response): Response
     {
         if (($errorResponse = $this->validateRequest($request, CreatePermissionRequest::class, true)) instanceof Response) {
@@ -56,21 +62,25 @@ class PermissionController extends Controller
         return $response->withJson(['data' => $permission], 201);
     }
 
-    public function show(Request $request, Response $response, int $id): Response
+    public function show(Request $request, Response $response, $id): Response
     {
-        $permission = $this->getAction->execute($id);
+        $permission = $this->getAction->execute((int) $id);
 
         return $response->withJson(['data' => $permission]);
     }
 
-    public function update(Request $request, Response $response, int $id): Response
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function update(Request $request, Response $response, $id): Response
     {
         if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class, true)) instanceof Response) {
             return $errorResponse;
         }
 
         $validated = $this->validatedData($request, UpdatePermissionRequest::class);
-        $dto = new UpdatePermissionDTO($id, $validated['name'] ?? null, $validated['description'] ?? null);
+        $dto = new UpdatePermissionDTO((int) $id, $validated['name']);
 
         $permission = $this->updateAction->execute($dto);
 

@@ -46,11 +46,4 @@ $app = AppFactory::createFromContainer($container);
 (require __DIR__.'/../routes/web.php')($app);
 (require __DIR__.'/../routes/api.php')($app);
 
-$_SERVER['app'] = &$app;
-
-function app()
-{
-    return $_SERVER['app'];
-}
-
 $app->run();

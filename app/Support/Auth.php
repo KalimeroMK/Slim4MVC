@@ -8,11 +8,16 @@ use App\Models\User;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
+use Exception;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class Auth
 {
     protected Session $session;
+
+    protected ?User $user = null;
 
     /**
      * @throws DependencyException
@@ -30,9 +35,9 @@ class Auth
         if (! $user || ! password_verify($password, $user->password)) {
             return false;
         }
+
         $this->session->migrate(true);
 
-        // Store user data in session
         $this->session->set('user', [
             'id' => $user->id,
             'email' => $user->email,
@@ -51,18 +56,30 @@ class Auth
 
     public function user(): ?User
     {
-        $userData = $this->session->get('user');
+        if ($this->user instanceof \App\Models\User) {
+            return $this->user;
+        }
 
-        return $userData ? User::find($userData['id']) : null;
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+        if (! str_starts_with($authHeader, 'Bearer ')) {
+            return null;
+        }
+
+        $token = trim(str_replace('Bearer', '', $authHeader));
+
+        try {
+            $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
+            $this->user = User::find($decoded->id);
+
+            return $this->user;
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     public function check(): bool
     {
         return $this->user() instanceof User;
-    }
-
-    public function guest(): bool
-    {
-        return ! $this->check();
     }
 }

@@ -12,5 +12,6 @@ class PermissionRole extends Model
         'role_id',
         'permission_id',
     ];
+
     protected $hidden = [];
 }
