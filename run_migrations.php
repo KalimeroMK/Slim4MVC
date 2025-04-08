@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 require __DIR__.'/vendor/autoload.php';
 
+use Database\Migrations\CreatePermissionRoleTable;
 use Database\Migrations\CreatePermissionTable;
 use Database\Migrations\CreateRoleTable;
-use Database\Migrations\CreateUsersTable;
 use Database\Migrations\CreateRoleUserTable;
-use Database\Migrations\CreatePermissionRoleTable;
+use Database\Migrations\CreateUsersTable;
 use Illuminate\Database\Capsule\Manager as Capsule;
 
 // 1. Setup Eloquent
@@ -27,7 +27,10 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 // 2. Helpers
-function now() { return date('Y-m-d H:i:s'); }
+function now()
+{
+    return date('Y-m-d H:i:s');
+}
 
 function migrationTableExists(): bool
 {
@@ -76,7 +79,7 @@ $migrations = [
 // 4. Run Command
 $command = $argv[1] ?? 'migrate';
 
-if (!migrationTableExists()) {
+if (! migrationTableExists()) {
     createMigrationsTable();
     echo "✅ Migrations table created.\n";
 }
@@ -88,6 +91,7 @@ switch ($command) {
         foreach ($migrations as $migrationClass) {
             if (migrationAlreadyRun($migrationClass)) {
                 echo "⏭️  Skipping already run: {$migrationClass}\n";
+
                 continue;
             }
 

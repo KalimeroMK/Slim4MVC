@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Requests\Role;
+declare(strict_types=1);
+
+namespace App\Http\Requests\Permission;
 
 use App\Http\Requests\FormRequest;
 
@@ -12,5 +14,4 @@ class UpdatePermissionRequest extends FormRequest
             'name' => 'nullable|string|max:20',
         ];
     }
-
 }

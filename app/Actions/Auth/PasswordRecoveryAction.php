@@ -28,7 +28,7 @@ class PasswordRecoveryAction implements PasswordRecoveryActionInterface
         $user->save();
 
         $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:81';
-        $resetLink = rtrim($appUrl, '/') . '/reset-password/' . $resetToken;
+        $resetLink = rtrim($appUrl, '/').'/reset-password/'.$resetToken;
 
         $this->mailService->send(
             $user->email,

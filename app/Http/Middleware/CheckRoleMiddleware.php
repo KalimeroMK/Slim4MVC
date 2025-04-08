@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
@@ -16,9 +18,10 @@ class CheckRoleMiddleware
         $route = RouteContext::fromRequest($request)->getRoute();
         $requiredRole = $route->getArgument('role');
 
-        if (!$user || !$user->hasRole($requiredRole)) {
+        if (! $user || ! $user->hasRole($requiredRole)) {
             $response = new Response();
             $response->getBody()->write('Unauthorized');
+
             return $response->withStatus(403);
         }
 

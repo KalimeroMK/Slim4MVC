@@ -15,7 +15,7 @@ final class CreateRoleAction
             'name' => $dto->name,
         ]);
 
-        if (!empty($dto->permissions)) {
+        if (! empty($dto->permissions)) {
             $role->givePermissionTo($dto->permissions);
         }
 

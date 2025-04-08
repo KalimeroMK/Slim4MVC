@@ -13,7 +13,7 @@ final class UpdatePermissionAction
     {
         $permission = Permission::findOrFail($dto->id);
 
-     $permission->update($dto->name);
+        $permission->update($dto->name);
 
         return $permission->fresh();
     }
