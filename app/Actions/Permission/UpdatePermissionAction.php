@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\Permission;
 
 use App\DTO\Permission\UpdatePermissionDTO;
+use App\Interface\Permission\UpdatePermissionActionInterface;
 use App\Models\Permission;
 
-final class UpdatePermissionAction
+final class UpdatePermissionAction implements UpdatePermissionActionInterface
 {
     public function execute(UpdatePermissionDTO $dto): Permission
     {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\AuthMiddleware;
 
 return function ($app): void {
@@ -13,6 +14,15 @@ return function ($app): void {
     $app->post('/api/v1/login', [AuthController::class, 'login']);
     $app->post('/api/v1/password-recovery', [AuthController::class, 'passwordRecovery']);
     $app->post('/api/v1/reset-password', [AuthController::class, 'updatePassword']);
+
+    $app->group('/api/v1/users', function ($group): void {
+        $group->get('', [UserController::class, 'index']);
+        $group->post('', [UserController::class, 'store']);
+        $group->get('/{id}', [UserController::class, 'show']);
+        $group->put('/{id}', [UserController::class, 'update']);
+        $group->patch('/{id}', [UserController::class, 'update']);
+        $group->delete('/{id}', [UserController::class, 'destroy']);
+    })->add(AuthMiddleware::class);
 
     $app->group('/api/v1/roles', function ($group): void {
         $group->get('', [RoleController::class, 'index']);

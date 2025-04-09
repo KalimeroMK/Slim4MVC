@@ -120,5 +120,6 @@ class AuthController extends Controller
         $this->resetPasswordAction->execute($dto);
 
         return $response->withJson(['message' => 'Password successfully reset']);
+
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Interface\Permission;
 
-use App\DTO\Role\UpdateRoleDTO;
+use App\DTO\Permission\UpdatePermissionDTO;
 use RuntimeException;
 
 interface UpdatePermissionActionInterface
@@ -14,5 +14,5 @@ interface UpdatePermissionActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(UpdateRoleDTO $dto): ?array;
+    public function execute(UpdatePermissionDTO $dto): ?array;
 }

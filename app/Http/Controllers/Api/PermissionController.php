@@ -43,7 +43,12 @@ class PermissionController extends Controller
     {
         $permissions = $this->listAction->execute();
 
-        return $response->withJson(['data' => $permissions]);
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'data' => $permissions,
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -61,14 +66,24 @@ class PermissionController extends Controller
 
         $permission = $this->createAction->execute($dto);
 
-        return $response->withJson(['data' => $permission], 201);
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'data' => $permission,
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function show(Request $request, Response $response, array $args): Response
     {
         $permission = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
-        return $response->withJson(['data' => $permission]);
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'data' => $permission,
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -77,7 +92,8 @@ class PermissionController extends Controller
      */
     public function update(Request $request, Response $response, array $args): Response
     {
-        if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class, true)) instanceof Response) {
+        if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class,
+            true)) instanceof Response) {
             return $errorResponse;
         }
 
@@ -86,13 +102,24 @@ class PermissionController extends Controller
 
         $permission = $this->updateAction->execute($dto);
 
-        return $response->withJson(['data' => $permission]);
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'data' => $permission,
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
-        return $response->withJson(['message' => 'Permission deleted successfully']);
+        $response->getBody()->write(json_encode([
+            'status' => 'success',
+            'message' => 'Permission deleted successfully',
+
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

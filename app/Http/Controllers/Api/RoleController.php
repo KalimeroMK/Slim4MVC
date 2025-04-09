@@ -38,18 +38,16 @@ class RoleController extends Controller
         parent::__construct($container);
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function index(Request $request, Response $response): Response
     {
         $roles = $this->listRolesAction->execute();
 
-        return $response->withJson([
+        $response->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $roles,
-        ]);
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -69,24 +67,24 @@ class RoleController extends Controller
 
         $role = $this->createRoleAction->execute($dto);
 
-        return $response->withJson([
+        $response->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $role,
-        ], 201);
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function show(Request $request, Response $response, array $args): Response
     {
         $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
 
-        return $response->withJson([
+        $response->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $role,
-        ]);
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -108,23 +106,23 @@ class RoleController extends Controller
 
         $role = $this->updateRoleAction->execute($dto);
 
-        return $response->withJson([
+        $response->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $role,
-        ]);
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
 
-        return $response->withJson([
+        $response->getBody()->write(json_encode([
             'status' => 'success',
             'message' => 'Role deleted successfully',
-        ]);
+        ]));
+
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }
