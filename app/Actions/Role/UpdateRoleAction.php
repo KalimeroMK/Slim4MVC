@@ -20,8 +20,9 @@ final class UpdateRoleAction implements UpdateRoleActionInterface
             'name' => $dto->name,
         ]);
 
-        if (! empty($dto->permissions)) {
-            $role->givePermissionTo($dto->permissions);
+        if ($dto->permissions !== []) {
+            /** @var Role $role */
+            $role->syncPermissions($dto->permissions);
         }
 
         return $role->fresh()->load('permissions')->toArray();

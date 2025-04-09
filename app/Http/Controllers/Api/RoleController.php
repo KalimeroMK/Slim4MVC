@@ -12,9 +12,10 @@ use App\Actions\Role\UpdateRoleAction;
 use App\DTO\Role\CreateRoleDTO;
 use App\DTO\Role\UpdateRoleDTO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Permission\CreatePermissionRequest;
-use App\Http\Requests\Permission\UpdatePermissionRequest;
-use App\Trait\ValidatesRequests;
+use App\Http\Requests\Role\CreateRoleRequest;
+use App\Http\Requests\Role\UpdateRoleRequest;
+use App\Traits\RouteParamsTrait;
+use App\Traits\ValidatesRequests;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -23,6 +24,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class RoleController extends Controller
 {
+    use RouteParamsTrait;
     use ValidatesRequests;
 
     public function __construct(
@@ -56,11 +58,11 @@ class RoleController extends Controller
      */
     public function store(Request $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, CreatePermissionRequest::class, true)) instanceof Response) {
+        if (($errorResponse = $this->validateRequest($request, CreateRoleRequest::class, true)) instanceof Response) {
             return $errorResponse;
         }
 
-        $validated = $this->validatedData($request, CreatePermissionRequest::class);
+        $validated = $this->validatedData($request, CreateRoleRequest::class);
         $dto = new CreateRoleDTO(
             $validated['name'],
         );
@@ -77,9 +79,9 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function show(Request $request, Response $response, $id): Response
+    public function show(Request $request, Response $response, array $args): Response
     {
-        $role = $this->getRoleAction->execute((int) $id);
+        $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
 
         return $response->withJson([
             'status' => 'success',
@@ -91,16 +93,17 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function update(Request $request, Response $response, $id): Response
+    public function update(Request $request, Response $response, array $args): Response
     {
-        if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class, true)) instanceof Response) {
+        if (($errorResponse = $this->validateRequest($request, UpdateRoleRequest::class, true)) instanceof Response) {
             return $errorResponse;
         }
 
-        $validated = $this->validatedData($request, UpdatePermissionRequest::class);
+        $validated = $this->validatedData($request, UpdateRoleRequest::class);
         $dto = new UpdateRoleDTO(
-            (int) $id,
+            $this->getParamAsInt($args, 'id'),
             $validated['name'] ?? null,
+            $validated['permissions'] ?? [],
         );
 
         $role = $this->updateRoleAction->execute($dto);
@@ -115,9 +118,9 @@ class RoleController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function destroy(Request $request, Response $response, $id): Response
+    public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteRoleAction->execute((int) $id);
+        $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
 
         return $response->withJson([
             'status' => 'success',

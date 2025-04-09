@@ -14,7 +14,8 @@ use App\DTO\Permission\UpdatePermissionDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Permission\CreatePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
-use App\Trait\ValidatesRequests;
+use App\Traits\RouteParamsTrait;
+use App\Traits\ValidatesRequests;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -23,6 +24,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class PermissionController extends Controller
 {
+    use RouteParamsTrait;
     use ValidatesRequests;
 
     public function __construct(
@@ -55,16 +57,16 @@ class PermissionController extends Controller
         }
 
         $validated = $this->validatedData($request, CreatePermissionRequest::class);
-        $dto = new CreatePermissionDTO($validated['name'], $validated['description'] ?? null);
+        $dto = new CreatePermissionDTO($validated['name']);
 
         $permission = $this->createAction->execute($dto);
 
         return $response->withJson(['data' => $permission], 201);
     }
 
-    public function show(Request $request, Response $response, $id): Response
+    public function show(Request $request, Response $response, array $args): Response
     {
-        $permission = $this->getAction->execute((int) $id);
+        $permission = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
         return $response->withJson(['data' => $permission]);
     }
@@ -73,31 +75,24 @@ class PermissionController extends Controller
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function update(Request $request, Response $response, $id): Response
+    public function update(Request $request, Response $response, array $args): Response
     {
         if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class, true)) instanceof Response) {
             return $errorResponse;
         }
 
         $validated = $this->validatedData($request, UpdatePermissionRequest::class);
-        $dto = new UpdatePermissionDTO((int) $id, $validated['name']);
+        $dto = new UpdatePermissionDTO($this->getParamAsInt($args, 'id'), $validated['name']);
 
         $permission = $this->updateAction->execute($dto);
 
         return $response->withJson(['data' => $permission]);
     }
 
-    public function destroy(Request $request, Response $response, int $id): Response
+    public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteAction->execute($id);
+        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
         return $response->withJson(['message' => 'Permission deleted successfully']);
-    }
-
-    public function roles(Request $request, Response $response, int $id): Response
-    {
-        $roles = $this->rolesAction->execute($id);
-
-        return $response->withJson(['data' => $roles]);
     }
 }

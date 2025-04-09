@@ -17,7 +17,7 @@ use App\Interface\Auth\PasswordRecoveryActionInterface;
 use App\Interface\Auth\RegisterActionInterface;
 use App\Interface\Auth\WebLoginActionInterface;
 use App\Support\Auth;
-use App\Trait\ValidatesRequests;
+use App\Traits\ValidatesRequests;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;

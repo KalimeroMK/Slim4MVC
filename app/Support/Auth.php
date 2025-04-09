@@ -56,7 +56,7 @@ class Auth
 
     public function user(): ?User
     {
-        if ($this->user instanceof \App\Models\User) {
+        if ($this->user instanceof User) {
             return $this->user;
         }
 
