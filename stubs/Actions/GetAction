@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{{controllerName}};
+
+use App\Models\{{controllerName}};
+
+final class Get{{controllerName}}Action
+{
+    public function execute(int $id): {{controllerName}}
+    {
+        return {{controllerName}}::findOrFail($id);
+    }
+}

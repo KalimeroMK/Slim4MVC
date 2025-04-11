@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{{controllerName}};
+
+use App\Models\{{controllerName}};
+
+final class Delete{{controllerName}}Action
+{
+    public function execute(int $id): void
+    {
+        $model = {{controllerName}}::findOrFail($id);
+        $model->delete();
+    }
+}

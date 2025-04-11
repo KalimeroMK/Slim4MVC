@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{{controllerName}};
+
+use App\DTO\{{controllerName}}\Create{{controllerName}}DTO;
+use App\Models\{{controllerName}};
+
+final class Create{{controllerName}}Action
+{
+    public function execute(Create{{controllerName}}DTO $dto): {{controllerName}}
+    {
+        return {{controllerName}}::create((array) $dto);
+    }
+}

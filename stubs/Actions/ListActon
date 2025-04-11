@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{{controllerName}};
+
+use App\Models\{{controllerName}};
+use Illuminate\Database\Eloquent\Collection;
+
+final class List{{controllerName}}Action
+{
+    public function execute(): Collection
+    {
+        return {{controllerName}}::all();
+    }
+}

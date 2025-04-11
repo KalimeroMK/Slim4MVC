@@ -4,64 +4,98 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Traits\RouteParamsTrait;
+use App\Traits\ValidatesRequests;
 use Psr\Http\Message\RequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
+use App\Http\Requests\{{controllerName}}\Create{{controllerName}}Request;
+use App\Http\Requests\{{controllerName}}\Update{{controllerName}}Request;
+use App\DTO\{{controllerName}}\Create{{controllerName}}DTO;
+use App\DTO\{{controllerName}}\Update{{controllerName}}DTO;
+use App\Actions\{{controllerName}}\Create{{controllerName}}Action;
+use App\Actions\{{controllerName}}\Delete{{controllerName}}Action;
+use App\Actions\{{controllerName}}\Get{{controllerName}}Action;
+use App\Actions\{{controllerName}}\List{{controllerName}}Action;
+use App\Actions\{{controllerName}}\Update{{controllerName}}Action;
 
 class {{controllerName}}Controller
 {
-    // Display a listing of the resource
-    public function index(Request $request, Response $response)
-    {
-        // Add your logic here for listing resources
-        $response->getBody()->write('Displaying a list of {{controllerName}} resources');
-        return $response;
+    use RouteParamsTrait;
+    use ValidatesRequests;
+
+    public function __construct(
+        private readonly Create{{controllerName}}Action $createAction,
+        private readonly Update{{controllerName}}Action $updateAction,
+        private readonly Delete{{controllerName}}Action $deleteAction,
+        private readonly Get{{controllerName}}Action $getAction,
+        private readonly List{{controllerName}}Action $listAction,
+    ) {
     }
 
-    // Show the form for creating a new resource
-    public function create(Request $request, Response $response)
+    public function index(Request $request, Response $response): Response
     {
-        // Add your logic here for showing the form to create a new resource
-        $response->getBody()->write('Displaying form to create {{controllerName}} resource');
-        return $response;
+        $items = $this->listAction->execute();
+
+        return $response->withJson([
+            'status' => 'success',
+            'data' => $items,
+        ]);
     }
 
-    // Store a newly created resource in storage
-    public function store(Request $request, Response $response)
+    public function store(Request $request, Response $response): Response
     {
-        // Add your logic here for storing a new resource
-        $response->getBody()->write('{{controllerName}} resource created');
-        return $response;
+        if (($errorResponse = $this->validateRequest($request, Create{{controllerName}}Request::class, true)) instanceof Response) {
+            return $errorResponse;
+        }
+
+        $validated = $this->validatedData($request, Create{{controllerName}}Request::class);
+        $dto = new Create{{controllerName}}DTO(...$validated);
+
+        $item = $this->createAction->execute($dto);
+
+        return $response->withJson([
+            'status' => 'success',
+            'data' => $item,
+        ], 201);
     }
 
-    // Display the specified resource
-    public function show(Request $request, Response $response, array $args)
+    public function show(Request $request, Response $response, array $args): Response
     {
-        // Add your logic here for showing a specific resource
-        $response->getBody()->write('Displaying {{controllerName}} resource with ID: ' . $args['id']);
-        return $response;
+        $item = $this->getAction->execute($this->getParamAsInt($args, 'id'));
+
+        return $response->withJson([
+            'status' => 'success',
+            'data' => $item,
+        ]);
     }
 
-    // Show the form for editing the specified resource
-    public function edit(Request $request, Response $response, array $args)
+    public function update(Request $request, Response $response, array $args): Response
     {
-        // Add your logic here for showing the form to edit a resource
-        $response->getBody()->write('Displaying form to edit {{controllerName}} resource with ID: ' . $args['id']);
-        return $response;
+        if (($errorResponse = $this->validateRequest($request, Update{{controllerName}}Request::class, true)) instanceof Response) {
+            return $errorResponse;
+        }
+
+        $validated = $this->validatedData($request, Update{{controllerName}}Request::class);
+        $dto = new Update{{controllerName}}DTO(
+            $this->getParamAsInt($args, 'id'),
+            ...$validated,
+        );
+
+        $item = $this->updateAction->execute($dto);
+
+        return $response->withJson([
+            'status' => 'success',
+            'data' => $item,
+        ]);
     }
 
-    // Update the specified resource in storage
-    public function update(Request $request, Response $response, array $args)
+    public function destroy(Request $request, Response $response, array $args): Response
     {
-        // Add your logic here for updating a resource
-        $response->getBody()->write('{{controllerName}} resource with ID: ' . $args['id'] . ' updated');
-        return $response;
-    }
+        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
-    // Remove the specified resource from storage
-    public function destroy(Request $request, Response $response, array $args)
-    {
-        // Add your logic here for deleting a resource
-        $response->getBody()->write('{{controllerName}} resource with ID: ' . $args['id'] . ' deleted');
-        return $response;
+        return $response->withJson([
+            'status' => 'success',
+            'message' => '{{controllerName}} deleted successfully',
+        ]);
     }
 }
