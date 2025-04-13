@@ -10,12 +10,12 @@ use App\Http\Traits\AuthorizesRequests;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Psr7\Response as Psr7Response;
 
 abstract class Controller
 {
     use AuthorizesRequests;
 
-    protected ContainerInterface $container;
     protected Request $request;
     protected Response $response;
 
@@ -24,34 +24,87 @@ abstract class Controller
         Request $request,
         Response $response
     ) {
-        $this->container = $container;
         $this->request = $request;
         $this->response = $response;
     }
 
+    /**
+     * Get the container instance.
+     */
     protected function getContainer(): ContainerInterface
     {
         return $this->container;
     }
 
+    /**
+     * Redirect to a specific URL.
+     */
     protected function redirect(string $url): Response
     {
-        $response = $this->container->get(Response::class);
-        return $response->withHeader('Location', $url)->withStatus(302);
+        return $this->response
+            ->withHeader('Location', $url)
+            ->withStatus(302);
     }
 
     /**
-     * Return a 403 Forbidden response
+     * Return a JSON response.
+     *
+     * @param mixed $data
+     * @param int $status
      */
-    protected function respondUnauthorized(): Response
+    protected function respondWithJson(mixed $data, int $status = 200): Response
     {
-        $this->response->getBody()->write(json_encode([
-            'error' => 'Unauthorized',
-            'message' => 'You are not authorized to perform this action'
-        ]));
+        $this->response->getBody()->write(json_encode($data));
 
         return $this->response
             ->withHeader('Content-Type', 'application/json')
-            ->withStatus(403);
+            ->withStatus($status);
+    }
+
+    /**
+     * Return a 403 Forbidden response.
+     */
+    protected function respondUnauthorized(): Response
+    {
+        return $this->respondWithJson([
+            'error' => 'Unauthorized',
+            'message' => 'You are not authorized to perform this action'
+        ], 403);
+    }
+
+    /**
+     * Return a 404 Not Found response.
+     */
+    protected function notFound(): Response
+    {
+        return $this->respondWithJson([
+            'error' => 'Not Found',
+            'message' => 'The requested resource was not found'
+        ], 404);
+    }
+
+    /**
+     * Return a 400 Bad Request response.
+     */
+    protected function badRequest(string $message = 'Bad Request'): Response
+    {
+        return $this->respondWithJson([
+            'error' => 'Bad Request',
+            'message' => $message
+        ], 400);
+    }
+
+    /**
+     * Return a 422 Unprocessable Entity response.
+     *
+     * @param array $errors
+     */
+    protected function validationError(array $errors): Response
+    {
+        return $this->respondWithJson([
+            'error' => 'Validation Error',
+            'message' => 'The given data was invalid',
+            'errors' => $errors
+        ], 422);
     }
 }
