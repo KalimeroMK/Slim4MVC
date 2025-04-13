@@ -15,32 +15,28 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Traits\RouteParamsTrait;
-use App\Traits\ValidatesRequests;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class RoleController extends Controller
 {
     use RouteParamsTrait;
-    use ValidatesRequests;
 
     public function __construct(
         ContainerInterface $container,
-        private readonly CreateRoleAction $createRoleAction,
-        private readonly UpdateRoleAction $updateRoleAction,
-        private readonly DeleteRoleAction $deleteRoleAction,
-        private readonly GetRoleAction $getRoleAction,
-        private readonly ListRolesAction $listRolesAction
+        private readonly CreateRoleAction $createAction,
+        private readonly UpdateRoleAction $updateAction,
+        private readonly DeleteRoleAction $deleteAction,
+        private readonly GetRoleAction $getAction,
+        private readonly ListRolesAction $listAction
     ) {
         parent::__construct($container);
     }
 
     public function index(Request $request, Response $response): Response
     {
-        $roles = $this->listRolesAction->execute();
+        $roles = $this->listAction->execute();
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -50,22 +46,13 @@ class RoleController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function store(Request $request, Response $response): Response
+    public function store(CreateRoleRequest $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, CreateRoleRequest::class, true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, CreateRoleRequest::class);
-        $dto = new CreateRoleDTO(
-            $validated['name'],
+        $role = $this->createAction->execute(
+            new CreateRoleDTO(
+                $request->validated()['name'],
+            )
         );
-
-        $role = $this->createRoleAction->execute($dto);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -77,7 +64,7 @@ class RoleController extends Controller
 
     public function show(Request $request, Response $response, array $args): Response
     {
-        $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
+        $role = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -87,24 +74,15 @@ class RoleController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(UpdateRoleRequest $request, Response $response, array $args): Response
     {
-        if (($errorResponse = $this->validateRequest($request, UpdateRoleRequest::class, true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, UpdateRoleRequest::class);
-        $dto = new UpdateRoleDTO(
-            $this->getParamAsInt($args, 'id'),
-            $validated['name'] ?? null,
-            $validated['permissions'] ?? [],
+        $role = $this->updateAction->execute(
+            new UpdateRoleDTO(
+                $this->getParamAsInt($args, 'id'),
+                $request->validated()['name'] ?? null,
+                $request->validated()['permissions'] ?? []
+            )
         );
-
-        $role = $this->updateRoleAction->execute($dto);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -116,7 +94,7 @@ class RoleController extends Controller
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
+        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
         $response->getBody()->write(json_encode([
             'status' => 'success',

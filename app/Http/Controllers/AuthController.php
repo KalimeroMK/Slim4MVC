@@ -17,19 +17,13 @@ use App\Interface\Auth\PasswordRecoveryActionInterface;
 use App\Interface\Auth\RegisterActionInterface;
 use App\Interface\Auth\WebLoginActionInterface;
 use App\Support\Auth;
-use App\Traits\ValidatesRequests;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Random\RandomException;
 use RuntimeException;
 
 class AuthController extends Controller
 {
-    use ValidatesRequests;
-
     public function __construct(
         ContainerInterface $container,
         private readonly RegisterActionInterface $registerAction,
@@ -40,7 +34,6 @@ class AuthController extends Controller
         parent::__construct($container);
     }
 
-    // Show Forms
     public function showRegisterForm(Request $request, Response $response): Response
     {
         return view('auth.register', $response);
@@ -61,38 +54,21 @@ class AuthController extends Controller
         return view('auth.reset-password', $response, $token);
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function register(Request $request, Response $response): Response
+    public function register(RegisterRequest $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, RegisterRequest::class)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, RegisterRequest::class);
-        $dto = new RegisterDTO($validated['name'], $validated['email'], $validated['password']);
-
-        $this->registerAction->execute($dto);
+        $this->registerAction->execute(
+            RegisterDTO::fromRequest($request->validated())
+        );
 
         return $this->redirect('/login');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function login(Request $request, Response $response): Response
+    public function login(LoginRequest $request, Response $response): Response
     {
-        $validated = $this->validatedData($request, LoginRequest::class);
-        $dto = new LoginDTO(
-            $validated['email'],
-            $validated['password']
-        );
-
         try {
-            $this->webLoginAction->execute($dto);
+            $this->webLoginAction->execute(
+                LoginDTO::fromRequest($request->validated())
+            );
 
             return $this->redirect('/dashboard');
         } catch (RuntimeException $e) {
@@ -107,40 +83,20 @@ class AuthController extends Controller
         return $this->redirect('/');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     * @throws RandomException
-     */
-    public function sendPasswordResetLink(Request $request, Response $response): Response
+    public function sendPasswordResetLink(PasswordRecoveryRequest $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, PasswordRecoveryRequest::class)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, PasswordRecoveryRequest::class);
-
-        $dto = new PasswordRecoveryDTO($validated['email']);
-        $this->passwordRecoveryAction->execute($dto);
+        $this->passwordRecoveryAction->execute(
+            PasswordRecoveryDTO::fromRequest($request->validated())
+        );
 
         return view('auth.send-reset-password-link-success', $response);
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function updatePassword(Request $request, Response $response): Response
+    public function updatePassword(ResetPasswordRequest $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, ResetPasswordRequest::class)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, ResetPasswordRequest::class);
-
-        $dto = new ResetPasswordDTO($validated['token'], $validated['password']);
-
-        $this->resetPasswordAction->execute($dto);
+        $this->resetPasswordAction->execute(
+            ResetPasswordDTO::fromRequest($request->validated())
+        );
 
         return $this->redirect('/login');
     }

@@ -15,17 +15,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Permission\CreatePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
 use App\Traits\RouteParamsTrait;
-use App\Traits\ValidatesRequests;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class PermissionController extends Controller
 {
     use RouteParamsTrait;
-    use ValidatesRequests;
 
     public function __construct(
         ContainerInterface $container,
@@ -51,20 +47,11 @@ class PermissionController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function store(Request $request, Response $response): Response
+    public function store(CreatePermissionRequest $request, Response $response): Response
     {
-        if (($errorResponse = $this->validateRequest($request, CreatePermissionRequest::class, true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, CreatePermissionRequest::class);
-        $dto = new CreatePermissionDTO($validated['name']);
-
-        $permission = $this->createAction->execute($dto);
+        $permission = $this->createAction->execute(
+            new CreatePermissionDTO($request->validated()['name'])
+        );
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -86,21 +73,14 @@ class PermissionController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(UpdatePermissionRequest $request, Response $response, array $args): Response
     {
-        if (($errorResponse = $this->validateRequest($request, UpdatePermissionRequest::class,
-            true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, UpdatePermissionRequest::class);
-        $dto = new UpdatePermissionDTO($this->getParamAsInt($args, 'id'), $validated['name']);
-
-        $permission = $this->updateAction->execute($dto);
+        $permission = $this->updateAction->execute(
+            new UpdatePermissionDTO(
+                $this->getParamAsInt($args, 'id'),
+                $request->validated()['name']
+            )
+        );
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -117,7 +97,6 @@ class PermissionController extends Controller
         $response->getBody()->write(json_encode([
             'status' => 'success',
             'message' => 'Permission deleted successfully',
-
         ]));
 
         return $response->withHeader('Content-Type', 'application/json');

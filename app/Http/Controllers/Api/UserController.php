@@ -15,45 +15,23 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Traits\RouteParamsTrait;
-use App\Traits\ValidatesRequests;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 class UserController extends Controller
 {
     use RouteParamsTrait;
-    use ValidatesRequests;
 
-    private CreateUserAction $createUserAction;
-
-    private UpdateUserAction $updateUserAction;
-
-    private DeleteUserAction $deleteUserAction;
-
-    private GetUserAction $getUserAction;
-
-    private ListUsersAction $listUsersAction;
-
-    /**
-     * UserController constructor.
-     */
     public function __construct(
         ContainerInterface $container,
-        CreateUserAction $createUserAction,
-        UpdateUserAction $updateUserAction,
-        DeleteUserAction $deleteUserAction,
-        GetUserAction $getUserAction,
-        ListUsersAction $listUsersAction
+        private readonly CreateUserAction $createAction,
+        private readonly UpdateUserAction $updateAction,
+        private readonly DeleteUserAction $deleteAction,
+        private readonly GetUserAction $getAction,
+        private readonly ListUsersAction $listAction
     ) {
         parent::__construct($container);
-        $this->createUserAction = $createUserAction;
-        $this->updateUserAction = $updateUserAction;
-        $this->deleteUserAction = $deleteUserAction;
-        $this->getUserAction = $getUserAction;
-        $this->listUsersAction = $listUsersAction;
     }
 
     /**
@@ -63,8 +41,8 @@ class UserController extends Controller
      */
     public function index(Request $request, Response $response): Response
     {
+        $users = $this->listAction->execute();
 
-        $users = $this->listUsersAction->execute();
         $response->getBody()->write(json_encode([
             'status' => 'success',
             'data' => $users,
@@ -84,29 +62,17 @@ class UserController extends Controller
      *   "email": "john@example.com",
      *   "password": "secret"
      * }
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
-    public function store(Request $request, Response $response): Response
+    public function store(CreateUserRequest $request, Response $response): Response
     {
-        // Validate the request and return error response if validation fails.
-        if (($errorResponse = $this->validateRequest($request, CreateUserRequest::class, true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        // Retrieve validated data.
-        $validated = $this->validatedData($request, CreateUserRequest::class);
-
-        // Create a DTO from the validated data.
-        $dto = new CreateUserDTO(
-            $validated['name'] ?? '',
-            $validated['email'] ?? '',
-            $validated['password'] ?? ''
+        $user = $this->createAction->execute(
+            new CreateUserDTO(
+                $request->validated()['name'],
+                $request->validated()['email'],
+                $request->validated()['password'],
+                $request->validated()['roles'] ?? []
+            )
         );
-
-        // Execute the action to create a user.
-        $user = $this->createUserAction->execute($dto);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -126,8 +92,7 @@ class UserController extends Controller
      */
     public function show(Request $request, Response $response, array $args): Response
     {
-
-        $user = $this->getUserAction->execute($this->getParamAsInt($args, 'id'));
+        $user = $this->getAction->execute($args['id']);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -149,25 +114,18 @@ class UserController extends Controller
      * }
      *
      * @param  array  $args  Array with route parameters (expects 'id')
-     *
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
-    public function update(Request $request, Response $response, array $args): Response
+    public function update(UpdateUserRequest $request, Response $response, array $args): Response
     {
-        if (($errorResponse = $this->validateRequest($request, UpdateUserRequest::class, true)) instanceof Response) {
-            return $errorResponse;
-        }
-
-        $validated = $this->validatedData($request, UpdateUserRequest::class);
-
-        $dto = new UpdateUserDTO(
-            $this->getParamAsInt($args, 'id'),
-            $validated['name'] ?? null,
-            $validated['email'] ?? null
+        $user = $this->updateAction->execute(
+            new UpdateUserDTO(
+                $args['id'],
+                $request->validated()['name'] ?? null,
+                $request->validated()['email'] ?? null,
+                $request->validated()['password'] ?? null,
+                $request->validated()['roles'] ?? []
+            )
         );
-
-        $user = $this->updateUserAction->execute($dto);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',
@@ -186,8 +144,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request, Response $response, array $args): Response
     {
-
-        $this->deleteUserAction->execute($this->getParamAsInt($args, 'id'));
+        $this->deleteAction->execute($args['id']);
 
         $response->getBody()->write(json_encode([
             'status' => 'success',

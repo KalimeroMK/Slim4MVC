@@ -6,8 +6,11 @@ declare(strict_types=1);
 
 require __DIR__.'/../vendor/autoload.php';
 
+use App\Http\RequestHandlers\FormRequestStrategy;
+use App\Support\RequestResolver;
 use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Validation\Factory;
 use Slim\Factory\AppFactory;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
@@ -38,6 +41,11 @@ $validation($container, $capsule);
 // Set the container in Slim
 AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);
+
+// Configure request handler strategy
+$resolver = new RequestResolver($container, $container->get(Factory::class));
+$strategy = new FormRequestStrategy($container, $resolver);
+$app->getRouteCollector()->setDefaultInvocationStrategy($strategy);
 
 // Load middleware
 (require __DIR__.'/../bootstrap/middleware.php')($app, $container);
