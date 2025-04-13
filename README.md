@@ -134,69 +134,159 @@ The project has the following structure:
 │   └── Unit/
 │── .env
 │── composer.json
+
+## Key Features
+
+- MVC Architecture with Slim 4
+- Docker Configuration for Development
+- Database Integration with Eloquent ORM
+- Migration System
+- Blade Templating Engine
+- CSRF Protection
+- Form Request Validation (Laravel-style)
+  - Automatic validation through FormRequest base class
+  - ValidationException handling
+  - Support for Laravel validation rules
+  - DTO pattern with fromRequest constructors
+- CLI Commands for Development
+  - Model & Migration Generation
+  - Controller Generation
+  - Route Listing
+- API Ready with Structured Response Handling
+- Authentication System
+- Middleware System
+- Comprehensive Directory Structure
+
+## Authorization System
+
+The project includes a comprehensive authorization system with both middleware and policies.
+
+### Using Role & Permission Middleware
+
+```php
+// routes/web.php or routes/api.php
+
+// Single role check
+$app->get('/admin/dashboard', [DashboardController::class, 'index'])
+    ->add(new CheckRoleMiddleware())
+    ->setArgument('roles', 'admin');
+
+// Multiple roles check (user needs only one of these roles)
+$app->get('/reports', [ReportController::class, 'index'])
+    ->add(new CheckRoleMiddleware())
+    ->setArgument('roles', ['admin', 'manager']);
+
+// Permission check
+$app->post('/users', [UserController::class, 'store'])
+    ->add(new CheckPermissionMiddleware())
+    ->setArgument('permissions', 'create-users');
+
+// Multiple permissions check
+$app->put('/posts/{id}', [PostController::class, 'update'])
+    ->add(new CheckPermissionMiddleware())
+    ->setArgument('permissions', ['edit-posts', 'publish-posts']);
 ```
 
-## Blade Templating
+### Using Policies
 
-This project uses Blade templating engine similar to Laravel. To render a Blade view, you can use the `view` function in your controllers.
+1. **Create a Policy:**
 
-Example:
 ```php
-public function index(Request $request, Response $response): Response
+// app/Policies/PostPolicy.php
+class PostPolicy extends Policy
 {
-    $data = [
-        'title' => 'Welcome',
-        'content' => 'Welcome to Slim 4 with Blade!',
-    ];
+    public function update(User $user, Post $post): bool
+    {
+        return $user->id === $post->user_id || $user->hasPermission('edit-posts');
+    }
 
-    return view($response, 'welcome', $data);
+    public function delete(User $user, Post $post): bool
+    {
+        return $user->hasRole('admin') || 
+            ($user->id === $post->user_id && $user->hasPermission('delete-posts'));
+    }
 }
 ```
 
-## CSRF Protection
+2. **Use in Controllers:**
 
-To handle CSRF protection, this project uses the Slim CSRF package. The CSRF middleware is automatically added to your routes.
-
-Example route with CSRF middleware:
 ```php
-@csrf 
+class PostController extends Controller
+{
+    public function update(Request $request, Response $response, int $id): Response
+    {
+        $post = Post::find($id);
+        
+        if (!$this->authorize('update', $post)) {
+            return $this->respondUnauthorized();
+        }
+
+        // Continue with update logic...
+    }
+
+    public function delete(Request $request, Response $response, int $id): Response
+    {
+        $post = Post::find($id);
+        
+        if (!$this->authorize('delete', $post)) {
+            return $this->respondUnauthorized();
+        }
+
+        // Continue with delete logic...
+    }
+}
 ```
-## Docker Configuration
 
-### `docker-compose.yml`
+### Super Admin Override
 
-The project uses Docker Compose to set up all necessary containers. The configuration includes:
+The base Policy class includes a `before` method that automatically allows all actions for users with the 'super-admin' role:
 
-- **app**: Container for the application which is based on PHP and Slim 4.
-- **db**: Container for MariaDB.
-- **nginx**: Container for Nginx.
+```php
+// app/Policies/Policy.php
+abstract class Policy
+{
+    public function before(User $user): ?bool
+    {
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
 
-### `Dockerfile`
+        return null; // fall through to specific policy method
+    }
+}
+```
 
-Contains configuration for PHP, Slim 4, and all necessary extensions to run the application in Docker.
+### Best Practices
 
-### Nginx Configuration
+1. Use middleware for:
+   - Route-level authorization
+   - Simple role/permission checks
+   - Early request filtering
 
-The `nginx.conf` file is used to configure the Nginx server which forwards PHP requests to PHP-FPM.
+2. Use policies for:
+   - Resource-level authorization
+   - Complex permission logic
+   - Business rules
+   - Model-specific authorization
 
-## Development Steps
+3. Combine both when needed:
+   ```php
+   // Route with middleware for basic access
+   $app->group('/admin/posts', function (Group $group) {
+       $group->get('', [PostController::class, 'index']);
+       $group->post('', [PostController::class, 'store']);
+   })->add(new CheckRoleMiddleware())
+     ->setArgument('roles', ['admin', 'editor']);
 
-1. **Configuring Nginx:**
-   If you want to configure Nginx, you can edit `docker/nginx/default.conf` to set up the desired server.
-
-2. **Configuring Docker:**
-   If needed, you can modify the Docker configuration in `docker-compose.yml` to add new services or change existing ones.
-
-## Frequently Asked Questions
-
-1. **How do I shut down Docker?**
-   To shut down Docker, run the following command:
-    ```bash
-    docker-compose down
-    ```
-
-2. **What if the database is not working?**
-   Check if the database configuration is correct in the `.env` file. If using Docker, ensure the database container is up and running.
+   // Then use policies in the controller for specific actions
+   public function store(Request $request): Response
+   {
+       if (!$this->authorize('create', Post::class)) {
+           return $this->respondUnauthorized();
+       }
+       // ... store logic
+   }
+   ```
 
 ## License
 
