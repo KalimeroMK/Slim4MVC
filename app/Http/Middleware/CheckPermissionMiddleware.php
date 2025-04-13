@@ -10,33 +10,33 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Response;
 use Slim\Routing\RouteContext;
 
-class CheckRoleMiddleware
+class CheckPermissionMiddleware
 {
     public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $user = $request->getAttribute('user');
         $route = RouteContext::fromRequest($request)->getRoute();
-        $roles = $route->getArgument('roles');
+        $permissions = $route->getArgument('permissions');
 
-        // Convert single role to array
-        if (!is_array($roles)) {
-            $roles = [$roles];
+        // Convert single permission to array
+        if (!is_array($permissions)) {
+            $permissions = [$permissions];
         }
 
-        // Check if user has any of the required roles
-        $hasRole = false;
-        foreach ($roles as $role) {
-            if ($user && $user->hasRole($role)) {
-                $hasRole = true;
+        // Check if user has any of the required permissions
+        $hasPermission = false;
+        foreach ($permissions as $permission) {
+            if ($user && $user->hasPermission($permission)) {
+                $hasPermission = true;
                 break;
             }
         }
 
-        if (!$hasRole) {
+        if (!$hasPermission) {
             $response = new Response();
             $response->getBody()->write(json_encode([
                 'error' => 'Unauthorized',
-                'message' => 'You do not have the required role to access this resource'
+                'message' => 'You do not have the required permission to access this resource'
             ]));
 
             return $response
