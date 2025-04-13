@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\DTO\{{controllerName}};
+
+final class Update{{controllerName}}DTO
+{
+    public function __construct(
+        public readonly int $id,
+        // Example: public readonly string $name,
+    ) {
+    }
+}

@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{{controllerName}};
+
+use App\DTO\{{controllerName}}\Update{{controllerName}}DTO;
+use App\Models\{{controllerName}};
+
+final class Update{{controllerName}}Action
+{
+    public function execute(Update{{controllerName}}DTO $dto): {{controllerName}}
+    {
+        $model = {{controllerName}}::findOrFail($dto->id);
+        $model->update((array) $dto);
+
+        return $model;
+    }
+}
