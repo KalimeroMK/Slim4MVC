@@ -12,4 +12,12 @@ readonly class ResetPasswordDTO
         public string $token,
         public string $password
     ) {}
+
+    public static function fromRequest(array $validated): self
+    {
+        return new self(
+            token: $validated['token'],
+            password: $validated['password']
+        );
+    }
 }

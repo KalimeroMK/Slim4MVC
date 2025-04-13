@@ -50,7 +50,7 @@ class PermissionController extends Controller
     public function store(CreatePermissionRequest $request, Response $response): Response
     {
         $permission = $this->createAction->execute(
-            new CreatePermissionDTO($request->validated()['name'])
+            CreatePermissionDTO::fromRequest($request->validated())
         );
 
         $response->getBody()->write(json_encode([
@@ -76,10 +76,7 @@ class PermissionController extends Controller
     public function update(UpdatePermissionRequest $request, Response $response, array $args): Response
     {
         $permission = $this->updateAction->execute(
-            new UpdatePermissionDTO(
-                $this->getParamAsInt($args, 'id'),
-                $request->validated()['name']
-            )
+            UpdatePermissionDTO::fromRequest($request->validated())
         );
 
         $response->getBody()->write(json_encode([

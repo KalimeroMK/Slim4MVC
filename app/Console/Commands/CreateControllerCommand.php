@@ -23,7 +23,7 @@ class CreateControllerCommand extends Command
     {
         $name = $input->getArgument('name');
         $projectRoot = dirname(__DIR__, 3);
-        $stubRoot = $projectRoot . '/stubs';
+        $stubRoot = $projectRoot.'/stubs';
 
         $map = [
             // Controllers
@@ -79,18 +79,20 @@ class CreateControllerCommand extends Command
             $stubPath = $item['stub'];
             $destination = $item['destination'];
 
-            if (!file_exists($stubPath)) {
+            if (! file_exists($stubPath)) {
                 $output->writeln("<error>Missing stub: $stubPath</error>");
+
                 continue;
             }
 
             if (file_exists($destination)) {
                 $output->writeln("<comment>Skipped (already exists): $destination</comment>");
+
                 continue;
             }
 
             $dir = dirname($destination);
-            if (!is_dir($dir)) {
+            if (! is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
 

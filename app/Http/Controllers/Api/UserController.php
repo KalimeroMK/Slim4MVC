@@ -66,12 +66,7 @@ class UserController extends Controller
     public function store(CreateUserRequest $request, Response $response): Response
     {
         $user = $this->createAction->execute(
-            new CreateUserDTO(
-                $request->validated()['name'],
-                $request->validated()['email'],
-                $request->validated()['password'],
-                $request->validated()['roles'] ?? []
-            )
+            CreateUserDTO::fromRequest($request->validated())
         );
 
         $response->getBody()->write(json_encode([

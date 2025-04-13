@@ -49,9 +49,7 @@ class RoleController extends Controller
     public function store(CreateRoleRequest $request, Response $response): Response
     {
         $role = $this->createAction->execute(
-            new CreateRoleDTO(
-                $request->validated()['name'],
-            )
+            CreateRoleDTO::fromRequest($request->validated())
         );
 
         $response->getBody()->write(json_encode([
@@ -77,11 +75,7 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $request, Response $response, array $args): Response
     {
         $role = $this->updateAction->execute(
-            new UpdateRoleDTO(
-                $this->getParamAsInt($args, 'id'),
-                $request->validated()['name'] ?? null,
-                $request->validated()['permissions'] ?? []
-            )
+            UpdateRoleDTO::fromRequest($request->validated())
         );
 
         $response->getBody()->write(json_encode([

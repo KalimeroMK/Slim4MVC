@@ -18,4 +18,13 @@ class UpdateUserDTO
         $this->name = $name;
         $this->email = $email;
     }
+
+    public static function fromRequest(array $validated): self
+    {
+        return new self(
+            id: $validated['id'],
+            name: $validated['name'],
+            email: $validated['email']
+        );
+    }
 }

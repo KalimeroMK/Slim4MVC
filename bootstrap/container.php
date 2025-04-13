@@ -8,11 +8,11 @@ use DI\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->useAutowiring(true);
-$containerBuilder->addDefinitions(require __DIR__ . '/dependencies.php');
+$containerBuilder->addDefinitions(require __DIR__.'/dependencies.php');
 
 $container = $containerBuilder->build();
 
