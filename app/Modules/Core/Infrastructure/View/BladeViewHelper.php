@@ -9,10 +9,7 @@ if (! function_exists('view')) {
     /**
      * Render a Blade view template.
      *
-     * @param string $template
-     * @param Response $response
-     * @param array<string, mixed> $with
-     * @return Response
+     * @param  array<string, mixed>  $with
      */
     function view(string $template, Response $response, array $with = []): Response
     {
