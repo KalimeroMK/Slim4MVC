@@ -9,16 +9,28 @@ namespace App\Actions\Role;
 use App\DTO\Role\UpdateRoleDTO;
 use App\Interface\Role\UpdateRoleActionInterface;
 use App\Models\Role;
+use App\Repositories\RoleRepository;
 
 final class UpdateRoleAction implements UpdateRoleActionInterface
 {
+    public function __construct(
+        private readonly RoleRepository $repository
+    ) {}
+
+    /**
+     * Execute role update.
+     *
+     * @param UpdateRoleDTO $dto
+     * @return array<string, mixed>|null
+     */
     public function execute(UpdateRoleDTO $dto): ?array
     {
-        $role = Role::findOrFail($dto->id);
+        $attributes = [];
+        if ($dto->name !== null) {
+            $attributes['name'] = $dto->name;
+        }
 
-        $role->update([
-            'name' => $dto->name,
-        ]);
+        $role = $this->repository->update($dto->id, $attributes);
 
         if ($dto->permissions !== []) {
             /** @var Role $role */

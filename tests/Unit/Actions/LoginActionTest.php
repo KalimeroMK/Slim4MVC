@@ -6,7 +6,9 @@ namespace Tests\Unit\Actions;
 
 use App\Actions\Auth\LoginAction;
 use App\DTO\Auth\LoginDTO;
+use App\Exceptions\InvalidCredentialsException;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -17,7 +19,8 @@ class LoginActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = new LoginAction();
+        $repository = new UserRepository();
+        $this->action = new LoginAction($repository);
         $_ENV['JWT_SECRET'] = 'test-secret-key-for-testing-only';
     }
 
@@ -43,7 +46,7 @@ class LoginActionTest extends TestCase
     {
         $dto = new LoginDTO('nonexistent@example.com', 'password123');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(InvalidCredentialsException::class);
         $this->expectExceptionMessage('Invalid credentials');
 
         $this->action->execute($dto);
@@ -59,7 +62,7 @@ class LoginActionTest extends TestCase
 
         $dto = new LoginDTO('test@example.com', 'wrongpassword');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(InvalidCredentialsException::class);
         $this->expectExceptionMessage('Invalid credentials');
 
         $this->action->execute($dto);

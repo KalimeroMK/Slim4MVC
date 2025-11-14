@@ -6,6 +6,7 @@ namespace Tests\Unit\Actions;
 
 use App\Actions\User\DeleteUserAction;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 
@@ -16,7 +17,8 @@ class DeleteUserActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = new DeleteUserAction();
+        $repository = new UserRepository();
+        $this->action = new DeleteUserAction($repository);
     }
 
     public function test_execute_deletes_user_from_database(): void

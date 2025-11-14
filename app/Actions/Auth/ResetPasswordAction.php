@@ -7,22 +7,34 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\DTO\Auth\ResetPasswordDTO;
+use App\Exceptions\NotFoundException;
 use App\Interface\Auth\ResetPasswordActionInterface;
-use App\Models\User;
-use RuntimeException;
+use App\Repositories\UserRepository;
 
 class ResetPasswordAction implements ResetPasswordActionInterface
 {
+    public function __construct(
+        protected UserRepository $repository
+    ) {}
+
+    /**
+     * Execute password reset.
+     *
+     * @param ResetPasswordDTO $dto
+     * @return void
+     * @throws NotFoundException
+     */
     public function execute(ResetPasswordDTO $dto): void
     {
-        $user = User::where('password_reset_token', $dto->token)->first();
+        $user = $this->repository->findByPasswordResetToken($dto->token);
 
         if (! $user) {
-            throw new RuntimeException('Invalid or expired reset token');
+            throw new NotFoundException('Invalid or expired reset token');
         }
 
-        $user->password = password_hash($dto->password, PASSWORD_BCRYPT);
-        $user->password_reset_token = null;
-        $user->save();
+        $this->repository->update($user->id, [
+            'password' => password_hash($dto->password, PASSWORD_BCRYPT),
+            'password_reset_token' => null,
+        ]);
     }
 }

@@ -28,6 +28,9 @@ use App\Interface\User\CreateUserActionInterface;
 use App\Interface\User\UpdateUserActionInterface;
 use App\Queue\FileQueue;
 use App\Queue\Queue;
+use App\Repositories\PermissionRepository;
+use App\Repositories\RoleRepository;
+use App\Repositories\UserRepository;
 
 return [
     RegisterActionInterface::class => \DI\autowire(RegisterAction::class),
@@ -41,6 +44,10 @@ return [
     UpdatePermissionActionInterface::class => \DI\autowire(UpdatePermissionAction::class),
     CreateUserActionInterface::class => \DI\autowire(CreateUserAction::class),
     UpdateUserActionInterface::class => \DI\autowire(UpdateUserAction::class),
+    // Repositories
+    UserRepository::class => \DI\autowire(UserRepository::class),
+    RoleRepository::class => \DI\autowire(RoleRepository::class),
+    PermissionRepository::class => \DI\autowire(PermissionRepository::class),
     // Event system
     Dispatcher::class => \DI\autowire(Dispatcher::class),
     // Queue system

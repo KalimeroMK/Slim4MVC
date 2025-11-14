@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\AuthWebMiddleware;
 use App\Http\Middleware\ClearFlashDataMiddleware;
+use App\Http\Middleware\ExceptionHandlerMiddleware;
 use App\Http\Middleware\ValidationExceptionMiddleware;
 use App\Support\RequestResolver;
 use Illuminate\Validation\Factory;
@@ -62,6 +63,9 @@ return function ($app, $container): void {
     $container->set(AuthWebMiddleware::class, function () use ($container): AuthWebMiddleware {
         return new AuthWebMiddleware($container->get(App\Support\Auth::class));
     });
+
+    // Add exception handler middleware (should be early to catch all exceptions)
+    $app->add(new ExceptionHandlerMiddleware());
 
     // Add validation exception handling
     $app->add(new ValidationExceptionMiddleware());

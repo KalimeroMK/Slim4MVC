@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Role;
 
-use App\Models\Role;
+use App\Repositories\RoleRepository;
 
 final class DeleteRoleAction
 {
+    public function __construct(
+        private readonly RoleRepository $repository
+    ) {}
+
+    /**
+     * Execute role deletion.
+     *
+     * @param int $id
+     * @return void
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
     public function execute(int $id): void
     {
-        $role = Role::findOrFail($id);
-        $role->delete();
+        $this->repository->delete($id);
     }
 }

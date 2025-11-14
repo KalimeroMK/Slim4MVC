@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\User;
 
-use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Repositories\UserRepository;
 
 final class ListUsersAction
 {
+    public function __construct(
+        private readonly UserRepository $repository
+    ) {}
+
     /**
      * Execute listing users with pagination.
      *
-     * @return array{items: LengthAwarePaginator, total: int, page: int, perPage: int}
+     * @param int $page
+     * @param int $perPage
+     * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {
-        $paginator = User::with('roles')
-            ->orderBy('id', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
-
-        return [
-            'items' => $paginator->items(),
-            'total' => $paginator->total(),
-            'page' => $paginator->currentPage(),
-            'perPage' => $paginator->perPage(),
-        ];
+        return $this->repository->paginateWithRoles($page, $perPage);
     }
 }

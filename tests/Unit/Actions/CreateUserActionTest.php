@@ -7,6 +7,7 @@ namespace Tests\Unit\Actions;
 use App\Actions\User\CreateUserAction;
 use App\DTO\User\CreateUserDTO;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Tests\TestCase;
 
 class CreateUserActionTest extends TestCase
@@ -16,7 +17,8 @@ class CreateUserActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = new CreateUserAction();
+        $repository = new UserRepository();
+        $this->action = new CreateUserAction($repository);
     }
 
     public function test_execute_creates_user_with_hashed_password(): void

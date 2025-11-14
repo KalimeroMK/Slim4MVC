@@ -11,16 +11,24 @@ use App\Events\Dispatcher;
 use App\Events\UserRegistered;
 use App\Interface\Auth\RegisterActionInterface;
 use App\Models\User;
+use App\Repositories\UserRepository;
 
 class RegisterAction implements RegisterActionInterface
 {
     public function __construct(
-        protected Dispatcher $dispatcher
+        protected Dispatcher $dispatcher,
+        protected UserRepository $repository
     ) {}
 
+    /**
+     * Execute user registration.
+     *
+     * @param RegisterDTO $dto
+     * @return User
+     */
     public function execute(RegisterDTO $dto): User
     {
-        $user = User::create([
+        $user = $this->repository->create([
             'name' => $dto->name,
             'email' => $dto->email,
             'password' => password_hash($dto->password, PASSWORD_BCRYPT),

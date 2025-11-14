@@ -8,29 +8,38 @@ use App\DTO\Auth\PasswordRecoveryDTO;
 use App\Events\Dispatcher;
 use App\Events\PasswordResetRequested;
 use App\Interface\Auth\PasswordRecoveryActionInterface;
-use App\Models\User;
+use App\Repositories\UserRepository;
 use Random\RandomException;
 
 class PasswordRecoveryAction implements PasswordRecoveryActionInterface
 {
     public function __construct(
-        protected Dispatcher $dispatcher
+        protected Dispatcher $dispatcher,
+        protected UserRepository $repository
     ) {}
 
     /**
+     * Execute password recovery request.
+     *
+     * @param PasswordRecoveryDTO $dto
+     * @return void
      * @throws RandomException
      */
     public function execute(PasswordRecoveryDTO $dto): void
     {
-        $user = User::where('email', $dto->email)->first();
+        $user = $this->repository->findByEmail($dto->email);
 
         if (!$user) {
             return; // Don't reveal if user exists
         }
 
         $resetToken = bin2hex(random_bytes(16));
-        $user->password_reset_token = $resetToken;
-        $user->save();
+        $this->repository->update($user->id, [
+            'password_reset_token' => $resetToken,
+        ]);
+
+        // Reload user to get updated token
+        $user = $this->repository->findOrFail($user->id);
 
         // Dispatch event instead of sending email directly
         $this->dispatcher->dispatch(new PasswordResetRequested($user, $resetToken));

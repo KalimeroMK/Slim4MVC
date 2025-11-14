@@ -7,6 +7,7 @@ namespace Tests\Unit\Actions;
 use App\Actions\User\GetUserAction;
 use App\Models\Role;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 
@@ -17,7 +18,8 @@ class GetUserActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = new GetUserAction();
+        $repository = new UserRepository();
+        $this->action = new GetUserAction($repository);
     }
 
     public function test_execute_returns_user_with_roles(): void

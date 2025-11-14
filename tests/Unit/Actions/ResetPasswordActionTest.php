@@ -6,8 +6,9 @@ namespace Tests\Unit\Actions;
 
 use App\Actions\Auth\ResetPasswordAction;
 use App\DTO\Auth\ResetPasswordDTO;
+use App\Exceptions\NotFoundException;
 use App\Models\User;
-use RuntimeException;
+use App\Repositories\UserRepository;
 use Tests\TestCase;
 
 class ResetPasswordActionTest extends TestCase
@@ -17,7 +18,8 @@ class ResetPasswordActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = new ResetPasswordAction();
+        $repository = new UserRepository();
+        $this->action = new ResetPasswordAction($repository);
     }
 
     public function test_execute_with_valid_token_resets_password(): void
@@ -41,7 +43,7 @@ class ResetPasswordActionTest extends TestCase
     {
         $dto = new ResetPasswordDTO('invalid-token', 'newpassword123');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Invalid or expired reset token');
 
         $this->action->execute($dto);
@@ -58,7 +60,7 @@ class ResetPasswordActionTest extends TestCase
 
         $dto = new ResetPasswordDTO('nonexistent-token', 'newpassword123');
 
-        $this->expectException(RuntimeException::class);
+        $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Invalid or expired reset token');
 
         $this->action->execute($dto);

@@ -9,6 +9,7 @@ use App\DTO\Auth\RegisterDTO;
 use App\Events\Dispatcher;
 use App\Events\UserRegistered;
 use App\Models\User;
+use App\Repositories\UserRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 
@@ -23,7 +24,8 @@ class RegisterActionTest extends TestCase
         parent::setUp();
 
         $this->dispatcher = $this->createMock(Dispatcher::class);
-        $this->action = new RegisterAction($this->dispatcher);
+        $repository = new UserRepository();
+        $this->action = new RegisterAction($this->dispatcher, $repository);
     }
 
     public function test_execute_creates_user_with_hashed_password(): void

@@ -15,9 +15,12 @@
     "firebase/php-jwt": "^6.11",
     "illuminate/config": "^v12.3.0",
     "illuminate/database": "^12.0",
+    "illuminate/pagination": "^12.38",
+    "illuminate/support": "^12.26",
     "illuminate/translation": "^12.7",
     "illuminate/validation": "^12.7",
     "illuminate/view": "^12.0",
+    "monolog/monolog": "^3.0",
     "php-di/slim-bridge": "^3.4",
     "phpmailer/phpmailer": "^6.9",
     "slim/csrf": "^1.5",
@@ -26,8 +29,7 @@
     "slim/slim": "^4.0",
     "symfony/console": "^6.0",
     "tuupola/cors-middleware": "^1.4",
-    "vlucas/phpdotenv": "^5.6",
-    "monolog/monolog": "^3.0"
+    "vlucas/phpdotenv": "^5.6"
   },
   "autoload": {
     "psr-4": {

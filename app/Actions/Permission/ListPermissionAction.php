@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace App\Actions\Permission;
 
-use App\Models\Permission;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use App\Repositories\PermissionRepository;
 
 final class ListPermissionAction
 {
+    public function __construct(
+        private readonly PermissionRepository $repository
+    ) {}
+
     /**
      * Execute listing permissions with pagination.
      *
+     * @param int $page
+     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {
-        $paginator = Permission::with('roles')
-            ->orderBy('id', 'desc')
-            ->paginate($perPage, ['*'], 'page', $page);
-
-        return [
-            'items' => $paginator->items(),
-            'total' => $paginator->total(),
-            'page' => $paginator->currentPage(),
-            'perPage' => $paginator->perPage(),
-        ];
+        return $this->repository->paginateWithRoles($page, $perPage);
     }
 }

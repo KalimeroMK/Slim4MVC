@@ -7,17 +7,30 @@ namespace App\Actions\Permission;
 use App\DTO\Permission\UpdatePermissionDTO;
 use App\Interface\Permission\UpdatePermissionActionInterface;
 use App\Models\Permission;
+use App\Repositories\PermissionRepository;
 
 final class UpdatePermissionAction implements UpdatePermissionActionInterface
 {
+    public function __construct(
+        private readonly PermissionRepository $repository
+    ) {}
+
+    /**
+     * Execute permission update.
+     *
+     * @param UpdatePermissionDTO $dto
+     * @return Permission
+     */
     public function execute(UpdatePermissionDTO $dto): Permission
     {
-        $permission = Permission::findOrFail($dto->id);
+        $attributes = [];
+        if ($dto->name !== null) {
+            $attributes['name'] = $dto->name;
+        }
 
-        $permission->update([
-            'name' => $dto->name,
-        ]);
+        /** @var Permission $permission */
+        $permission = $this->repository->update($dto->id, $attributes);
 
-        return $permission->fresh();
+        return $permission;
     }
 }

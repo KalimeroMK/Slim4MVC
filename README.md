@@ -15,7 +15,9 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Error Logging** - PSR-3 compatible logging with Monolog
 - **API Resources** - Consistent API response formatting with Resource classes
 - **Consistent API Responses** - Standardized JSON responses with enums and helper methods
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (47 tests, 127 assertions)
+- **Repository Pattern** - Clean data access layer abstraction for better testability and maintainability
+- **Exception Handling** - Custom exception classes with centralized exception handling middleware
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (96 tests, 223 assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (models, controllers, requests)
 - **Docker Ready** - Complete Docker setup for development
 
@@ -73,6 +75,7 @@ The application will be available at [http://localhost:81](http://localhost:81)
 ├── app/
 │   ├── Actions/              # Business logic layer
 │   ├── DTO/                  # Data Transfer Objects
+│   ├── Exceptions/            # Custom exception classes
 │   ├── Http/
 │   │   ├── Controllers/      # Request handlers
 │   │   ├── Middleware/       # HTTP middleware
@@ -80,6 +83,7 @@ The application will be available at [http://localhost:81](http://localhost:81)
 │   ├── Interface/            # Service contracts
 │   ├── Models/               # Eloquent models
 │   ├── Policies/            # Authorization policies
+│   ├── Repositories/          # Data access layer (Repository pattern)
 │   ├── Support/              # Helper classes (Auth, Logger, Mailer)
 │   └── View/                 # Blade integration
 ├── bootstrap/                # Application bootstrap files
@@ -293,13 +297,17 @@ The project includes a comprehensive test suite covering:
 - Password reset (ResetPasswordAction)
 - Middleware (AuthMiddleware, RateLimitMiddleware)
 - Models (User, Role, Permission relationships)
+- Repositories (UserRepository, RoleRepository, PermissionRepository)
+- Exception handling (Custom exceptions)
 - Form request validation
 - Console commands (MakeRequestCommand)
 - API Resources
+- Event system (Dispatcher, Listeners)
+- Queue system (FileQueue, Jobs)
 
 **Test coverage:**
-- ✅ 47 tests
-- ✅ 127 assertions
+- ✅ 96 tests
+- ✅ 223 assertions
 - ✅ All tests passing
 
 Run tests:
@@ -439,11 +447,57 @@ The project follows a clean architecture pattern:
 
 1. **Controllers** - Thin controllers that delegate to Actions
 2. **Actions** - Business logic layer
-3. **DTOs** - Data Transfer Objects for type-safe data handling
-4. **Models** - Eloquent models for database interaction
-5. **Middleware** - Request/response processing
-6. **Policies** - Authorization logic
-7. **Form Requests** - Input validation
+3. **Repositories** - Data access layer abstraction (Repository pattern)
+4. **DTOs** - Data Transfer Objects for type-safe data handling
+5. **Models** - Eloquent models for database interaction
+6. **Middleware** - Request/response processing
+7. **Policies** - Authorization logic
+8. **Form Requests** - Input validation
+9. **Exceptions** - Custom exception classes for better error handling
+
+### Repository Pattern
+
+The application uses the Repository pattern to abstract data access logic:
+
+```php
+use App\Repositories\UserRepository;
+
+class UserController extends Controller
+{
+    public function __construct(
+        private readonly UserRepository $repository
+    ) {}
+    
+    public function show(int $id): Response
+    {
+        $user = $this->repository->findOrFail($id);
+        return ApiResponse::success(UserResource::make($user));
+    }
+}
+```
+
+Available Repositories:
+- `UserRepository` - User data access with methods like `findByEmail()`, `findByPasswordResetToken()`
+- `RoleRepository` - Role data access with methods like `findByName()`, `paginateWithPermissions()`
+- `PermissionRepository` - Permission data access with methods like `findByName()`, `paginateWithRoles()`
+
+### Exception Handling
+
+Custom exception classes provide consistent error handling:
+
+```php
+use App\Exceptions\NotFoundException;
+use App\Exceptions\InvalidCredentialsException;
+use App\Exceptions\UnauthorizedException;
+use App\Exceptions\ForbiddenException;
+use App\Exceptions\BadRequestException;
+
+// In Actions
+throw new NotFoundException('User not found');
+throw new InvalidCredentialsException('Invalid email or password');
+```
+
+The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriate API responses.
 
 ## 🔒 Security Features
 
@@ -455,6 +509,7 @@ The project follows a clean architecture pattern:
 - ✅ SQL injection protection (Eloquent ORM)
 - ✅ XSS protection (Blade templating)
 - ✅ Secure session handling
+- ✅ Centralized exception handling with proper error responses
 
 ## 📦 Dependencies
 
@@ -474,6 +529,8 @@ The project follows a clean architecture pattern:
 - `monolog/monolog` - Logging
 - `phpmailer/phpmailer` - Email sending
 - `vlucas/phpdotenv` - Environment variables
+- `illuminate/pagination` - Pagination support
+- `illuminate/support` - Laravel support package
 
 ### Development
 - `phpunit/phpunit` - Testing
