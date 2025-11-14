@@ -2,6 +2,19 @@
   "$schema": "https://getcomposer.org/schema.json",
   "name": "kalimeromk/slim-mvc-starter",
   "description": "Slim 4 MVC Starter Kit with Eloquent and Laravel Migrations",
+  "license": "MIT",
+  "keywords": [
+    "slim",
+    "slim4",
+    "mvc",
+    "starter",
+    "kit",
+    "eloquent",
+    "laravel",
+    "migrations",
+    "php",
+    "framework"
+  ],
   "authors": [
     {
       "name": "Zoran Shefot Bogoevski",
