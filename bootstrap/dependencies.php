@@ -20,6 +20,7 @@ use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Queue\FileQueue;
 use App\Modules\Core\Infrastructure\Queue\Queue;
+use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 use App\Modules\Product\Application\Actions\CreateItemAction;
@@ -59,8 +60,9 @@ return [
     // Event system
     Dispatcher::class => autowire(Dispatcher::class),
     // Queue system
-    Queue::class => factory(function (): FileQueue {
-        return new FileQueue();
+    QueueManager::class => autowire(QueueManager::class),
+    Queue::class => factory(function (QueueManager $queueManager): Queue {
+        return $queueManager->queue();
     }),
     // JWT Service
     JwtService::class => factory(function (): JwtService {

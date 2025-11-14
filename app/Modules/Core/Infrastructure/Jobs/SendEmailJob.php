@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Jobs;
 
-use App\Support\Mailer;
-use App\View\Blade;
+use App\Modules\Core\Infrastructure\Support\Mailer;
+use App\Modules\Core\Infrastructure\View\Blade;
 use Psr\Container\ContainerInterface;
 
-class SendEmailJob implements Job
+class SendEmailJob extends BaseJob
 {
     public function __construct(
         private readonly string $to,
@@ -21,8 +21,8 @@ class SendEmailJob implements Job
     {
         // Create Blade instance if container not provided
         if (! $container instanceof ContainerInterface) {
-            $viewsPath = dirname(__DIR__, 2).'/resources/views';
-            $cachePath = dirname(__DIR__, 2).'/storage/cache/view';
+            $viewsPath = dirname(__DIR__, 3).'/resources/views';
+            $cachePath = dirname(__DIR__, 3).'/storage/cache/view';
             $blade = new Blade($viewsPath, $cachePath);
         } else {
             $blade = $container->get(Blade::class);

@@ -8,6 +8,10 @@ use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
 use App\Console\Commands\MakeModuleCommand;
 use App\Console\Commands\MakeRequestCommand;
+use App\Console\Commands\QueueFailedCommand;
+use App\Console\Commands\QueueFlushCommand;
+use App\Console\Commands\QueueRetryCommand;
+use App\Console\Commands\QueueStatsCommand;
 use App\Console\Commands\QueueWorkCommand;
 use App\Console\Commands\SeedDatabaseCommand;
 use DI\ContainerBuilder;
@@ -43,7 +47,11 @@ $application->add(new CreateControllerCommand);
 $application->add(new MakeModelCommand());
 $application->add(new MakeModuleCommand());
 $application->add(new MakeRequestCommand());
-$application->add(new QueueWorkCommand($container->get(\App\Queue\Queue::class), $container));
+$application->add(new QueueWorkCommand($container->get(\App\Modules\Core\Infrastructure\Queue\Queue::class), $container));
+$application->add(new QueueStatsCommand($container->get(\App\Modules\Core\Infrastructure\Queue\QueueManager::class)));
+$application->add(new QueueFailedCommand());
+$application->add(new QueueRetryCommand($container->get(\App\Modules\Core\Infrastructure\Queue\QueueManager::class)));
+$application->add(new QueueFlushCommand());
 $application->add(new SeedDatabaseCommand());
 
 
