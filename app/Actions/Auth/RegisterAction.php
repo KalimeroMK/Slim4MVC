@@ -7,14 +7,15 @@ declare(strict_types=1);
 namespace App\Actions\Auth;
 
 use App\DTO\Auth\RegisterDTO;
+use App\Events\Dispatcher;
+use App\Events\UserRegistered;
 use App\Interface\Auth\RegisterActionInterface;
 use App\Models\User;
-use App\Support\Mailer;
 
 class RegisterAction implements RegisterActionInterface
 {
     public function __construct(
-        protected Mailer $mailer
+        protected Dispatcher $dispatcher
     ) {}
 
     public function execute(RegisterDTO $dto): User
@@ -25,13 +26,8 @@ class RegisterAction implements RegisterActionInterface
             'password' => password_hash($dto->password, PASSWORD_BCRYPT),
         ]);
 
-        // Send welcome email
-        $this->mailer->send(
-            $user->email,
-            'Welcome to our platform!',
-            'email.welcome',  // Blade template path
-            ['user' => $user]
-        );
+        // Dispatch event instead of sending email directly
+        $this->dispatcher->dispatch(new UserRegistered($user));
 
         return $user;
     }

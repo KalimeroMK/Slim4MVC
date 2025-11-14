@@ -104,15 +104,42 @@ class ApiResponse
      * @param int $page Current page
      * @param int $perPage Items per page
      * @param int|HttpStatusCode $statusCode HTTP status code
+     * @param string|null $baseUrl Base URL for pagination links (optional)
      */
     public static function paginated(
         array $data,
         int $total,
         int $page,
         int $perPage,
-        int|HttpStatusCode $statusCode = HttpStatusCode::OK
+        int|HttpStatusCode $statusCode = HttpStatusCode::OK,
+        ?string $baseUrl = null
     ): Response {
         $totalPages = (int) ceil($total / $perPage);
+        $totalPages = max(1, $totalPages); // At least 1 page
+
+        // Generate pagination URLs if baseUrl is provided
+        $nextPageUrl = null;
+        $prevPageUrl = null;
+
+        if ($baseUrl !== null) {
+            $parsedUrl = parse_url($baseUrl);
+            $queryParams = [];
+            if (isset($parsedUrl['query'])) {
+                parse_str($parsedUrl['query'], $queryParams);
+            }
+
+            if ($page < $totalPages) {
+                $queryParams['page'] = $page + 1;
+                $queryParams['per_page'] = $perPage;
+                $nextPageUrl = $parsedUrl['path'].'?'.http_build_query($queryParams);
+            }
+
+            if ($page > 1) {
+                $queryParams['page'] = $page - 1;
+                $queryParams['per_page'] = $perPage;
+                $prevPageUrl = $parsedUrl['path'].'?'.http_build_query($queryParams);
+            }
+        }
 
         return self::success([
             'items' => $data,
@@ -120,9 +147,11 @@ class ApiResponse
                 'total' => $total,
                 'per_page' => $perPage,
                 'current_page' => $page,
-                'total_pages' => $totalPages,
-                'has_next_page' => $page < $totalPages,
-                'has_previous_page' => $page > 1,
+                'last_page' => $totalPages,
+                'from' => $total > 0 ? (($page - 1) * $perPage) + 1 : 0,
+                'to' => min($page * $perPage, $total),
+                'next_page_url' => $nextPageUrl,
+                'prev_page_url' => $prevPageUrl,
             ],
         ], $statusCode);
     }

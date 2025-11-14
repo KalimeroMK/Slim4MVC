@@ -38,15 +38,25 @@ class UserController extends Controller
     }
 
     /**
-     * List all users.
+     * List all users with pagination.
      *
-     * GET /api/v1/users
+     * GET /api/v1/users?page=1&per_page=15
      */
     public function index(Request $request, Response $response): Response
     {
-        $users = $this->listAction->execute();
+        $params = $this->getPaginationParams();
+        $result = $this->listAction->execute($params['page'], $params['perPage']);
 
-        return ApiResponse::success(UserResource::collection($users));
+        $items = UserResource::collection($result['items']);
+
+        return ApiResponse::paginated(
+            $items,
+            $result['total'],
+            $result['page'],
+            $result['perPage'],
+            HttpStatusCode::OK,
+            $this->getPaginationBaseUrl()
+        );
     }
 
     /**

@@ -37,6 +37,9 @@ $validation($container, $capsule);
 // Configure Blade templating
 (require __DIR__.'/../bootstrap/blade.php')($container);
 
+// Configure Event system
+(require __DIR__.'/../bootstrap/events.php')($container);
+
 // Set the container in Slim
 AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);

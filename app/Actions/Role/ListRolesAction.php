@@ -5,12 +5,26 @@ declare(strict_types=1);
 namespace App\Actions\Role;
 
 use App\Models\Role;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ListRolesAction
 {
-    public function execute(): Collection
+    /**
+     * Execute listing roles with pagination.
+     *
+     * @return array{items: array, total: int, page: int, perPage: int}
+     */
+    public function execute(int $page = 1, int $perPage = 15): array
     {
-        return Role::with('permissions')->get();
+        $paginator = Role::with('permissions')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return [
+            'items' => $paginator->items(),
+            'total' => $paginator->total(),
+            'page' => $paginator->currentPage(),
+            'perPage' => $paginator->perPage(),
+        ];
     }
 }

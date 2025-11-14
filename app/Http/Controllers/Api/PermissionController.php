@@ -38,11 +38,26 @@ class PermissionController extends Controller
         parent::__construct($container);
     }
 
+    /**
+     * List all permissions with pagination.
+     *
+     * GET /api/v1/permissions?page=1&per_page=15
+     */
     public function index(Request $request, Response $response): Response
     {
-        $permissions = $this->listAction->execute();
+        $params = $this->getPaginationParams();
+        $result = $this->listAction->execute($params['page'], $params['perPage']);
 
-        return ApiResponse::success(PermissionResource::collection($permissions));
+        $items = PermissionResource::collection($result['items']);
+
+        return ApiResponse::paginated(
+            $items,
+            $result['total'],
+            $result['page'],
+            $result['perPage'],
+            HttpStatusCode::OK,
+            $this->getPaginationBaseUrl()
+        );
     }
 
     public function store(CreatePermissionRequest $request, Response $response): Response

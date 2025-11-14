@@ -6,8 +6,9 @@ namespace Tests\Unit\Actions;
 
 use App\Actions\Auth\RegisterAction;
 use App\DTO\Auth\RegisterDTO;
+use App\Events\Dispatcher;
+use App\Events\UserRegistered;
 use App\Models\User;
-use App\Support\Mailer;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 
@@ -15,27 +16,21 @@ class RegisterActionTest extends TestCase
 {
     private RegisterAction $action;
 
-    private MockObject $mailer;
+    private MockObject $dispatcher;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->mailer = $this->createMock(Mailer::class);
-        $this->action = new RegisterAction($this->mailer);
+        $this->dispatcher = $this->createMock(Dispatcher::class);
+        $this->action = new RegisterAction($this->dispatcher);
     }
 
     public function test_execute_creates_user_with_hashed_password(): void
     {
-        $this->mailer->expects($this->once())
-            ->method('send')
-            ->with(
-                $this->anything(),
-                'Welcome to our platform!',
-                'email.welcome',
-                $this->anything()
-            )
-            ->willReturn(true);
+        $this->dispatcher->expects($this->once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(UserRegistered::class));
 
         $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
         $user = $this->action->execute($dto);
@@ -46,19 +41,14 @@ class RegisterActionTest extends TestCase
         $this->assertTrue(password_verify('password123', $user->password));
     }
 
-    public function test_execute_sends_welcome_email(): void
+    public function test_execute_dispatches_user_registered_event(): void
     {
-        $this->mailer->expects($this->once())
-            ->method('send')
-            ->with(
-                'test@example.com',
-                'Welcome to our platform!',
-                'email.welcome',
-                $this->callback(function ($data) {
-                    return isset($data['user']) && $data['user'] instanceof User;
-                })
-            )
-            ->willReturn(true);
+        $this->dispatcher->expects($this->once())
+            ->method('dispatch')
+            ->with($this->callback(function (UserRegistered $event) {
+                return $event->user instanceof User
+                    && $event->user->email === 'test@example.com';
+            }));
 
         $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
         $this->action->execute($dto);
@@ -66,7 +56,7 @@ class RegisterActionTest extends TestCase
 
     public function test_execute_creates_user_in_database(): void
     {
-        $this->mailer->method('send')->willReturn(true);
+        $this->dispatcher->method('dispatch');
 
         $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
         $user = $this->action->execute($dto);

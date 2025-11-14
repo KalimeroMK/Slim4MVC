@@ -90,4 +90,33 @@ abstract class Controller
     {
         return ApiResponse::validationError($errors, $message);
     }
+
+    /**
+     * Get pagination parameters from request.
+     *
+     * @return array{page: int, perPage: int}
+     */
+    protected function getPaginationParams(): array
+    {
+        $queryParams = $this->request->getQueryParams();
+        $page = max(1, (int) ($queryParams['page'] ?? 1));
+        $perPage = max(1, min(100, (int) ($queryParams['per_page'] ?? 15))); // Max 100 per page
+
+        return [
+            'page' => $page,
+            'perPage' => $perPage,
+        ];
+    }
+
+    /**
+     * Get base URL for pagination links.
+     */
+    protected function getPaginationBaseUrl(): string
+    {
+        $uri = $this->request->getUri();
+        $path = $uri->getPath();
+        $query = $uri->getQuery();
+
+        return $path.($query ? '?'.$query : '');
+    }
 }

@@ -7,12 +7,23 @@ use App\Console\Commands\CreateControllerCommand;
 use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
 use App\Console\Commands\MakeRequestCommand;
+use App\Console\Commands\QueueWorkCommand;
 use App\Console\Commands\SeedDatabaseCommand;
+use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Console\Application;
 
 // Autoload dependencies
 require __DIR__ . '/vendor/autoload.php';
+
+// Initialize container for console commands
+$containerBuilder = new ContainerBuilder();
+$containerBuilder->useAutowiring(true);
+$containerBuilder->addDefinitions(require __DIR__ . '/bootstrap/dependencies.php');
+$container = $containerBuilder->build();
+
+// Load database for queue commands
+require __DIR__ . '/bootstrap/database.php';
 
 // Create Slim app
 $app = AppFactory::create();
@@ -28,6 +39,7 @@ $application->add(new ListRoutesCommand($app));
 $application->add(new CreateControllerCommand);
 $application->add(new MakeModelCommand());
 $application->add(new MakeRequestCommand());
+$application->add(new QueueWorkCommand($container->get(\App\Queue\Queue::class), $container));
 $application->add(new SeedDatabaseCommand());
 
 

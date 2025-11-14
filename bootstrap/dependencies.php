@@ -14,6 +14,7 @@ use App\Actions\Role\CreateRoleAction;
 use App\Actions\Role\UpdateRoleAction;
 use App\Actions\User\CreateUserAction;
 use App\Actions\User\UpdateUserAction;
+use App\Events\Dispatcher;
 use App\Interface\Auth\LoginActionInterface;
 use App\Interface\Auth\PasswordRecoveryActionInterface;
 use App\Interface\Auth\RegisterActionInterface;
@@ -25,6 +26,8 @@ use App\Interface\Role\CreateRoleActionInterface;
 use App\Interface\Role\UpdateRoleActionInterface;
 use App\Interface\User\CreateUserActionInterface;
 use App\Interface\User\UpdateUserActionInterface;
+use App\Queue\FileQueue;
+use App\Queue\Queue;
 
 return [
     RegisterActionInterface::class => \DI\autowire(RegisterAction::class),
@@ -38,4 +41,10 @@ return [
     UpdatePermissionActionInterface::class => \DI\autowire(UpdatePermissionAction::class),
     CreateUserActionInterface::class => \DI\autowire(CreateUserAction::class),
     UpdateUserActionInterface::class => \DI\autowire(UpdateUserAction::class),
+    // Event system
+    Dispatcher::class => \DI\autowire(Dispatcher::class),
+    // Queue system
+    Queue::class => \DI\factory(function () {
+        return new FileQueue();
+    }),
 ];

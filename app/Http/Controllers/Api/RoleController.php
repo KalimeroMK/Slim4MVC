@@ -37,11 +37,26 @@ class RoleController extends Controller
         parent::__construct($container);
     }
 
+    /**
+     * List all roles with pagination.
+     *
+     * GET /api/v1/roles?page=1&per_page=15
+     */
     public function index(Request $request, Response $response): Response
     {
-        $roles = $this->listAction->execute();
+        $params = $this->getPaginationParams();
+        $result = $this->listAction->execute($params['page'], $params['perPage']);
 
-        return ApiResponse::success(RoleResource::collection($roles));
+        $items = RoleResource::collection($result['items']);
+
+        return ApiResponse::paginated(
+            $items,
+            $result['total'],
+            $result['page'],
+            $result['perPage'],
+            HttpStatusCode::OK,
+            $this->getPaginationBaseUrl()
+        );
     }
 
     public function store(CreateRoleRequest $request, Response $response): Response
