@@ -1,7 +1,7 @@
 {
   "$schema": "https://getcomposer.org/schema.json",
   "name": "kalimeromk/slim-mvc-starter",
-  "description": "Slim 4 MVC Starter Kit with Eloquent and Laravel Migrations",
+  "description": "A production-ready Slim 4 MVC Starter Kit with Eloquent ORM, database migrations, JWT authentication, role-based permissions, and modular architecture",
   "license": "MIT",
   "keywords": [
     "slim",
