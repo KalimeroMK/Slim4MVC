@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Traits\AuthorizesRequests;
+use App\Support\ApiResponse;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -63,21 +64,15 @@ abstract class Controller
      */
     protected function respondUnauthorized(): Response
     {
-        return $this->respondWithJson([
-            'error' => 'Unauthorized',
-            'message' => 'You are not authorized to perform this action',
-        ], 403);
+        return ApiResponse::forbidden('You are not authorized to perform this action');
     }
 
     /**
      * Return a 404 Not Found response.
      */
-    protected function notFound(): Response
+    protected function notFound(?string $message = null): Response
     {
-        return $this->respondWithJson([
-            'error' => 'Not Found',
-            'message' => 'The requested resource was not found',
-        ], 404);
+        return ApiResponse::notFound($message ?? 'The requested resource was not found');
     }
 
     /**
@@ -85,21 +80,14 @@ abstract class Controller
      */
     protected function badRequest(string $message = 'Bad Request'): Response
     {
-        return $this->respondWithJson([
-            'error' => 'Bad Request',
-            'message' => $message,
-        ], 400);
+        return ApiResponse::badRequest($message);
     }
 
     /**
      * Return a 422 Unprocessable Entity response.
      */
-    protected function validationError(array $errors): Response
+    protected function validationError(array $errors, ?string $message = null): Response
     {
-        return $this->respondWithJson([
-            'error' => 'Validation Error',
-            'message' => 'The given data was invalid',
-            'errors' => $errors,
-        ], 422);
+        return ApiResponse::validationError($errors, $message);
     }
 }

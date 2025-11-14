@@ -11,9 +11,11 @@ use App\Actions\User\ListUsersAction;
 use App\Actions\User\UpdateUserAction;
 use App\DTO\User\CreateUserDTO;
 use App\DTO\User\UpdateUserDTO;
+use App\Enums\HttpStatusCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Support\ApiResponse;
 use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -43,12 +45,7 @@ class UserController extends Controller
     {
         $users = $this->listAction->execute();
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $users,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success($users);
     }
 
     /**
@@ -69,13 +66,7 @@ class UserController extends Controller
             CreateUserDTO::fromRequest($request->validated())
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $user,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json')
-            ->withStatus(201);
+        return ApiResponse::success($user, HttpStatusCode::CREATED);
     }
 
     /**
@@ -89,12 +80,7 @@ class UserController extends Controller
     {
         $user = $this->getAction->execute($args['id']);
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $user,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success($user);
     }
 
     /**
@@ -122,12 +108,7 @@ class UserController extends Controller
             )
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $user,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success($user);
     }
 
     /**
@@ -141,11 +122,6 @@ class UserController extends Controller
     {
         $this->deleteAction->execute($args['id']);
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'message' => 'User deleted successfully',
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'User deleted successfully');
     }
 }

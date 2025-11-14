@@ -7,10 +7,10 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Exceptions\ValidationException;
+use App\Support\ApiResponse;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use Illuminate\Validation\Validator;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Response;
 
 abstract class FormRequest
 {
@@ -49,13 +49,13 @@ abstract class FormRequest
         );
 
         if ($this->validator->fails()) {
-            $response = new Response();
-            $response->getBody()->write(json_encode([
-                'errors' => $this->validator->errors()->all(),
-            ]));
+            // Format errors by field for better API response
+            $errors = [];
+            foreach ($this->validator->errors()->messages() as $field => $messages) {
+                $errors[$field] = $messages;
+            }
 
-            $response = $response->withStatus(422)
-                ->withHeader('Content-Type', 'application/json');
+            $response = ApiResponse::validationError($errors);
 
             // Throw an exception that can be caught by middleware
             throw new ValidationException($response);

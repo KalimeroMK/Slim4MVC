@@ -74,8 +74,12 @@ class AuthMiddlewareTest extends TestCase
         $response = $this->middleware->process($request, $handler);
         $body = json_decode((string) $response->getBody(), true);
 
-        $this->assertArrayHasKey('error', $body);
-        $this->assertEquals('Unauthorized', $body['error']);
+        $this->assertArrayHasKey('status', $body);
+        $this->assertEquals('error', $body['status']);
+        $this->assertArrayHasKey('message', $body);
+        $this->assertEquals('Unauthorized', $body['message']);
+        $this->assertArrayHasKey('code', $body);
+        $this->assertEquals('UNAUTHORIZED', $body['code']);
     }
 
     private function createHandler(): RequestHandlerInterface
