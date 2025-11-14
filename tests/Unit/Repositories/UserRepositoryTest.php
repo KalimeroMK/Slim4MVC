@@ -155,4 +155,3 @@ class UserRepositoryTest extends TestCase
         $this->assertTrue($result['total'] >= 1);
     }
 }
-

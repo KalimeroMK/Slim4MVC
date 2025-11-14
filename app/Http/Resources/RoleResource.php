@@ -13,7 +13,7 @@ class RoleResource extends Resource
      */
     public static function make(mixed $resource): array
     {
-        if (!($resource instanceof Role)) {
+        if (! ($resource instanceof Role)) {
             return [];
         }
 
@@ -30,4 +30,3 @@ class RoleResource extends Resource
         ];
     }
 }
-

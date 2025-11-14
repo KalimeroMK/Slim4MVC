@@ -13,22 +13,28 @@ class ApiResponse
 {
     // Response status constants (for backward compatibility)
     public const STATUS_SUCCESS = 'success';
+
     public const STATUS_ERROR = 'error';
 
     // Common error messages
     public const ERROR_UNAUTHORIZED = 'Unauthorized';
+
     public const ERROR_FORBIDDEN = 'Forbidden';
+
     public const ERROR_NOT_FOUND = 'Not Found';
+
     public const ERROR_VALIDATION = 'Validation Error';
+
     public const ERROR_BAD_REQUEST = 'Bad Request';
+
     public const ERROR_SERVER_ERROR = 'Internal Server Error';
 
     /**
      * Return a successful JSON response.
      *
-     * @param mixed $data Response data
-     * @param int $statusCode HTTP status code
-     * @param string|null $message Optional message
+     * @param  mixed  $data  Response data
+     * @param  int  $statusCode  HTTP status code
+     * @param  string|null  $message  Optional message
      */
     public static function success(
         mixed $data = null,
@@ -36,9 +42,9 @@ class ApiResponse
         ?string $message = null
     ): Response {
         $response = new Psr7Response();
-        
+
         $statusCodeValue = $statusCode instanceof HttpStatusCode ? $statusCode->getValue() : $statusCode;
-        
+
         $body = [
             'status' => ApiResponseStatus::SUCCESS->getValue(),
         ];
@@ -61,10 +67,10 @@ class ApiResponse
     /**
      * Return an error JSON response.
      *
-     * @param string $message Error message
-     * @param int $statusCode HTTP status code
-     * @param array $errors Optional validation errors
-     * @param string|null $code Optional error code
+     * @param  string  $message  Error message
+     * @param  int  $statusCode  HTTP status code
+     * @param  array  $errors  Optional validation errors
+     * @param  string|null  $code  Optional error code
      */
     public static function error(
         string $message,
@@ -73,9 +79,9 @@ class ApiResponse
         ?string $code = null
     ): Response {
         $response = new Psr7Response();
-        
+
         $statusCodeValue = $statusCode instanceof HttpStatusCode ? $statusCode->getValue() : $statusCode;
-        
+
         $body = [
             'status' => ApiResponseStatus::ERROR->getValue(),
             'message' => $message,
@@ -85,7 +91,7 @@ class ApiResponse
             $body['code'] = $code;
         }
 
-        if (!empty($errors)) {
+        if ($errors !== []) {
             $body['errors'] = $errors;
         }
 
@@ -99,12 +105,12 @@ class ApiResponse
     /**
      * Return a paginated JSON response.
      *
-     * @param array $data Items data
-     * @param int $total Total items count
-     * @param int $page Current page
-     * @param int $perPage Items per page
-     * @param int|HttpStatusCode $statusCode HTTP status code
-     * @param string|null $baseUrl Base URL for pagination links (optional)
+     * @param  array  $data  Items data
+     * @param  int  $total  Total items count
+     * @param  int  $page  Current page
+     * @param  int  $perPage  Items per page
+     * @param  int|HttpStatusCode  $statusCode  HTTP status code
+     * @param  string|null  $baseUrl  Base URL for pagination links (optional)
      */
     public static function paginated(
         array $data,
@@ -234,4 +240,3 @@ class ApiResponse
         );
     }
 }
-

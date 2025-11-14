@@ -21,7 +21,7 @@ class Logger
     public static function log(string $level, string $message, array $context = []): void
     {
         $logger = self::getLogger();
-        if ($logger instanceof \Psr\Log\LoggerInterface) {
+        if ($logger instanceof LoggerInterface) {
             $logger->log($level, $message, $context);
         }
     }
@@ -48,7 +48,7 @@ class Logger
 
     private static function getLogger(): ?LoggerInterface
     {
-        if (!self::$container instanceof \DI\Container) {
+        if (! self::$container instanceof Container) {
             return null;
         }
 

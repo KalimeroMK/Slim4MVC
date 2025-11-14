@@ -15,8 +15,6 @@ final class DeletePermissionAction
     /**
      * Execute permission deletion.
      *
-     * @param int $id
-     * @return void
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function execute(int $id): void

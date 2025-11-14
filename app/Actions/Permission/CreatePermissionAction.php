@@ -17,9 +17,6 @@ final class CreatePermissionAction implements CreatePermissionActionInterface
 
     /**
      * Execute permission creation.
-     *
-     * @param CreatePermissionDTO $dto
-     * @return Permission
      */
     public function execute(CreatePermissionDTO $dto): Permission
     {

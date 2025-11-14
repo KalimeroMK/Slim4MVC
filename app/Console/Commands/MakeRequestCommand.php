@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
@@ -32,13 +33,13 @@ class MakeRequestCommand extends Command
 
         $projectRoot = dirname(__DIR__, 2);
         $stubPath = $projectRoot.'/stubs/Request/'.ucfirst($type).'Request';
-        
+
         // Check if stub exists, if not try alternative path
-        if (!file_exists($stubPath)) {
+        if (! file_exists($stubPath)) {
             $stubPath = __DIR__.'/../../../stubs/Request/'.ucfirst($type).'Request';
         }
 
-        if (!file_exists($stubPath)) {
+        if (! file_exists($stubPath)) {
             $output->writeln("<error>Stub file not found: $stubPath</error>");
 
             return Command::FAILURE;
@@ -49,23 +50,21 @@ class MakeRequestCommand extends Command
         if (count($parts) === 2) {
             $namespace = $parts[0];
             $className = $parts[1];
-        } else {
+        } elseif (preg_match('/^Create(.+)Request$/', $name, $matches)) {
             // Try to extract namespace from class name
-            if (preg_match('/^Create(.+)Request$/', $name, $matches)) {
-                $namespace = $matches[1];
-                $className = $name;
-            } elseif (preg_match('/^Update(.+)Request$/', $name, $matches)) {
-                $namespace = $matches[1];
-                $className = $name;
-            } else {
-                $namespace = 'User';
-                $className = $name;
-            }
+            $namespace = $matches[1];
+            $className = $name;
+        } elseif (preg_match('/^Update(.+)Request$/', $name, $matches)) {
+            $namespace = $matches[1];
+            $className = $name;
+        } else {
+            $namespace = 'User';
+            $className = $name;
         }
 
         // Fix path - projectRoot already points to root, not app directory
         $destination = "$projectRoot/app/Http/Requests/$namespace/$className.php";
-        
+
         // If projectRoot already contains app, adjust
         if (str_ends_with($projectRoot, '/app')) {
             $destination = dirname($projectRoot)."/app/Http/Requests/$namespace/$className.php";
@@ -79,7 +78,7 @@ class MakeRequestCommand extends Command
 
         // Create directory if needed
         $dir = dirname($destination);
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
@@ -118,7 +117,7 @@ class MakeRequestCommand extends Command
 
         $modelClass = "App\\Models\\$modelName";
 
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             $output->writeln("<comment>Warning: Model class $modelClass not found. Skipping auto-generation.</comment>");
 
             return null;
@@ -128,7 +127,7 @@ class MakeRequestCommand extends Command
             $reflection = new ReflectionClass($modelClass);
             $model = $reflection->newInstanceWithoutConstructor();
 
-            if (!($model instanceof Model)) {
+            if (! ($model instanceof Model)) {
                 $output->writeln("<comment>Warning: $modelClass is not an Eloquent Model. Skipping auto-generation.</comment>");
 
                 return null;
@@ -147,11 +146,7 @@ class MakeRequestCommand extends Command
                 $fieldRules = [];
 
                 // Determine if field is required
-                if ($isUpdate) {
-                    $fieldRules[] = 'sometimes';
-                } else {
-                    $fieldRules[] = 'required';
-                }
+                $fieldRules[] = $isUpdate ? 'sometimes' : 'required';
 
                 // Determine type based on cast or field name
                 $cast = $casts[$field] ?? null;
@@ -165,28 +160,26 @@ class MakeRequestCommand extends Command
                     } else {
                         $fieldRules[] = 'string';
                     }
-                } else {
+                } elseif (str_contains($field, 'email')) {
                     // Guess type from field name
-                    if (str_contains($field, 'email')) {
-                        $fieldRules[] = 'email';
-                        if (!$isUpdate) {
-                            $fieldRules[] = "unique:".strtolower($modelName)."s,$field";
-                        }
-                    } elseif (str_contains($field, 'password')) {
-                        $fieldRules[] = 'string';
-                        $fieldRules[] = 'min:8';
-                        if (!$isUpdate) {
-                            $fieldRules[] = 'confirmed';
-                        }
-                    } elseif (str_contains($field, 'url')) {
-                        $fieldRules[] = 'url';
-                    } else {
-                        $fieldRules[] = 'string';
+                    $fieldRules[] = 'email';
+                    if (! $isUpdate) {
+                        $fieldRules[] = 'unique:'.mb_strtolower($modelName)."s,$field";
                     }
+                } elseif (str_contains($field, 'password')) {
+                    $fieldRules[] = 'string';
+                    $fieldRules[] = 'min:8';
+                    if (! $isUpdate) {
+                        $fieldRules[] = 'confirmed';
+                    }
+                } elseif (str_contains($field, 'url')) {
+                    $fieldRules[] = 'url';
+                } else {
+                    $fieldRules[] = 'string';
                 }
 
                 // Add max length for string fields
-                if (in_array('string', $fieldRules) && !in_array('email', $fieldRules) && !in_array('password', $fieldRules)) {
+                if (in_array('string', $fieldRules) && ! in_array('email', $fieldRules) && ! in_array('password', $fieldRules)) {
                     $fieldRules[] = 'max:255';
                 }
 
@@ -194,12 +187,12 @@ class MakeRequestCommand extends Command
             }
 
             // Add password_confirmation if password exists
-            if (in_array('password', $fillable) && !$isUpdate) {
+            if (in_array('password', $fillable) && ! $isUpdate) {
                 $rules['password_confirmation'] = 'required';
             }
 
             return $rules;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $output->writeln("<comment>Warning: Could not generate rules from model: {$e->getMessage()}</comment>");
 
             return null;
@@ -215,7 +208,7 @@ class MakeRequestCommand extends Command
         foreach ($rules as $field => $rule) {
             $rulesString .= "            '$field' => '$rule',\n";
         }
-        $rulesString .= "        ];";
+        $rulesString .= '        ];';
 
         // Replace the rules section
         $content = preg_replace(
@@ -228,4 +221,3 @@ class MakeRequestCommand extends Command
         return $content;
     }
 }
-

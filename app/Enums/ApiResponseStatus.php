@@ -14,4 +14,3 @@ enum ApiResponseStatus: string
         return $this->value;
     }
 }
-

@@ -12,4 +12,3 @@ class UserRegistered extends Event
         public readonly User $user
     ) {}
 }
-

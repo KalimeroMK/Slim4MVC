@@ -20,15 +20,13 @@ class ResetPasswordAction implements ResetPasswordActionInterface
     /**
      * Execute password reset.
      *
-     * @param ResetPasswordDTO $dto
-     * @return void
      * @throws NotFoundException
      */
     public function execute(ResetPasswordDTO $dto): void
     {
         $user = $this->repository->findByPasswordResetToken($dto->token);
 
-        if (! $user) {
+        if (! $user instanceof \App\Models\User) {
             throw new NotFoundException('Invalid or expired reset token');
         }
 

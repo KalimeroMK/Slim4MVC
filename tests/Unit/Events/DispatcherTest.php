@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Unit\Events;
 
 use App\Events\Dispatcher;
-use App\Events\Event;
 use App\Events\PasswordResetRequested;
 use App\Events\UserRegistered;
 use App\Models\User;
@@ -16,6 +15,7 @@ use Psr\Container\ContainerInterface;
 class DispatcherTest extends TestCase
 {
     private Dispatcher $dispatcher;
+
     private MockObject $container;
 
     protected function setUp(): void
@@ -93,7 +93,7 @@ class DispatcherTest extends TestCase
 
         // Should not throw exception
         $this->dispatcher->dispatch($event);
-        
+
         // Verify no listeners were called
         $listeners = $this->dispatcher->getListeners();
         $this->assertArrayNotHasKey(UserRegistered::class, $listeners);
@@ -122,4 +122,3 @@ class DispatcherTest extends TestCase
         $this->assertTrue($passwordResetCalled);
     }
 }
-

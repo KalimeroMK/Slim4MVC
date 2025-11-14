@@ -28,4 +28,3 @@ interface Queue
      */
     public function clear(): void;
 }
-

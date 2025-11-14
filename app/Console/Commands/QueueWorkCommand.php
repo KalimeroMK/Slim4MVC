@@ -6,7 +6,9 @@ namespace App\Console\Commands;
 
 use App\Jobs\Job;
 use App\Queue\Queue;
+use Exception;
 use Psr\Container\ContainerInterface;
+use ReflectionMethod;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -41,7 +43,7 @@ class QueueWorkCommand extends Command
         while (true) {
             $job = $this->queue->pop();
 
-            if ($job === null) {
+            if (! $job instanceof Job) {
                 if ($stopWhenEmpty) {
                     $output->writeln('<info>Queue is empty. Stopping.</info>');
 
@@ -54,29 +56,25 @@ class QueueWorkCommand extends Command
             }
 
             try {
-                if ($job instanceof Job) {
-                    // Pass container to job if it accepts it
-                    if (method_exists($job, 'handle')) {
-                        $reflection = new \ReflectionMethod($job, 'handle');
-                        $params = $reflection->getParameters();
+                // Pass container to job if it accepts it
+                if (method_exists($job, 'handle')) {
+                    $reflection = new ReflectionMethod($job, 'handle');
+                    $params = $reflection->getParameters();
 
-                        if (count($params) > 0 && $params[0]->getType()?->getName() === 'Psr\Container\ContainerInterface') {
-                            $job->handle($this->container);
-                        } else {
-                            $job->handle();
-                        }
-                    }
-
-                    $processed++;
-                    $output->writeln("<info>✓ Processed job #{$processed}</info>");
-
-                    if ($maxJobs > 0 && $processed >= $maxJobs) {
-                        $output->writeln("<info>Processed {$processed} jobs. Stopping.</info>");
-
-                        break;
+                    if (count($params) > 0 && $params[0]->getType()?->getName() === 'Psr\Container\ContainerInterface') {
+                        $job->handle($this->container);
+                    } else {
+                        $job->handle();
                     }
                 }
-            } catch (\Exception $e) {
+                $processed++;
+                $output->writeln("<info>✓ Processed job #{$processed}</info>");
+                if ($maxJobs > 0 && $processed >= $maxJobs) {
+                    $output->writeln("<info>Processed {$processed} jobs. Stopping.</info>");
+
+                    break;
+                }
+            } catch (Exception $e) {
                 $output->writeln("<error>✗ Failed to process job: {$e->getMessage()}</error>");
             }
         }
@@ -86,4 +84,3 @@ class QueueWorkCommand extends Command
         return Command::SUCCESS;
     }
 }
-

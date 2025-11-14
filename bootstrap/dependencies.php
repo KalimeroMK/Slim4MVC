@@ -51,7 +51,7 @@ return [
     // Event system
     Dispatcher::class => \DI\autowire(Dispatcher::class),
     // Queue system
-    Queue::class => \DI\factory(function () {
+    Queue::class => \DI\factory(function (): FileQueue {
         return new FileQueue();
     }),
 ];

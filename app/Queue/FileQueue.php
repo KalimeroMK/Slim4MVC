@@ -11,19 +11,19 @@ class FileQueue implements Queue
 {
     private string $queueFile;
 
-    public function __construct(string $queuePath = null)
+    public function __construct(?string $queuePath = null)
     {
         $queuePath = $queuePath ?? dirname(__DIR__, 2).'/storage/queue/jobs.json';
         $this->queueFile = $queuePath;
 
         // Ensure directory exists
         $dir = dirname($this->queueFile);
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
 
         // Create file if it doesn't exist
-        if (!file_exists($this->queueFile)) {
+        if (! file_exists($this->queueFile)) {
             file_put_contents($this->queueFile, json_encode([], JSON_PRETTY_PRINT));
         }
     }
@@ -43,7 +43,7 @@ class FileQueue implements Queue
     {
         $jobs = $this->loadJobs();
 
-        if (empty($jobs)) {
+        if ($jobs === []) {
             return null;
         }
 
@@ -74,7 +74,7 @@ class FileQueue implements Queue
      */
     private function loadJobs(): array
     {
-        if (!file_exists($this->queueFile)) {
+        if (! file_exists($this->queueFile)) {
             return [];
         }
 
@@ -84,7 +84,7 @@ class FileQueue implements Queue
         }
 
         $jobs = json_decode($content, true);
-        if (!is_array($jobs)) {
+        if (! is_array($jobs)) {
             return [];
         }
 
@@ -94,11 +94,10 @@ class FileQueue implements Queue
     /**
      * Save jobs to file.
      *
-     * @param array<int, array{class: string, data: string, created_at: int}> $jobs
+     * @param  array<int, array{class: string, data: string, created_at: int}>  $jobs
      */
     private function saveJobs(array $jobs): void
     {
         file_put_contents($this->queueFile, json_encode($jobs, JSON_PRETTY_PRINT), LOCK_EX);
     }
 }
-

@@ -1,4 +1,11 @@
 /vendor/
 .idea
 .env
-/storage/cache/
+/storage/cache/view/*
+!/storage/cache/view/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/queue/*
+!/storage/queue/.gitkeep
+.phpunit.cache/
+.env.example.backup

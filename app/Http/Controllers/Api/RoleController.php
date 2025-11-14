@@ -66,8 +66,8 @@ class RoleController extends Controller
         );
 
         // CreateRoleAction returns Role model (load() returns the model, not array)
-        $role = $roleData instanceof \App\Models\Role 
-            ? $roleData 
+        $role = $roleData instanceof \App\Models\Role
+            ? $roleData
             : \App\Models\Role::with('permissions')->find($roleData['id'] ?? null);
 
         return ApiResponse::success(RoleResource::make($role), HttpStatusCode::CREATED);

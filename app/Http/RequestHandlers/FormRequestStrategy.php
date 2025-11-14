@@ -83,7 +83,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
     {
         $cacheKey = $this->getCacheKey($callable);
 
-        if (!isset($this->reflectionCache[$cacheKey])) {
+        if (! isset($this->reflectionCache[$cacheKey])) {
             $this->reflectionCache[$cacheKey] = $this->createReflection($callable);
         }
 

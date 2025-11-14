@@ -67,6 +67,19 @@ A modern, production-ready starter kit for building web applications with Slim F
    php slim seed:database
    ```
 
+7. **Setup storage permissions:**
+   ```bash
+   # Using PHP script (recommended)
+   php setup-storage.php
+   
+   # Or using bash script
+   ./setup-storage.sh
+   
+   # Or manually
+   chmod -R 775 storage
+   chown -R www-data:www-data storage  # Adjust user/group as needed
+   ```
+
 The application will be available at [http://localhost:81](http://localhost:81)
 
 ## 📁 Project Structure
@@ -536,6 +549,111 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 - `phpunit/phpunit` - Testing
 - `laravel/pint` - Code formatting
 - `rector/rector` - Code refactoring
+
+## 🚀 Deployment
+
+### Storage Directory Setup
+
+The application requires write access to the `storage/` directory for logs, cache, and queue files.
+
+#### Setup
+
+**For Nginx:**
+```bash
+# Set ownership
+sudo chown -R www-data:www-data storage
+
+# Set permissions
+sudo chmod -R 775 storage
+```
+
+**For Apache:**
+```bash
+# Set ownership
+sudo chown -R www-data:www-data storage
+
+# Set permissions
+sudo chmod -R 775 storage
+```
+
+**For Docker:**
+The storage directory is automatically mounted and permissions are handled by the container.
+
+### Web Server Configuration
+
+#### Nginx Configuration
+
+The nginx configuration is located in `docker/nginx/app.conf`. For production, ensure:
+
+1. **Document root** points to `/var/www/html/public`
+2. **PHP-FPM** is configured correctly
+3. **Storage directory** is protected (denied access in nginx config)
+4. **Security headers** are set
+
+Example production nginx configuration:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/html/public;
+    
+    # Deny access to storage
+    location ~ ^/storage/ {
+        deny all;
+    }
+    
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+    
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+```
+
+#### Apache Configuration
+
+The `.htaccess` file in `public/` directory handles URL rewriting. Ensure:
+
+1. **mod_rewrite** is enabled:
+   ```bash
+   sudo a2enmod rewrite
+   sudo systemctl restart apache2
+   ```
+
+2. **AllowOverride** is set to All in Apache config:
+   ```apache
+   <Directory /var/www/html/public>
+       Options -Indexes +FollowSymLinks
+       AllowOverride All
+       Require all granted
+   </Directory>
+   ```
+
+3. **Storage directory** is protected (already configured in `.htaccess`)
+
+### Permissions Reference
+
+| Directory | Permissions | Owner | Purpose |
+|-----------|-------------|-------|---------|
+| `storage/` | 775 | www-data | Root storage directory |
+| `storage/logs/` | 775 | www-data | Application logs |
+| `storage/cache/` | 775 | www-data | Blade view cache |
+| `storage/queue/` | 775 | www-data | Queue job files |
+
+**Note:** Adjust user/group (`www-data`, `nginx`, `apache`) based on your server configuration.
+
+### Security Considerations
+
+1. **Storage directory** should never be accessible via web browser
+2. **Environment files** (`.env`) should be protected
+3. **Composer files** should not be accessible
+4. **Git files** should not be accessible
+5. **File uploads** (if implemented) should be stored outside `public/` directory
 
 ## 🤝 Contributing
 

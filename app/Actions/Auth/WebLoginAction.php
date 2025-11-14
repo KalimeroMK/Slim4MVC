@@ -20,8 +20,6 @@ readonly class WebLoginAction implements WebLoginActionInterface
     /**
      * Execute web login.
      *
-     * @param LoginDTO $dto
-     * @return void
      * @throws InvalidCredentialsException
      */
     public function execute(LoginDTO $dto): void

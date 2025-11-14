@@ -14,16 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 class UserRepository extends EloquentRepository
 {
     /**
-     * Get the model class name.
-     *
-     * @return class-string<User>
-     */
-    protected function model(): string
-    {
-        return User::class;
-    }
-
-    /**
      * Get all users with roles.
      *
      * @return Collection<int, User>
@@ -36,8 +26,6 @@ class UserRepository extends EloquentRepository
     /**
      * Get paginated users with roles.
      *
-     * @param int $page
-     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function paginateWithRoles(int $page = 1, int $perPage = 15): array
@@ -56,8 +44,6 @@ class UserRepository extends EloquentRepository
 
     /**
      * Find user by email.
-     *
-     * @return User|null
      */
     public function findByEmail(string $email): ?User
     {
@@ -66,8 +52,6 @@ class UserRepository extends EloquentRepository
 
     /**
      * Find user by email with roles.
-     *
-     * @return User|null
      */
     public function findByEmailWithRoles(string $email): ?User
     {
@@ -76,12 +60,19 @@ class UserRepository extends EloquentRepository
 
     /**
      * Find user by password reset token.
-     *
-     * @return User|null
      */
     public function findByPasswordResetToken(string $token): ?User
     {
         return User::where('password_reset_token', $token)->first();
     }
-}
 
+    /**
+     * Get the model class name.
+     *
+     * @return class-string<User>
+     */
+    protected function model(): string
+    {
+        return User::class;
+    }
+}

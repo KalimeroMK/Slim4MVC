@@ -14,16 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 class PermissionRepository extends EloquentRepository
 {
     /**
-     * Get the model class name.
-     *
-     * @return class-string<Permission>
-     */
-    protected function model(): string
-    {
-        return Permission::class;
-    }
-
-    /**
      * Get all permissions with roles.
      *
      * @return Collection<int, Permission>
@@ -36,8 +26,6 @@ class PermissionRepository extends EloquentRepository
     /**
      * Get paginated permissions with roles.
      *
-     * @param int $page
-     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function paginateWithRoles(int $page = 1, int $perPage = 15): array
@@ -56,8 +44,6 @@ class PermissionRepository extends EloquentRepository
 
     /**
      * Find permission by name.
-     *
-     * @return Permission|null
      */
     public function findByName(string $name): ?Permission
     {
@@ -66,12 +52,19 @@ class PermissionRepository extends EloquentRepository
 
     /**
      * Find permission by name with roles.
-     *
-     * @return Permission|null
      */
     public function findByNameWithRoles(string $name): ?Permission
     {
         return Permission::with('roles')->where('name', $name)->first();
     }
-}
 
+    /**
+     * Get the model class name.
+     *
+     * @return class-string<Permission>
+     */
+    protected function model(): string
+    {
+        return Permission::class;
+    }
+}

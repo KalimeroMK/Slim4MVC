@@ -15,8 +15,6 @@ final class ListPermissionAction
     /**
      * Execute listing permissions with pagination.
      *
-     * @param int $page
-     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array

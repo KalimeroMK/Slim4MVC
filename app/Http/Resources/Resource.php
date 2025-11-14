@@ -8,18 +8,15 @@ abstract class Resource
 {
     /**
      * Transform a single resource.
-     *
-     * @param mixed $resource
      */
     abstract public static function make(mixed $resource): array;
 
     /**
      * Transform a collection of resources.
      *
-     * @param iterable $collection
      * @return array<int, array>
      */
-    public static function collection(iterable $collection): array
+    final public static function collection(iterable $collection): array
     {
         $result = [];
 
@@ -32,10 +29,8 @@ abstract class Resource
 
     /**
      * Transform resource when it's not null, otherwise return null.
-     *
-     * @param mixed $resource
      */
-    public static function when(mixed $resource): ?array
+    final public static function when(mixed $resource): ?array
     {
         if ($resource === null) {
             return null;
@@ -44,4 +39,3 @@ abstract class Resource
         return static::make($resource);
     }
 }
-

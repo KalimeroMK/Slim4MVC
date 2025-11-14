@@ -10,11 +10,13 @@ use App\Listeners\SendWelcomeEmail;
 use App\Models\User;
 use App\Queue\Queue;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionClass;
 use Tests\TestCase;
 
 class SendWelcomeEmailTest extends TestCase
 {
     private SendWelcomeEmail $listener;
+
     private MockObject $queue;
 
     protected function setUp(): void
@@ -39,7 +41,7 @@ class SendWelcomeEmailTest extends TestCase
             ->method('push')
             ->with($this->callback(function (SendEmailJob $job) use ($user) {
                 // Verify job properties using reflection
-                $reflection = new \ReflectionClass($job);
+                $reflection = new ReflectionClass($job);
                 $toProperty = $reflection->getProperty('to');
                 $toProperty->setAccessible(true);
                 $subjectProperty = $reflection->getProperty('subject');
@@ -55,4 +57,3 @@ class SendWelcomeEmailTest extends TestCase
         $this->listener->handle($event);
     }
 }
-

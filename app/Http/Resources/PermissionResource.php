@@ -13,7 +13,7 @@ class PermissionResource extends Resource
      */
     public static function make(mixed $resource): array
     {
-        if (!($resource instanceof Permission)) {
+        if (! ($resource instanceof Permission)) {
             return [];
         }
 
@@ -30,4 +30,3 @@ class PermissionResource extends Resource
         ];
     }
 }
-

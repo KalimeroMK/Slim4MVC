@@ -22,8 +22,8 @@ class LoginAction implements LoginActionInterface
     /**
      * Execute user login.
      *
-     * @param LoginDTO $dto
      * @return array{user: \App\Models\User, token: string}
+     *
      * @throws InvalidCredentialsException
      * @throws RuntimeException
      */

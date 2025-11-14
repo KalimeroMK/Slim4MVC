@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Queue;
 
-use App\Jobs\Job;
 use App\Jobs\SendEmailJob;
 use App\Queue\FileQueue;
 use PHPUnit\Framework\TestCase;
@@ -12,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 class FileQueueTest extends TestCase
 {
     private FileQueue $queue;
+
     private string $testQueueFile;
 
     protected function setUp(): void
@@ -98,4 +98,3 @@ class FileQueueTest extends TestCase
         // Note: We can't directly compare objects, but we can verify they were popped in order
     }
 }
-

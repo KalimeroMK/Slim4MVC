@@ -19,4 +19,3 @@ return function (ContainerInterface $container): void {
     // Store dispatcher in container for easy access
     $container->set(Dispatcher::class, $dispatcher);
 };
-

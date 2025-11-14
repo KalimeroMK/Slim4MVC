@@ -15,8 +15,6 @@ final class DeleteRoleAction
     /**
      * Execute role deletion.
      *
-     * @param int $id
-     * @return void
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function execute(int $id): void

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * Base Eloquent repository implementation.
  *
  * @template TModel of Model
+ *
  * @implements Repository<TModel>
  */
 abstract class EloquentRepository implements Repository
@@ -27,7 +28,7 @@ abstract class EloquentRepository implements Repository
      *
      * @return Collection<int, TModel>
      */
-    public function all(): Collection
+    final public function all(): Collection
     {
         return $this->model()::all();
     }
@@ -37,7 +38,7 @@ abstract class EloquentRepository implements Repository
      *
      * @return TModel|null
      */
-    public function find(int $id): ?Model
+    final public function find(int $id): ?Model
     {
         return $this->model()::find($id);
     }
@@ -46,9 +47,10 @@ abstract class EloquentRepository implements Repository
      * Find a record by ID or throw exception.
      *
      * @return TModel
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function findOrFail(int $id): Model
+    final public function findOrFail(int $id): Model
     {
         return $this->model()::findOrFail($id);
     }
@@ -56,10 +58,10 @@ abstract class EloquentRepository implements Repository
     /**
      * Create a new record.
      *
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      * @return TModel
      */
-    public function create(array $attributes): Model
+    final public function create(array $attributes): Model
     {
         return $this->model()::create($attributes);
     }
@@ -67,12 +69,12 @@ abstract class EloquentRepository implements Repository
     /**
      * Update a record.
      *
-     * @param int $id
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      * @return TModel
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function update(int $id, array $attributes): Model
+    final public function update(int $id, array $attributes): Model
     {
         $model = $this->findOrFail($id);
         $model->update($attributes);
@@ -83,11 +85,9 @@ abstract class EloquentRepository implements Repository
     /**
      * Delete a record.
      *
-     * @param int $id
-     * @return bool
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function delete(int $id): bool
+    final public function delete(int $id): bool
     {
         $model = $this->findOrFail($id);
 
@@ -97,11 +97,9 @@ abstract class EloquentRepository implements Repository
     /**
      * Get paginated records.
      *
-     * @param int $page
-     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
-    public function paginate(int $page = 1, int $perPage = 15): array
+    final public function paginate(int $page = 1, int $perPage = 15): array
     {
         $paginator = $this->model()::query()
             ->orderBy('id', 'desc')
@@ -118,10 +116,10 @@ abstract class EloquentRepository implements Repository
     /**
      * Find records by criteria.
      *
-     * @param array<string, mixed> $criteria
+     * @param  array<string, mixed>  $criteria
      * @return Collection<int, TModel>
      */
-    public function findBy(array $criteria): Collection
+    final public function findBy(array $criteria): Collection
     {
         $query = $this->model()::query();
 
@@ -132,4 +130,3 @@ abstract class EloquentRepository implements Repository
         return $query->get();
     }
 }
-

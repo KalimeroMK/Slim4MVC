@@ -16,8 +16,6 @@ final class GetUserAction
     /**
      * Execute getting a user by ID.
      *
-     * @param int $id
-     * @return User
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function execute(int $id): User

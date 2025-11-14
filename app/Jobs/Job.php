@@ -11,4 +11,3 @@ interface Job
      */
     public function handle(): void;
 }
-

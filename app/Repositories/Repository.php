@@ -32,6 +32,7 @@ interface Repository
      * Find a record by ID or throw exception.
      *
      * @return TModel
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function findOrFail(int $id): Model;
@@ -39,7 +40,7 @@ interface Repository
     /**
      * Create a new record.
      *
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      * @return TModel
      */
     public function create(array $attributes): Model;
@@ -47,9 +48,9 @@ interface Repository
     /**
      * Update a record.
      *
-     * @param int $id
-     * @param array<string, mixed> $attributes
+     * @param  array<string, mixed>  $attributes
      * @return TModel
+     *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function update(int $id, array $attributes): Model;
@@ -57,8 +58,6 @@ interface Repository
     /**
      * Delete a record.
      *
-     * @param int $id
-     * @return bool
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function delete(int $id): bool;
@@ -66,8 +65,6 @@ interface Repository
     /**
      * Get paginated records.
      *
-     * @param int $page
-     * @param int $perPage
      * @return array{items: array, total: int, page: int, perPage: int}
      */
     public function paginate(int $page = 1, int $perPage = 15): array;
@@ -75,9 +72,8 @@ interface Repository
     /**
      * Find records by criteria.
      *
-     * @param array<string, mixed> $criteria
+     * @param  array<string, mixed>  $criteria
      * @return Collection<int, TModel>
      */
     public function findBy(array $criteria): Collection;
 }
-

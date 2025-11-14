@@ -10,11 +10,13 @@ use App\Listeners\SendPasswordResetEmail;
 use App\Models\User;
 use App\Queue\Queue;
 use PHPUnit\Framework\MockObject\MockObject;
+use ReflectionClass;
 use Tests\TestCase;
 
 class SendPasswordResetEmailTest extends TestCase
 {
     private SendPasswordResetEmail $listener;
+
     private MockObject $queue;
 
     protected function setUp(): void
@@ -38,9 +40,9 @@ class SendPasswordResetEmailTest extends TestCase
 
         $this->queue->expects($this->once())
             ->method('push')
-            ->with($this->callback(function (SendEmailJob $job) use ($user, $token) {
+            ->with($this->callback(function (SendEmailJob $job) use ($user) {
                 // Verify job properties using reflection
-                $reflection = new \ReflectionClass($job);
+                $reflection = new ReflectionClass($job);
                 $toProperty = $reflection->getProperty('to');
                 $toProperty->setAccessible(true);
                 $subjectProperty = $reflection->getProperty('subject');
@@ -56,4 +58,3 @@ class SendPasswordResetEmailTest extends TestCase
         $this->listener->handle($event);
     }
 }
-

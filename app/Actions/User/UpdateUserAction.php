@@ -17,7 +17,6 @@ final class UpdateUserAction implements UpdateUserActionInterface
     /**
      * Execute user update.
      *
-     * @param UpdateUserDTO $dto
      * @return array<string, mixed>
      */
     public function execute(UpdateUserDTO $dto): array

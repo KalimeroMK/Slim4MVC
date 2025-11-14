@@ -13,4 +13,3 @@ class PasswordResetRequested extends Event
         public readonly string $token
     ) {}
 }
-

@@ -85,4 +85,3 @@ class RoleRepositoryTest extends TestCase
         $this->assertNull($found);
     }
 }
-

@@ -90,7 +90,7 @@ class Auth
             return $this->user;
         } catch (Exception $e) {
             // Log authentication failures for security monitoring
-            if ($this->logger instanceof \Psr\Log\LoggerInterface) {
+            if ($this->logger instanceof LoggerInterface) {
                 $this->logger->warning('JWT authentication failed', [
                     'error' => $e->getMessage(),
                     'token_preview' => mb_substr($token, 0, 20).'...',

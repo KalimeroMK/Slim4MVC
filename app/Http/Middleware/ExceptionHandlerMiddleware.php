@@ -16,6 +16,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 use RuntimeException;
+use Throwable;
 
 /**
  * Middleware to handle exceptions and convert them to appropriate API responses.
@@ -24,10 +25,6 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
 {
     /**
      * Process the request and handle exceptions.
-     *
-     * @param Request $request
-     * @param Handler $handler
-     * @return Response
      */
     public function process(Request $request, Handler $handler): Response
     {
@@ -50,7 +47,7 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
             error_log('RuntimeException: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
 
             return ApiResponse::error($e->getMessage(), 500);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log unexpected exceptions
             error_log('Unexpected exception: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
 
@@ -58,4 +55,3 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
         }
     }
 }
-

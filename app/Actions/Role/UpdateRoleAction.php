@@ -20,7 +20,6 @@ final class UpdateRoleAction implements UpdateRoleActionInterface
     /**
      * Execute role update.
      *
-     * @param UpdateRoleDTO $dto
      * @return array<string, mixed>|null
      */
     public function execute(UpdateRoleDTO $dto): ?array

@@ -17,9 +17,6 @@ final class UpdatePermissionAction implements UpdatePermissionActionInterface
 
     /**
      * Execute permission update.
-     *
-     * @param UpdatePermissionDTO $dto
-     * @return Permission
      */
     public function execute(UpdatePermissionDTO $dto): Permission
     {

@@ -16,8 +16,6 @@ final class GetPermissionAction
     /**
      * Execute getting a permission by ID.
      *
-     * @param int $id
-     * @return Permission
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function execute(int $id): Permission

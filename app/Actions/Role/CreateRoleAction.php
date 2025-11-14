@@ -18,7 +18,6 @@ final class CreateRoleAction implements CreateRoleActionInterface
     /**
      * Execute role creation.
      *
-     * @param CreateRoleDTO $dto
      * @return array<string, mixed>|null
      */
     public function execute(CreateRoleDTO $dto): ?array

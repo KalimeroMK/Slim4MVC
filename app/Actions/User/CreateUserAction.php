@@ -17,7 +17,6 @@ final class CreateUserAction implements CreateUserActionInterface
     /**
      * Execute user creation.
      *
-     * @param CreateUserDTO $dto
      * @return array<string, mixed>
      */
     public function execute(CreateUserDTO $dto): array

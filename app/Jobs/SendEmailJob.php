@@ -17,10 +17,10 @@ class SendEmailJob implements Job
         private readonly array $data = []
     ) {}
 
-    public function handle(ContainerInterface $container = null): void
+    public function handle(?ContainerInterface $container = null): void
     {
         // Create Blade instance if container not provided
-        if ($container === null) {
+        if (! $container instanceof ContainerInterface) {
             $viewsPath = dirname(__DIR__, 2).'/resources/views';
             $cachePath = dirname(__DIR__, 2).'/storage/cache/view';
             $blade = new Blade($viewsPath, $cachePath);
@@ -32,4 +32,3 @@ class SendEmailJob implements Job
         $mailer->send($this->to, $this->subject, $this->template, $this->data);
     }
 }
-

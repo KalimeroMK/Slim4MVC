@@ -85,4 +85,3 @@ class PermissionRepositoryTest extends TestCase
         $this->assertNull($found);
     }
 }
-

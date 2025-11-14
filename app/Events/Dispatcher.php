@@ -20,12 +20,12 @@ class Dispatcher
     /**
      * Register an event listener.
      *
-     * @param string $event Event class name
-     * @param string|callable $listener Listener class name or callable
+     * @param  string  $event  Event class name
+     * @param  string|callable  $listener  Listener class name or callable
      */
     public function listen(string $event, string|callable $listener): void
     {
-        if (!isset($this->listeners[$event])) {
+        if (! isset($this->listeners[$event])) {
             $this->listeners[$event] = [];
         }
 
@@ -39,7 +39,7 @@ class Dispatcher
     {
         $eventClass = get_class($event);
 
-        if (!isset($this->listeners[$eventClass])) {
+        if (! isset($this->listeners[$eventClass])) {
             return;
         }
 
@@ -65,4 +65,3 @@ class Dispatcher
         return $this->listeners;
     }
 }
-

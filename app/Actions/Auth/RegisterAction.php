@@ -22,9 +22,6 @@ class RegisterAction implements RegisterActionInterface
 
     /**
      * Execute user registration.
-     *
-     * @param RegisterDTO $dto
-     * @return User
      */
     public function execute(RegisterDTO $dto): User
     {

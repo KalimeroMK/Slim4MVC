@@ -13,7 +13,7 @@ class UserResource extends Resource
      */
     public static function make(mixed $resource): array
     {
-        if (!($resource instanceof User)) {
+        if (! ($resource instanceof User)) {
             return [];
         }
 
@@ -32,4 +32,3 @@ class UserResource extends Resource
         ];
     }
 }
-

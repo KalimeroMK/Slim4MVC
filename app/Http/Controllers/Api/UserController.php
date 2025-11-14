@@ -112,7 +112,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, Response $response, array $args): Response
     {
-        $userData = $this->updateAction->execute(
+        $this->updateAction->execute(
             new UpdateUserDTO(
                 $args['id'],
                 $request->validated()['name'] ?? null,

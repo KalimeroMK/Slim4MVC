@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 class SendEmailJobTest extends TestCase
 {
     private MockObject $mailer;
+
     private MockObject $blade;
 
     protected function setUp(): void
@@ -61,4 +62,3 @@ class SendEmailJobTest extends TestCase
         $this->assertTrue(method_exists($job, 'handle'));
     }
 }
-

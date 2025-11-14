@@ -12,7 +12,9 @@ use Symfony\Component\Console\Tester\CommandTester;
 class MakeRequestCommandTest extends TestCase
 {
     private string $projectRoot;
+
     private string $testNamespace = 'TestRequest';
+
     private string $testClassName = 'CreateTestRequest';
 
     protected function setUp(): void
@@ -121,7 +123,7 @@ class MakeRequestCommandTest extends TestCase
         $commandTester = new CommandTester($command);
 
         $requestPath = "{$this->testNamespace}/DuplicateRequest";
-        
+
         // Create file first time
         $commandTester->execute(['name' => $requestPath]);
         $this->assertEquals(0, $commandTester->getStatusCode());
@@ -154,4 +156,3 @@ class MakeRequestCommandTest extends TestCase
         $this->assertEquals(0, $commandTester->getStatusCode());
     }
 }
-

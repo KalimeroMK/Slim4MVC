@@ -53,4 +53,3 @@ class ExceptionTest extends TestCase
         $this->assertEquals('Test message', $exception->getMessage());
     }
 }
-

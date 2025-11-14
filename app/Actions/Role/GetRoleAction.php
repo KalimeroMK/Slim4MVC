@@ -16,8 +16,6 @@ final class GetRoleAction
     /**
      * Execute getting a role by ID.
      *
-     * @param int $id
-     * @return Role
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function execute(int $id): Role
