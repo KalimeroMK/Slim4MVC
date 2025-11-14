@@ -22,6 +22,10 @@ use App\Modules\Core\Infrastructure\Queue\FileQueue;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
+use App\Modules\Product\Application\Actions\CreateItemAction;
+use App\Modules\Product\Application\Actions\UpdateItemAction;
+use App\Modules\Product\Application\Interfaces\CreateItemActionInterface;
+use App\Modules\Product\Application\Interfaces\UpdateItemActionInterface;
 use App\Modules\Role\Application\Actions\CreateRoleAction;
 use App\Modules\Role\Application\Actions\UpdateRoleAction;
 use App\Modules\Role\Application\Interfaces\CreateRoleActionInterface;
@@ -64,4 +68,6 @@ return [
 
         return new JwtService($secret);
     }),
+    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class),
+    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),
 ];

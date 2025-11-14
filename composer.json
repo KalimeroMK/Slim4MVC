@@ -47,7 +47,8 @@
     "psr-4": {
       "App\\": "app/",
       "App\\View\\": "app/View/",
-      "Database\\Migrations\\": "database/migrations/"
+      "Database\\Migrations\\": "database/migrations/",
+      "Database\\Seed\\": "database/seed/"
     },
     "files": [
       "app/Modules/Core/Infrastructure/View/BladeViewHelper.php",
@@ -60,6 +61,7 @@
     "sort-packages": true
   },
   "require-dev": {
+    "fakerphp/faker": "^1.24",
     "laravel/pint": "^1.21",
     "phpunit/phpunit": "^12.4",
     "rector/rector": "^2.0.19"

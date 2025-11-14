@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Support;
 
-use App\View\Blade;
+use App\Modules\Core\Infrastructure\View\Blade;
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 

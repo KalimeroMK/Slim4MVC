@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Requests;
 
-use App\Exceptions\ValidationException;
-use App\Http\Requests\FormRequest;
+use App\Modules\Core\Infrastructure\Exceptions\ValidationException;
+use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 use Illuminate\Validation\Factory;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;

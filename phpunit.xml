@@ -21,6 +21,8 @@
         </include>
         <exclude>
             <directory>app/Console</directory>
+            <directory>app/View</directory>
+            <directory>app/Support</directory>
         </exclude>
     </source>
     <php>
