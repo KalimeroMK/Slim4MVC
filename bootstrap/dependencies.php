@@ -8,12 +8,12 @@ use App\Actions\Auth\PasswordRecoveryAction;
 use App\Actions\Auth\RegisterAction;
 use App\Actions\Auth\ResetPasswordAction;
 use App\Actions\Auth\WebLoginAction;
-use App\DTO\Permission\CreatePermissionDTO;
-use App\DTO\Permission\UpdatePermissionDTO;
-use App\DTO\Role\CreateRoleDTO;
-use App\DTO\Role\UpdateRoleDTO;
-use App\DTO\User\CreateUserDTO;
-use App\DTO\User\UpdateUserDTO;
+use App\Actions\Permission\CreatePermissionAction;
+use App\Actions\Permission\UpdatePermissionAction;
+use App\Actions\Role\CreateRoleAction;
+use App\Actions\Role\UpdateRoleAction;
+use App\Actions\User\CreateUserAction;
+use App\Actions\User\UpdateUserAction;
 use App\Interface\Auth\LoginActionInterface;
 use App\Interface\Auth\PasswordRecoveryActionInterface;
 use App\Interface\Auth\RegisterActionInterface;
@@ -32,10 +32,10 @@ return [
     PasswordRecoveryActionInterface::class => \DI\autowire(PasswordRecoveryAction::class),
     ResetPasswordActionInterface::class => \DI\autowire(ResetPasswordAction::class),
     WebLoginActionInterface::class => \DI\autowire(WebLoginAction::class),
-    CreateRoleActionInterface::class => \DI\autowire((CreateRoleDTO::class)),
-    UpdateRoleActionInterface::class => \DI\autowire((UpdateRoleDTO::class)),
-    CreatePermissionActionInterface::class => \DI\autowire((CreatePermissionDTO::class)),
-    UpdatePermissionActionInterface::class => \DI\autowire((UpdatePermissionDTO::class)),
-    CreateUserActionInterface::class => \DI\autowire((CreateUserDTO::class)),
-    UpdateUserActionInterface::class => \DI\autowire((UpdateUserDTO::class)),
+    CreateRoleActionInterface::class => \DI\autowire(CreateRoleAction::class),
+    UpdateRoleActionInterface::class => \DI\autowire(UpdateRoleAction::class),
+    CreatePermissionActionInterface::class => \DI\autowire(CreatePermissionAction::class),
+    UpdatePermissionActionInterface::class => \DI\autowire(UpdatePermissionAction::class),
+    CreateUserActionInterface::class => \DI\autowire(CreateUserAction::class),
+    UpdateUserActionInterface::class => \DI\autowire(UpdateUserAction::class),
 ];

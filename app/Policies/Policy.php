@@ -11,7 +11,7 @@ abstract class Policy
     /**
      * Determine if the given user can perform any action.
      */
-    public function before(User $user): ?bool
+    final public function before(User $user): ?bool
     {
         // If user is super admin, allow all actions
         if ($user->hasRole('super-admin')) {

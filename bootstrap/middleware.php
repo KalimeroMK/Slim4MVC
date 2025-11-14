@@ -8,13 +8,43 @@ use App\Http\Middleware\ClearFlashDataMiddleware;
 use App\Http\Middleware\ValidationExceptionMiddleware;
 use App\Support\RequestResolver;
 use Illuminate\Validation\Factory;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+use Tuupola\Middleware\CorsMiddleware;
 
 return function ($app, $container): void {
+
+    // Configure logging
+    $logger = new Logger('app');
+    $logLevel = ($_ENV['APP_ENV'] ?? 'production') === 'production' ? Level::Warning : Level::Debug;
+    $logger->pushHandler(new StreamHandler(__DIR__.'/../storage/logs/slim.log', $logLevel));
+    $container->set(LoggerInterface::class, $logger);
+
+    // Set container for Logger helper class
+    App\Support\Logger::setContainer($container);
+
+    // Add CORS middleware for API routes
+    $cors = new CorsMiddleware([
+        'origin' => explode(',', $_ENV['CORS_ORIGINS'] ?? '*'),
+        'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        'headers.allow' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+        'headers.expose' => ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+        'credentials' => true,
+        'cache' => 86400,
+    ]);
 
     // Add middleware
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
-    $app->addErrorMiddleware(true, true, true);
+
+    // Add CORS middleware (should be early in the stack)
+    $app->add($cors);
+
+    // Only show error details in non-production environments
+    $displayErrorDetails = ($_ENV['APP_ENV'] ?? 'production') !== 'production';
+    $app->addErrorMiddleware($displayErrorDetails, true, true);
 
     // Register request resolver
     $container->set(RequestResolver::class, function () use ($container): RequestResolver {

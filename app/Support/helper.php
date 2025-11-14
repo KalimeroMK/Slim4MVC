@@ -30,13 +30,13 @@ if (! function_exists('base_path')) {
 }
 
 if (! function_exists('env')) {
-    function env($key, $default = false): bool
+    function env($key, $default = false): mixed
     {
         $value = getenv($key);
 
         throw_when(! $value && ! $default, "{$key} is not a defined .env variable and has not default value");
 
-        return $value || $default;
+        return $value ?: $default;
     }
 }
 

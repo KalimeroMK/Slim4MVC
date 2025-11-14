@@ -20,7 +20,7 @@ trait RouteParamsTrait
     protected function getParamAsInt(array $args, string $key, int $default = 0): int
     {
         if (isset($args[$key])) {
-            return (int) trim((string) $args[$key]);
+            return (int) mb_trim((string) $args[$key]);
         }
 
         return $default;
@@ -38,6 +38,6 @@ trait RouteParamsTrait
      */
     protected function getParamAsString(array $args, string $key, string $default = ''): string
     {
-        return isset($args[$key]) ? trim((string) $args[$key]) : $default;
+        return isset($args[$key]) ? mb_trim((string) $args[$key]) : $default;
     }
 }

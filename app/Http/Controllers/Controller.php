@@ -10,13 +10,13 @@ use App\Http\Traits\AuthorizesRequests;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Psr7\Response as Psr7Response;
 
 abstract class Controller
 {
     use AuthorizesRequests;
 
     protected Request $request;
+
     protected Response $response;
 
     public function __construct(
@@ -48,9 +48,6 @@ abstract class Controller
 
     /**
      * Return a JSON response.
-     *
-     * @param mixed $data
-     * @param int $status
      */
     protected function respondWithJson(mixed $data, int $status = 200): Response
     {
@@ -68,7 +65,7 @@ abstract class Controller
     {
         return $this->respondWithJson([
             'error' => 'Unauthorized',
-            'message' => 'You are not authorized to perform this action'
+            'message' => 'You are not authorized to perform this action',
         ], 403);
     }
 
@@ -79,7 +76,7 @@ abstract class Controller
     {
         return $this->respondWithJson([
             'error' => 'Not Found',
-            'message' => 'The requested resource was not found'
+            'message' => 'The requested resource was not found',
         ], 404);
     }
 
@@ -90,21 +87,19 @@ abstract class Controller
     {
         return $this->respondWithJson([
             'error' => 'Bad Request',
-            'message' => $message
+            'message' => $message,
         ], 400);
     }
 
     /**
      * Return a 422 Unprocessable Entity response.
-     *
-     * @param array $errors
      */
     protected function validationError(array $errors): Response
     {
         return $this->respondWithJson([
             'error' => 'Validation Error',
             'message' => 'The given data was invalid',
-            'errors' => $errors
+            'errors' => $errors,
         ], 422);
     }
 }

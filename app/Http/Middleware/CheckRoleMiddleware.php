@@ -19,7 +19,7 @@ class CheckRoleMiddleware
         $roles = $route->getArgument('roles');
 
         // Convert single role to array
-        if (!is_array($roles)) {
+        if (! is_array($roles)) {
             $roles = [$roles];
         }
 
@@ -32,11 +32,11 @@ class CheckRoleMiddleware
             }
         }
 
-        if (!$hasRole) {
+        if (! $hasRole) {
             $response = new Response();
             $response->getBody()->write(json_encode([
                 'error' => 'Unauthorized',
-                'message' => 'You do not have the required role to access this resource'
+                'message' => 'You do not have the required role to access this resource',
             ]));
 
             return $response

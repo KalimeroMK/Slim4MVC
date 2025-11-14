@@ -22,13 +22,19 @@ class LoginAction implements LoginActionInterface
             throw new RuntimeException('Invalid credentials');
         }
 
+        $jwtSecret = $_ENV['JWT_SECRET'] ?? null;
+
+        if (! $jwtSecret) {
+            throw new RuntimeException('JWT_SECRET is not configured');
+        }
+
         return [
             'user' => $user,
             'token' => JWT::encode([
                 'id' => $user->id,
                 'email' => $user->email,
                 'exp' => time() + 60 * 60 * 24,
-            ], $_ENV['JWT_SECRET'], 'HS256'),
+            ], $jwtSecret, 'HS256'),
         ];
     }
 }

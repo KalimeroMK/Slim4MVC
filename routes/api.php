@@ -7,13 +7,17 @@ use App\Http\Controllers\Api\PermissionController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\AuthMiddleware;
+use App\Http\Middleware\RateLimitMiddleware;
 
 return function ($app): void {
-    // Authentication routes
-    $app->post('/api/v1/register', [AuthController::class, 'register']);
-    $app->post('/api/v1/login', [AuthController::class, 'login']);
-    $app->post('/api/v1/password-recovery', [AuthController::class, 'passwordRecovery']);
-    $app->post('/api/v1/reset-password', [AuthController::class, 'updatePassword']);
+    // Rate limiting for auth endpoints (stricter: 5 requests per minute)
+    $authRateLimit = new RateLimitMiddleware(5, 60);
+
+    // Authentication routes with rate limiting
+    $app->post('/api/v1/register', [AuthController::class, 'register'])->add($authRateLimit);
+    $app->post('/api/v1/login', [AuthController::class, 'login'])->add($authRateLimit);
+    $app->post('/api/v1/password-recovery', [AuthController::class, 'passwordRecovery'])->add($authRateLimit);
+    $app->post('/api/v1/reset-password', [AuthController::class, 'updatePassword'])->add($authRateLimit);
 
     $app->group('/api/v1/users', function ($group): void {
         $group->get('', [UserController::class, 'index']);

@@ -43,8 +43,13 @@ class User extends Model
 
     public function permissions()
     {
-        return $this->roles()->with('permissions')->get()
-            ->pluck('permissions')->flatten()->unique('id');
+        return $this->roles()
+            ->with('permissions')
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->unique('id')
+            ->values();
     }
 
     public function hasRole($role): bool
@@ -52,7 +57,7 @@ class User extends Model
         return $this->roles()->where('name', $role)->exists();
     }
 
-    public function hasPermission($permission)
+    public function hasPermission($permission): bool
     {
         return $this->permissions()->contains('name', $permission);
     }

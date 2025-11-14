@@ -19,7 +19,7 @@ class CheckPermissionMiddleware
         $permissions = $route->getArgument('permissions');
 
         // Convert single permission to array
-        if (!is_array($permissions)) {
+        if (! is_array($permissions)) {
             $permissions = [$permissions];
         }
 
@@ -32,11 +32,11 @@ class CheckPermissionMiddleware
             }
         }
 
-        if (!$hasPermission) {
+        if (! $hasPermission) {
             $response = new Response();
             $response->getBody()->write(json_encode([
                 'error' => 'Unauthorized',
-                'message' => 'You do not have the required permission to access this resource'
+                'message' => 'You do not have the required permission to access this resource',
             ]));
 
             return $response

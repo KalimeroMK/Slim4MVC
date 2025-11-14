@@ -11,6 +11,7 @@ use DI\NotFoundException;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 class Auth
@@ -19,6 +20,8 @@ class Auth
 
     protected ?User $user = null;
 
+    protected ?LoggerInterface $logger = null;
+
     /**
      * @throws DependencyException
      * @throws NotFoundException
@@ -26,6 +29,12 @@ class Auth
     public function __construct(Container $container)
     {
         $this->session = $container->get(Session::class);
+
+        try {
+            $this->logger = $container->get(LoggerInterface::class);
+        } catch (DependencyException|NotFoundException $e) {
+            // Logger not available, continue without it
+        }
     }
 
     public function attempt(string $email, string $password): bool
@@ -66,14 +75,28 @@ class Auth
             return null;
         }
 
-        $token = trim(str_replace('Bearer', '', $authHeader));
+        $token = mb_trim(str_replace('Bearer', '', $authHeader));
 
         try {
-            $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
+            $jwtSecret = $_ENV['JWT_SECRET'] ?? null;
+
+            if (! $jwtSecret) {
+                throw new Exception('JWT_SECRET is not configured');
+            }
+
+            $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
             $this->user = User::find($decoded->id);
 
             return $this->user;
         } catch (Exception $e) {
+            // Log authentication failures for security monitoring
+            if ($this->logger instanceof \Psr\Log\LoggerInterface) {
+                $this->logger->warning('JWT authentication failed', [
+                    'error' => $e->getMessage(),
+                    'token_preview' => mb_substr($token, 0, 20).'...',
+                ]);
+            }
+
             return null;
         }
     }
