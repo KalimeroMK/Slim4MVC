@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\Actions;
+
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
+
+final class Get{{modelName}}Action
+{
+    public function __construct(
+        private readonly {{modelName}}Repository $repository
+    ) {}
+
+    /**
+     * Execute getting {{modelName}} by ID.
+     *
+     * @param int $id
+     * @return {{modelName}}
+     */
+    public function execute(int $id): {{modelName}}
+    {
+        return $this->repository->findOrFail($id);
+    }
+}
+

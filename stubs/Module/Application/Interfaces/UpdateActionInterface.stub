@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\Interfaces;
+
+use {{namespace}}\Application\DTOs\Update{{modelName}}DTO;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+
+interface Update{{modelName}}ActionInterface
+{
+    /**
+     * Execute {{modelName}} update.
+     *
+     * @param Update{{modelName}}DTO $dto
+     * @return {{modelName}}
+     */
+    public function execute(Update{{modelName}}DTO $dto): {{modelName}};
+}
+

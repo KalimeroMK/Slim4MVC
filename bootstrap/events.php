@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Events\Dispatcher;
-use App\Events\PasswordResetRequested;
-use App\Events\UserRegistered;
-use App\Listeners\SendPasswordResetEmail;
-use App\Listeners\SendWelcomeEmail;
+use App\Modules\Core\Infrastructure\Events\Dispatcher;
+use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
+use App\Modules\Core\Infrastructure\Events\UserRegistered;
+use App\Modules\Core\Infrastructure\Listeners\SendPasswordResetEmail;
+use App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail;
 use Psr\Container\ContainerInterface;
 
 return function (ContainerInterface $container): void {

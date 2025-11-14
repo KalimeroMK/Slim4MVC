@@ -4,7 +4,7 @@
 
 declare(strict_types=1);
 
-use App\View\Blade;
+use App\Modules\Core\Infrastructure\View\Blade;
 use DI\Container;
 use Psr\Container\ContainerInterface;
 

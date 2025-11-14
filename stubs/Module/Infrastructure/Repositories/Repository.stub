@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Infrastructure\Repositories;
+
+use App\Repositories\EloquentRepository;
+use Illuminate\Database\Eloquent\Collection;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+
+class {{modelName}}Repository extends EloquentRepository
+{
+    /**
+     * Get the model class name.
+     *
+     * @return class-string<{{modelName}}>
+     */
+    protected function model(): string
+    {
+        return {{modelName}}::class;
+    }
+
+    // Add custom repository methods here if needed
+    // Example:
+    // public function findByName(string $name): ?{{modelName}}
+    // {
+    //     return {{modelName}}::where('name', $name)->first();
+    // }
+}
+

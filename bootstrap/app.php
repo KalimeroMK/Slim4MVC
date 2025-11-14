@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 require __DIR__.'/../vendor/autoload.php';
 
-use App\Http\RequestHandlers\FormRequestStrategy;
+use App\Modules\Core\Infrastructure\Http\RequestHandlers\FormRequestStrategy;
 use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Validation\Factory;
@@ -54,5 +54,8 @@ $app->getRouteCollector()->setDefaultInvocationStrategy($strategy);
 // Load routes
 (require __DIR__.'/../routes/web.php')($app);
 (require __DIR__.'/../routes/api.php')($app);
+
+// Load and boot modules
+(require __DIR__.'/modules.php')($app, $container);
 
 $app->run();

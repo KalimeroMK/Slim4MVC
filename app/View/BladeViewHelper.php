@@ -2,17 +2,18 @@
 
 declare(strict_types=1);
 
-use App\View\Blade;
-use Psr\Http\Message\ResponseInterface as Response;
+namespace App\View;
 
-function view($template, Response $response, array $with = []): Response
+/**
+ * Blade View Helper
+ * 
+ * This file is kept for backward compatibility with composer autoload.
+ * The actual Blade functionality has been moved to Core module.
+ * 
+ * @deprecated Use App\Modules\Core\Infrastructure\View\Blade instead
+ */
+class BladeViewHelper
 {
-    $cache = __DIR__.'/../../storage/cache/view';
-    $views = __DIR__.'/../../resources/views';
-
-    $blade = new Blade($views, $cache);
-
-    $response->getBody()->write($blade->make($template, $with));
-
-    return $response;
+    // This class is kept for autoload compatibility only
 }
+

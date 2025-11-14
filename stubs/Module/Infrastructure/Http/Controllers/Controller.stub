@@ -1,0 +1,115 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Infrastructure\Http\Controllers;
+
+use {{namespace}}\Application\Actions\Create{{modelName}}Action;
+use {{namespace}}\Application\Actions\Delete{{modelName}}Action;
+use {{namespace}}\Application\Actions\Get{{modelName}}Action;
+use {{namespace}}\Application\Actions\List{{modelName}}Action;
+use {{namespace}}\Application\Actions\Update{{modelName}}Action;
+use {{namespace}}\Application\DTOs\Create{{modelName}}DTO;
+use {{namespace}}\Application\DTOs\Update{{modelName}}DTO;
+use {{namespace}}\Infrastructure\Http\Requests\Create{{modelName}}Request;
+use {{namespace}}\Infrastructure\Http\Requests\Update{{modelName}}Request;
+use {{namespace}}\Infrastructure\Http\Resources\{{modelName}}Resource;
+use App\Enums\HttpStatusCode;
+use App\Http\Controllers\Controller;
+use App\Support\ApiResponse;
+use App\Traits\RouteParamsTrait;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+class {{modelName}}Controller extends Controller
+{
+    use RouteParamsTrait;
+
+    public function __construct(
+        ContainerInterface $container,
+        private readonly Create{{modelName}}Action $createAction,
+        private readonly Update{{modelName}}Action $updateAction,
+        private readonly Delete{{modelName}}Action $deleteAction,
+        private readonly Get{{modelName}}Action $getAction,
+        private readonly List{{modelName}}Action $listAction
+    ) {
+        parent::__construct($container);
+    }
+
+    /**
+     * List all {{lowerModelName}}s with pagination.
+     */
+    public function index(Request $request, Response $response): Response
+    {
+        $params = $this->getPaginationParams();
+        $result = $this->listAction->execute($params['page'], $params['perPage']);
+
+        $items = {{modelName}}Resource::collection($result['items']);
+
+        return ApiResponse::paginated(
+            $items,
+            $result['total'],
+            $result['page'],
+            $result['perPage'],
+            HttpStatusCode::OK,
+            $this->getPaginationBaseUrl()
+        );
+    }
+
+    /**
+     * Create a new {{lowerModelName}}.
+     */
+    public function store(Create{{modelName}}Request $request, Response $response): Response
+    {
+        $data = $request->validated();
+        
+        // Map validated data to DTO
+        // Example: $dto = new Create{{modelName}}DTO(name: $data['name'], ...);
+        $dto = new Create{{modelName}}DTO();
+        
+        ${{lowerModelName}} = $this->createAction->execute($dto);
+
+        return ApiResponse::success(
+            {{modelName}}Resource::make(${{lowerModelName}}),
+            HttpStatusCode::CREATED
+        );
+    }
+
+    /**
+     * Get a {{lowerModelName}} by ID.
+     */
+    public function show(Request $request, Response $response, int $id): Response
+    {
+        ${{lowerModelName}} = $this->getAction->execute($id);
+
+        return ApiResponse::success({{modelName}}Resource::make(${{lowerModelName}}));
+    }
+
+    /**
+     * Update a {{lowerModelName}}.
+     */
+    public function update(Update{{modelName}}Request $request, Response $response, int $id): Response
+    {
+        $data = $request->validated();
+        
+        // Map validated data to DTO
+        // Example: $dto = new Update{{modelName}}DTO($id, name: $data['name'] ?? null, ...);
+        $dto = new Update{{modelName}}DTO($id);
+        
+        ${{lowerModelName}} = $this->updateAction->execute($dto);
+
+        return ApiResponse::success({{modelName}}Resource::make(${{lowerModelName}}));
+    }
+
+    /**
+     * Delete a {{lowerModelName}}.
+     */
+    public function destroy(Request $request, Response $response, int $id): Response
+    {
+        $this->deleteAction->execute($id);
+
+        return ApiResponse::success(['message' => '{{modelName}} deleted successfully']);
+    }
+}
+

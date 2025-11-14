@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\Actions;
+
+use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
+
+final class List{{modelName}}Action
+{
+    public function __construct(
+        private readonly {{modelName}}Repository $repository
+    ) {}
+
+    /**
+     * Execute listing {{modelName}}s with pagination.
+     *
+     * @param int $page
+     * @param int $perPage
+     * @return array{items: array, total: int, page: int, perPage: int}
+     */
+    public function execute(int $page = 1, int $perPage = 15): array
+    {
+        return $this->repository->paginate($page, $perPage);
+    }
+}
+

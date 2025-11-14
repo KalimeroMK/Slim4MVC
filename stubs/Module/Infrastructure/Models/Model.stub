@@ -1,0 +1,54 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Infrastructure\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * {{modelName}} model.
+ */
+class {{modelName}} extends Model
+{
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = '{{tableName}}';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        // Add fillable fields here
+        // Example: 'name', 'email', 'status',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        // Add hidden fields here
+        // Example: 'password', 'remember_token',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        // Add casts here
+        // Example: 
+        // 'created_at' => 'datetime',
+        // 'updated_at' => 'datetime',
+        // 'is_active' => 'boolean',
+    ];
+}
+

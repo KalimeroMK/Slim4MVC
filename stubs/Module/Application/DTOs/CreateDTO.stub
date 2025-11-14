@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\DTOs;
+
+/**
+ * Data Transfer Object for creating {{modelName}}.
+ */
+final class Create{{modelName}}DTO
+{
+    public function __construct(
+        // Add properties here
+        // Example: 
+        // public readonly string $name,
+        // public readonly string $email,
+    ) {}
+}
+

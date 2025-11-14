@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Infrastructure\Http\Resources;
+
+use App\Http\Resources\Resource;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+
+class {{modelName}}Resource extends Resource
+{
+    /**
+     * Transform the {{lowerModelName}} into an array.
+     *
+     * @param mixed $resource
+     * @return array<string, mixed>
+     */
+    public static function make(mixed $resource): array
+    {
+        if (! ($resource instanceof {{modelName}})) {
+            return [];
+        }
+
+        ${{lowerModelName}} = $resource;
+
+        return [
+            'id' => ${{lowerModelName}}->id,
+            // Add fields here
+            // Example: 'name' => ${{lowerModelName}}->name,
+            'created_at' => ${{lowerModelName}}->created_at?->toIso8601String(),
+            'updated_at' => ${{lowerModelName}}->updated_at?->toIso8601String(),
+        ];
+    }
+}
+

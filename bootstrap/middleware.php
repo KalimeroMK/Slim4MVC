@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Http\Middleware\AuthMiddleware;
-use App\Http\Middleware\AuthWebMiddleware;
-use App\Http\Middleware\ClearFlashDataMiddleware;
-use App\Http\Middleware\ExceptionHandlerMiddleware;
-use App\Http\Middleware\ValidationExceptionMiddleware;
-use App\Support\RequestResolver;
+use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\ClearFlashDataMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\ValidationExceptionMiddleware;
+use App\Modules\Core\Infrastructure\Support\RequestResolver;
 use Illuminate\Validation\Factory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
@@ -24,7 +24,7 @@ return function ($app, $container): void {
     $container->set(LoggerInterface::class, $logger);
 
     // Set container for Logger helper class
-    App\Support\Logger::setContainer($container);
+    App\Modules\Core\Infrastructure\Support\Logger::setContainer($container);
 
     // Add CORS middleware for API routes
     $cors = new CorsMiddleware([
@@ -57,11 +57,11 @@ return function ($app, $container): void {
 
     // Register other middlewares
     $container->set(AuthMiddleware::class, function () use ($container): AuthMiddleware {
-        return new AuthMiddleware($container->get(App\Support\Auth::class));
+        return new AuthMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class));
     });
 
     $container->set(AuthWebMiddleware::class, function () use ($container): AuthWebMiddleware {
-        return new AuthWebMiddleware($container->get(App\Support\Auth::class));
+        return new AuthWebMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class));
     });
 
     // Add exception handler middleware (should be early to catch all exceptions)

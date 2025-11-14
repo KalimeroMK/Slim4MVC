@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\Interfaces;
+
+use {{namespace}}\Application\DTOs\Create{{modelName}}DTO;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+
+interface Create{{modelName}}ActionInterface
+{
+    /**
+     * Execute {{modelName}} creation.
+     *
+     * @param Create{{modelName}}DTO $dto
+     * @return {{modelName}}
+     */
+    public function execute(Create{{modelName}}DTO $dto): {{modelName}};
+}
+

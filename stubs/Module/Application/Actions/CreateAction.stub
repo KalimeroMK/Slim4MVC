@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Application\Actions;
+
+use {{namespace}}\Application\DTOs\Create{{modelName}}DTO;
+use {{namespace}}\Application\Interfaces\Create{{modelName}}ActionInterface;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
+
+final class Create{{modelName}}Action implements Create{{modelName}}ActionInterface
+{
+    public function __construct(
+        private readonly {{modelName}}Repository $repository
+    ) {}
+
+    /**
+     * Execute {{modelName}} creation.
+     *
+     * @param Create{{modelName}}DTO $dto
+     * @return {{modelName}}
+     */
+    public function execute(Create{{modelName}}DTO $dto): {{modelName}}
+    {
+        // Convert DTO to array for repository
+        $attributes = [
+            // Map DTO properties to model attributes
+            // Example: 'name' => $dto->name,
+        ];
+        
+        return $this->repository->create($attributes);
+    }
+}
+

@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Policies;
+
+use App\Models\User;
+use App\Policies\Policy;
+use {{namespace}}\Infrastructure\Models\{{modelName}};
+
+class {{modelName}}Policy extends Policy
+{
+    /**
+     * Determine if the user can view the {{lowerModelName}}.
+     *
+     * @param User $user
+     * @param {{modelName}} ${{lowerModelName}}
+     * @return bool
+     */
+    public function view(User $user, {{modelName}} ${{lowerModelName}}): bool
+    {
+        // Add your authorization logic here
+        // Example: return $user->hasPermission('view-{{lowerModelName}}');
+        return true;
+    }
+
+    /**
+     * Determine if the user can create {{lowerModelName}}s.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function create(User $user): bool
+    {
+        // Add your authorization logic here
+        // Example: return $user->hasPermission('create-{{lowerModelName}}');
+        return true;
+    }
+
+    /**
+     * Determine if the user can update the {{lowerModelName}}.
+     *
+     * @param User $user
+     * @param {{modelName}} ${{lowerModelName}}
+     * @return bool
+     */
+    public function update(User $user, {{modelName}} ${{lowerModelName}}): bool
+    {
+        // Add your authorization logic here
+        // Example: return $user->hasPermission('update-{{lowerModelName}}') || $user->id === ${{lowerModelName}}->user_id;
+        return true;
+    }
+
+    /**
+     * Determine if the user can delete the {{lowerModelName}}.
+     *
+     * @param User $user
+     * @param {{modelName}} ${{lowerModelName}}
+     * @return bool
+     */
+    public function delete(User $user, {{modelName}} ${{lowerModelName}}): bool
+    {
+        // Add your authorization logic here
+        // Example: return $user->hasPermission('delete-{{lowerModelName}}');
+        return true;
+    }
+}
+

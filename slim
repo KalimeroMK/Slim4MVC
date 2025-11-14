@@ -6,6 +6,7 @@ declare(strict_types=1);
 use App\Console\Commands\CreateControllerCommand;
 use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
+use App\Console\Commands\MakeModuleCommand;
 use App\Console\Commands\MakeRequestCommand;
 use App\Console\Commands\QueueWorkCommand;
 use App\Console\Commands\SeedDatabaseCommand;
@@ -22,8 +23,10 @@ $containerBuilder->useAutowiring(true);
 $containerBuilder->addDefinitions(require __DIR__ . '/bootstrap/dependencies.php');
 $container = $containerBuilder->build();
 
-// Load database for queue commands
-require __DIR__ . '/bootstrap/database.php';
+// Load database for queue commands (only if .env exists)
+if (file_exists(__DIR__ . '/.env')) {
+    require __DIR__ . '/bootstrap/database.php';
+}
 
 // Create Slim app
 $app = AppFactory::create();
@@ -38,6 +41,7 @@ $application = new Application();
 $application->add(new ListRoutesCommand($app));
 $application->add(new CreateControllerCommand);
 $application->add(new MakeModelCommand());
+$application->add(new MakeModuleCommand());
 $application->add(new MakeRequestCommand());
 $application->add(new QueueWorkCommand($container->get(\App\Queue\Queue::class), $container));
 $application->add(new SeedDatabaseCommand());

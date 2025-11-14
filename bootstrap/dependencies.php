@@ -3,34 +3,34 @@
 declare(strict_types=1);
 
 // config/dependencies.php
-use App\Actions\Auth\LoginAction;
-use App\Actions\Auth\PasswordRecoveryAction;
-use App\Actions\Auth\RegisterAction;
-use App\Actions\Auth\ResetPasswordAction;
-use App\Actions\Auth\WebLoginAction;
-use App\Actions\Permission\CreatePermissionAction;
-use App\Actions\Permission\UpdatePermissionAction;
-use App\Actions\Role\CreateRoleAction;
-use App\Actions\Role\UpdateRoleAction;
-use App\Actions\User\CreateUserAction;
-use App\Actions\User\UpdateUserAction;
-use App\Events\Dispatcher;
-use App\Interface\Auth\LoginActionInterface;
-use App\Interface\Auth\PasswordRecoveryActionInterface;
-use App\Interface\Auth\RegisterActionInterface;
-use App\Interface\Auth\ResetPasswordActionInterface;
-use App\Interface\Auth\WebLoginActionInterface;
-use App\Interface\Permission\CreatePermissionActionInterface;
-use App\Interface\Permission\UpdatePermissionActionInterface;
-use App\Interface\Role\CreateRoleActionInterface;
-use App\Interface\Role\UpdateRoleActionInterface;
-use App\Interface\User\CreateUserActionInterface;
-use App\Interface\User\UpdateUserActionInterface;
-use App\Queue\FileQueue;
-use App\Queue\Queue;
-use App\Repositories\PermissionRepository;
-use App\Repositories\RoleRepository;
-use App\Repositories\UserRepository;
+use App\Modules\Auth\Application\Actions\Auth\LoginAction;
+use App\Modules\Auth\Application\Actions\Auth\PasswordRecoveryAction;
+use App\Modules\Auth\Application\Actions\Auth\RegisterAction;
+use App\Modules\Auth\Application\Actions\Auth\ResetPasswordAction;
+use App\Modules\Auth\Application\Actions\Auth\WebLoginAction;
+use App\Modules\Auth\Application\Interfaces\Auth\LoginActionInterface;
+use App\Modules\Auth\Application\Interfaces\Auth\PasswordRecoveryActionInterface;
+use App\Modules\Auth\Application\Interfaces\Auth\RegisterActionInterface;
+use App\Modules\Auth\Application\Interfaces\Auth\ResetPasswordActionInterface;
+use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
+use App\Modules\Core\Infrastructure\Events\Dispatcher;
+use App\Modules\Core\Infrastructure\Queue\FileQueue;
+use App\Modules\Core\Infrastructure\Queue\Queue;
+use App\Modules\Permission\Application\Actions\CreatePermissionAction;
+use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
+use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterface;
+use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterface;
+use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
+use App\Modules\Role\Application\Actions\CreateRoleAction;
+use App\Modules\Role\Application\Actions\UpdateRoleAction;
+use App\Modules\Role\Application\Interfaces\CreateRoleActionInterface;
+use App\Modules\Role\Application\Interfaces\UpdateRoleActionInterface;
+use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
+use App\Modules\User\Application\Actions\CreateUserAction;
+use App\Modules\User\Application\Actions\UpdateUserAction;
+use App\Modules\User\Application\Interfaces\CreateUserActionInterface;
+use App\Modules\User\Application\Interfaces\UpdateUserActionInterface;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 return [
     RegisterActionInterface::class => \DI\autowire(RegisterAction::class),
@@ -53,5 +53,4 @@ return [
     // Queue system
     Queue::class => \DI\factory(function (): FileQueue {
         return new FileQueue();
-    }),
-];
+    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
