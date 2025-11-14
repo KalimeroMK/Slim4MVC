@@ -10,10 +10,6 @@ interface ResetPasswordActionInterface
 {
     /**
      * Execute password reset action.
-     *
-     * @param ResetPasswordDTO $dto
-     * @return void
      */
     public function execute(ResetPasswordDTO $dto): void;
 }
-

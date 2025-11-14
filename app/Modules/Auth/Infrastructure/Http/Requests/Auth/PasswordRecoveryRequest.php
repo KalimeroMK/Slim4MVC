@@ -20,4 +20,3 @@ class PasswordRecoveryRequest extends FormRequest
         ];
     }
 }
-

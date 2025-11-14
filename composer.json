@@ -38,9 +38,9 @@
       "Database\\Migrations\\": "database/migrations/"
     },
     "files": [
-      "app/View/BladeViewHelper.php",
-      "app/View/BladeAssetHelper.php",
-      "app/Support/helper.php"
+      "app/Modules/Core/Infrastructure/View/BladeViewHelper.php",
+      "app/Modules/Core/Infrastructure/View/BladeAssetHelper.php",
+      "app/Modules/Core/Infrastructure/Support/helper.php"
     ]
   },
   "config": {

@@ -13,8 +13,7 @@ final class PasswordRecoveryDTO
     /**
      * Create DTO from request data.
      *
-     * @param array<string, mixed> $data
-     * @return self
+     * @param  array<string, mixed>  $data
      */
     public static function fromRequest(array $data): self
     {
@@ -23,4 +22,3 @@ final class PasswordRecoveryDTO
         );
     }
 }
-

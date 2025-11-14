@@ -261,7 +261,7 @@ class MakeModuleCommand extends Command
                 $arrayContent = mb_trim($matches[1]);
 
                 // Check if array has content (excluding comments)
-                $hasContent = ! empty($arrayContent) && ! preg_match('/^\s*\/\/.*$/', $arrayContent);
+                $hasContent = $arrayContent !== '' && $arrayContent !== '0' && ! preg_match('/^\s*\/\/.*$/', $arrayContent);
 
                 if (! $hasContent) {
                     // Empty array or only comments
@@ -336,7 +336,7 @@ class MakeModuleCommand extends Command
             ];
         }
 
-        if (empty($dependencies)) {
+        if ($dependencies === []) {
             $output->writeln('<comment>No Action Interfaces found to register</comment>');
 
             return;
@@ -356,23 +356,20 @@ class MakeModuleCommand extends Command
         }
 
         // Add use statements if needed
-        if (!empty($useStatementsToAdd)) {
+        if ($useStatementsToAdd !== []) {
             // Find the last use statement
             if (preg_match_all('/^use\s+[^;]+;/m', $content, $matches)) {
                 $lastUse = end($matches[0]);
                 $lastUsePos = mb_strrpos($content, $lastUse);
                 $insertPos = $lastUsePos + mb_strlen($lastUse);
-                
                 // Insert new use statements after the last one
                 $newUseStatements = "\n".implode("\n", $useStatementsToAdd);
                 $content = mb_substr($content, 0, $insertPos).$newUseStatements.mb_substr($content, $insertPos);
-            } else {
+            } elseif (preg_match('/(namespace\s+[^;]+;)/', $content, $matches)) {
                 // No use statements found, add after namespace declaration
-                if (preg_match('/(namespace\s+[^;]+;)/', $content, $matches)) {
-                    $namespaceLine = $matches[0];
-                    $newUseStatements = "\n\n".implode("\n", $useStatementsToAdd);
-                    $content = str_replace($namespaceLine, $namespaceLine.$newUseStatements, $content);
-                }
+                $namespaceLine = $matches[0];
+                $newUseStatements = "\n\n".implode("\n", $useStatementsToAdd);
+                $content = str_replace($namespaceLine, $namespaceLine.$newUseStatements, $content);
             }
         }
 
@@ -388,7 +385,7 @@ class MakeModuleCommand extends Command
             }
         }
 
-        if (! empty($newEntries)) {
+        if ($newEntries !== []) {
             // Find the return array and add entries before the closing bracket
             if (preg_match('/return\s*\[(.*?)\];/s', $content, $matches)) {
                 $arrayContent = $matches[1];

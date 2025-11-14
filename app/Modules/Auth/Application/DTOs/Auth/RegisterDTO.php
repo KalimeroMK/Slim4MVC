@@ -15,8 +15,7 @@ final class RegisterDTO
     /**
      * Create DTO from request data.
      *
-     * @param array<string, mixed> $data
-     * @return self
+     * @param  array<string, mixed>  $data
      */
     public static function fromRequest(array $data): self
     {
@@ -27,4 +26,3 @@ final class RegisterDTO
         );
     }
 }
-

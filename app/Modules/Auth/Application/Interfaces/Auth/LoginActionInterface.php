@@ -11,9 +11,7 @@ interface LoginActionInterface
     /**
      * Execute login action.
      *
-     * @param LoginDTO $dto
      * @return array<string, mixed>
      */
     public function execute(LoginDTO $dto): array;
 }
-

@@ -18,8 +18,6 @@ final class WebLoginAction implements WebLoginActionInterface
     /**
      * Execute web login action (session-based).
      *
-     * @param LoginDTO $dto
-     * @return void
      * @throws RuntimeException
      */
     public function execute(LoginDTO $dto): void
@@ -29,4 +27,3 @@ final class WebLoginAction implements WebLoginActionInterface
         }
     }
 }
-

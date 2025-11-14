@@ -10,10 +10,6 @@ interface PasswordRecoveryActionInterface
 {
     /**
      * Execute password recovery action.
-     *
-     * @param PasswordRecoveryDTO $dto
-     * @return void
      */
     public function execute(PasswordRecoveryDTO $dto): void;
 }
-

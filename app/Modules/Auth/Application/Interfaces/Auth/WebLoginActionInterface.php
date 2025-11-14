@@ -10,10 +10,6 @@ interface WebLoginActionInterface
 {
     /**
      * Execute web login action (session-based).
-     *
-     * @param LoginDTO $dto
-     * @return void
      */
     public function execute(LoginDTO $dto): void;
 }
-

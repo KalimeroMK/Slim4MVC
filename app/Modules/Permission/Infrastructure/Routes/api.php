@@ -18,7 +18,7 @@ return function (App $app): void {
     $auth = $container->get(Auth::class);
     $authMiddleware = new AuthMiddleware($auth);
 
-    $app->group('/api/v1/permissions', function ($group) {
+    $app->group('/api/v1/permissions', function ($group): void {
         $group->get('', [PermissionController::class, 'index']);
         $group->post('', [PermissionController::class, 'store']);
         $group->get('/{id}', [PermissionController::class, 'show']);

@@ -19,15 +19,12 @@ final class PasswordRecoveryAction implements PasswordRecoveryActionInterface
 
     /**
      * Execute password recovery action.
-     *
-     * @param PasswordRecoveryDTO $dto
-     * @return void
      */
     public function execute(PasswordRecoveryDTO $dto): void
     {
         $user = $this->repository->findByEmail($dto->email);
 
-        if (! $user) {
+        if (! $user instanceof \App\Modules\User\Infrastructure\Models\User) {
             // Don't reveal if email exists for security
             return;
         }
@@ -39,4 +36,3 @@ final class PasswordRecoveryAction implements PasswordRecoveryActionInterface
         $this->dispatcher->dispatch(new PasswordResetRequested($user, $token));
     }
 }
-
