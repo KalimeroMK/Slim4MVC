@@ -15,7 +15,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Error Logging** - PSR-3 compatible logging with Monolog
 - **API Resources** - Consistent API response formatting with Resource classes
 - **Consistent API Responses** - Standardized JSON responses with enums and helper methods
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (47+ tests, 120+ assertions)
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (47 tests, 127 assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (models, controllers, requests)
 - **Docker Ready** - Complete Docker setup for development
 
@@ -298,8 +298,8 @@ The project includes a comprehensive test suite covering:
 - API Resources
 
 **Test coverage:**
-- ✅ 47+ tests
-- ✅ 120+ assertions
+- ✅ 47 tests
+- ✅ 127 assertions
 - ✅ All tests passing
 
 Run tests:
