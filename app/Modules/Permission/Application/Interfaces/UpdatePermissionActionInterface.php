@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Interface\Permission;
+namespace App\Modules\Permission\Application\Interfaces;
 
-use App\DTO\Permission\UpdatePermissionDTO;
+use App\Modules\Permission\Application\DTOs\UpdatePermissionDTO;
 use RuntimeException;
 
 interface UpdatePermissionActionInterface

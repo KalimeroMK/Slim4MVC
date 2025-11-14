@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Permission;
+namespace App\Modules\Permission\Application\Actions;
 
-use App\DTO\Permission\UpdatePermissionDTO;
-use App\Interface\Permission\UpdatePermissionActionInterface;
+use App\Modules\Permission\Application\DTOs\UpdatePermissionDTO;
+use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterface;
 use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
 final class UpdatePermissionAction implements UpdatePermissionActionInterface
 {

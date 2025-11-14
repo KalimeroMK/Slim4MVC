@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Permission\Infrastructure\Http\Controllers\Api;
+namespace App\Modules\Permission\Infrastructure\Http\Controllers;
 
-use App\Actions\Permission\CreatePermissionAction;
-use App\Actions\Permission\DeletePermissionAction;
-use App\Actions\Permission\GetPermissionAction;
-use App\Actions\Permission\ListPermissionAction;
-use App\Actions\Permission\UpdatePermissionAction;
-use App\DTO\Permission\CreatePermissionDTO;
-use App\DTO\Permission\UpdatePermissionDTO;
-use App\Enums\HttpStatusCode;
+use App\Modules\Core\Application\Enums\HttpStatusCode;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
+use App\Modules\Core\Infrastructure\Support\ApiResponse;
+use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
+use App\Modules\Permission\Application\Actions\CreatePermissionAction;
+use App\Modules\Permission\Application\Actions\DeletePermissionAction;
+use App\Modules\Permission\Application\Actions\GetPermissionAction;
+use App\Modules\Permission\Application\Actions\ListPermissionAction;
+use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
+use App\Modules\Permission\Application\DTOs\CreatePermissionDTO;
+use App\Modules\Permission\Application\DTOs\UpdatePermissionDTO;
 use App\Modules\Permission\Infrastructure\Http\Requests\CreatePermissionRequest;
 use App\Modules\Permission\Infrastructure\Http\Requests\UpdatePermissionRequest;
 use App\Modules\Permission\Infrastructure\Http\Resources\PermissionResource;
-use App\Support\ApiResponse;
-use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

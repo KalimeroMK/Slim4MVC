@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\User;
+namespace App\Modules\User\Infrastructure\Http\Requests;
 
 use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 

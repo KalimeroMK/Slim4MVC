@@ -73,7 +73,7 @@ if (! function_exists('throw_when')) {
 }
 
 if (! function_exists('config')) {
-    function config($path = null): mixed
+    function config(int|array|string|null $path = null): mixed
     {
         $config = [];
         $folder = scandir(config_path());

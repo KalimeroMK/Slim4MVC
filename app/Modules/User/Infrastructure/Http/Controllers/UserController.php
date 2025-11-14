@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Modules\User\Infrastructure\Http\Controllers;
 
-use App\Actions\User\CreateUserAction;
-use App\Actions\User\DeleteUserAction;
-use App\Actions\User\GetUserAction;
-use App\Actions\User\ListUsersAction;
-use App\Actions\User\UpdateUserAction;
-use App\DTO\User\CreateUserDTO;
-use App\DTO\User\UpdateUserDTO;
-use App\Enums\HttpStatusCode;
+use App\Modules\Core\Application\Enums\HttpStatusCode;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
+use App\Modules\Core\Infrastructure\Support\ApiResponse;
+use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
+use App\Modules\User\Application\Actions\CreateUserAction;
+use App\Modules\User\Application\Actions\DeleteUserAction;
+use App\Modules\User\Application\Actions\GetUserAction;
+use App\Modules\User\Application\Actions\ListUsersAction;
+use App\Modules\User\Application\Actions\UpdateUserAction;
+use App\Modules\User\Application\DTOs\CreateUserDTO;
+use App\Modules\User\Application\DTOs\UpdateUserDTO;
 use App\Modules\User\Infrastructure\Http\Requests\CreateUserRequest;
 use App\Modules\User\Infrastructure\Http\Requests\UpdateUserRequest;
 use App\Modules\User\Infrastructure\Http\Resources\UserResource;
-use App\Support\ApiResponse;
-use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Permission;
+namespace App\Modules\Permission\Application\Actions;
 
 use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
 final class GetPermissionAction
 {

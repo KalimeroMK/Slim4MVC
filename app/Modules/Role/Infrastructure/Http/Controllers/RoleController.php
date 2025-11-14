@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Api;
+namespace App\Modules\Role\Infrastructure\Http\Controllers;
 
 use App\Modules\Core\Application\Enums\HttpStatusCode;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;

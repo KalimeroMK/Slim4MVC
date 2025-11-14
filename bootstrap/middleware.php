@@ -15,7 +15,7 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Tuupola\Middleware\CorsMiddleware;
 
-return function ($app, $container): void {
+return function ($app, DI\Container $container): void {
 
     // Configure logging
     $logger = new Logger('app');

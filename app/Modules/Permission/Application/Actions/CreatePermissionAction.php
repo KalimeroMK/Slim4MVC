@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Actions\Permission;
+namespace App\Modules\Permission\Application\Actions;
 
-use App\DTO\Permission\CreatePermissionDTO;
-use App\Interface\Permission\CreatePermissionActionInterface;
+use App\Modules\Permission\Application\DTOs\CreatePermissionDTO;
+use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterface;
 use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
 final class CreatePermissionAction implements CreatePermissionActionInterface
 {

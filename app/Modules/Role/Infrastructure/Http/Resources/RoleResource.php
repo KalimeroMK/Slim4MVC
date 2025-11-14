@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Permission\Infrastructure\Http\Resources;
+namespace App\Modules\Role\Infrastructure\Http\Resources;
 
 use App\Modules\Role\Infrastructure\Models\Role;
 

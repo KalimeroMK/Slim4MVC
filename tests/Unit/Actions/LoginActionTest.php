@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Actions\Auth\LoginAction;
-use App\DTO\Auth\LoginDTO;
-use App\Exceptions\InvalidCredentialsException;
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Modules\Auth\Application\Actions\Auth\LoginAction;
+use App\Modules\Auth\Application\DTOs\Auth\LoginDTO;
+use App\Modules\Core\Infrastructure\Exceptions\InvalidCredentialsException;
+use App\Modules\Core\Infrastructure\Support\JwtService;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -20,7 +21,8 @@ class LoginActionTest extends TestCase
     {
         parent::setUp();
         $repository = new UserRepository();
-        $this->action = new LoginAction($repository);
+        $jwtService = new JwtService('test-secret-key-for-testing-only');
+        $this->action = new LoginAction($repository, $jwtService);
         $_ENV['JWT_SECRET'] = 'test-secret-key-for-testing-only';
     }
 

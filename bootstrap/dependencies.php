@@ -20,6 +20,7 @@ use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Queue\FileQueue;
 use App\Modules\Core\Infrastructure\Queue\Queue;
+use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 use App\Modules\Role\Application\Actions\CreateRoleAction;
 use App\Modules\Role\Application\Actions\UpdateRoleAction;
@@ -56,5 +57,11 @@ return [
     // Queue system
     Queue::class => factory(function (): FileQueue {
         return new FileQueue();
+    }),
+    // JWT Service
+    JwtService::class => factory(function (): JwtService {
+        $secret = $_ENV['JWT_SECRET'] ?? '';
+
+        return new JwtService($secret);
     }),
 ];

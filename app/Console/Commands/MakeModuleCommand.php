@@ -18,7 +18,7 @@ class MakeModuleCommand extends Command
     {
         $this->setDescription('Create a new module with complete structure')
             ->addArgument('name', InputArgument::REQUIRED, 'The name of the module (e.g., Product, Blog)')
-            ->addOption('model', 'm', InputOption::VALUE_OPTIONAL, 'Model name (defaults to module name)', null)
+            ->addOption('model', 'm', InputOption::VALUE_OPTIONAL, 'Model name (defaults to module name)')
             ->addOption('migration', null, InputOption::VALUE_NONE, 'Create migration file');
     }
 

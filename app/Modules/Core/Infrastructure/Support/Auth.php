@@ -9,8 +9,6 @@ use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
 use Exception;
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -21,6 +19,8 @@ class Auth
     protected ?User $user = null;
 
     protected ?LoggerInterface $logger = null;
+
+    protected JwtService $jwtService;
 
     /**
      * @throws DependencyException
@@ -34,6 +34,13 @@ class Auth
             $this->logger = $container->get(LoggerInterface::class);
         } catch (DependencyException|NotFoundException $e) {
             // Logger not available, continue without it
+        }
+
+        try {
+            $this->jwtService = $container->get(JwtService::class);
+        } catch (DependencyException|NotFoundException $e) {
+            // JwtService will be created on demand if not in container
+            $this->jwtService = new JwtService();
         }
     }
 
@@ -78,13 +85,7 @@ class Auth
         $token = mb_trim(str_replace('Bearer', '', $authHeader));
 
         try {
-            $jwtSecret = $_ENV['JWT_SECRET'] ?? null;
-
-            if (! $jwtSecret) {
-                throw new Exception('JWT_SECRET is not configured');
-            }
-
-            $decoded = JWT::decode($token, new Key($jwtSecret, 'HS256'));
+            $decoded = $this->jwtService->decode($token);
             $this->user = User::find($decoded->id);
 
             return $this->user;

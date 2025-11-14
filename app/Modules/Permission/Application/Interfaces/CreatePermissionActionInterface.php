@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Interface\Permission;
+namespace App\Modules\Permission\Application\Interfaces;
 
-use App\DTO\Permission\CreatePermissionDTO;
+use App\Modules\Permission\Application\DTOs\CreatePermissionDTO;
 use RuntimeException;
 
 interface CreatePermissionActionInterface
