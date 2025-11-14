@@ -13,8 +13,10 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Rate Limiting** - Built-in protection against brute force attacks
 - **CORS Support** - Configurable CORS middleware for API endpoints
 - **Error Logging** - PSR-3 compatible logging with Monolog
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (42 tests, 105 assertions)
-- **CLI Commands** - Artisan-like commands for scaffolding
+- **API Resources** - Consistent API response formatting with Resource classes
+- **Consistent API Responses** - Standardized JSON responses with enums and helper methods
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (47+ tests, 120+ assertions)
+- **CLI Commands** - Artisan-like commands for scaffolding (models, controllers, requests)
 - **Docker Ready** - Complete Docker setup for development
 
 ## 📋 Requirements
@@ -111,8 +113,32 @@ php slim make:model Product -m
 ### Creating Controllers
 
 ```bash
-php slim make:controller ProductController
+php slim make:controller Product
 ```
+
+This will create:
+- Controller
+- Actions (Create, Update, Delete, Get, List)
+- DTOs (Create, Update)
+- Form Requests (Create, Update)
+
+### Creating Form Requests
+
+```bash
+# Create a basic request
+php slim make:request User/CreateUserRequest
+
+# Create request with auto-generated rules from model
+php slim make:request User/CreateUserRequest --model=User
+
+# Create update request with model
+php slim make:request User/UpdateUserRequest --model=User --type=update
+
+# Short syntax
+php slim make:request User/CreateUserRequest -m User -t create
+```
+
+The `--model` option automatically generates validation rules based on the model's `$fillable` fields and `$casts`.
 
 ### Running Migrations
 
@@ -260,7 +286,7 @@ Logs are written to `storage/logs/slim.log`. Log level is automatically set base
 
 ## 🧪 Testing
 
-The project includes a comprehensive test suite with 42 tests covering:
+The project includes a comprehensive test suite covering:
 
 - Authentication (Auth class, LoginAction, RegisterAction)
 - User management (CreateUserAction, GetUserAction, DeleteUserAction)
@@ -268,15 +294,19 @@ The project includes a comprehensive test suite with 42 tests covering:
 - Middleware (AuthMiddleware, RateLimitMiddleware)
 - Models (User, Role, Permission relationships)
 - Form request validation
+- Console commands (MakeRequestCommand)
+- API Resources
 
 **Test coverage:**
-- ✅ 42 tests
-- ✅ 105 assertions
+- ✅ 47+ tests
+- ✅ 120+ assertions
 - ✅ All tests passing
 
 Run tests:
 ```bash
 composer test
+# or
+./vendor/bin/phpunit --testdox
 ```
 
 ## 🔧 Configuration
@@ -312,6 +342,66 @@ MAIL_ENCRYPTION=tls
 
 # CORS
 CORS_ORIGINS=*
+```
+
+## 📦 API Resources
+
+The application uses Resource classes to format API responses consistently:
+
+```php
+use App\Http\Resources\UserResource;
+
+// Single resource
+return ApiResponse::success(UserResource::make($user));
+
+// Collection
+return ApiResponse::success(UserResource::collection($users));
+```
+
+Available Resources:
+- `UserResource` - Formats user data (hides password, includes roles)
+- `RoleResource` - Formats role data (includes permissions)
+- `PermissionResource` - Formats permission data (includes roles)
+
+## 📊 API Response Format
+
+All API responses follow a consistent format using the `ApiResponse` helper:
+
+**Success Response:**
+```json
+{
+  "status": "success",
+  "data": {...},
+  "message": "Optional message"
+}
+```
+
+**Error Response:**
+```json
+{
+  "status": "error",
+  "message": "Error message",
+  "code": "ERROR_CODE",
+  "errors": {
+    "field": ["Error message"]
+  }
+}
+```
+
+**Usage in Controllers:**
+```php
+use App\Support\ApiResponse;
+use App\Enums\HttpStatusCode;
+
+// Success
+return ApiResponse::success($data);
+return ApiResponse::success($user, HttpStatusCode::CREATED);
+
+// Errors
+return ApiResponse::error('Error message');
+return ApiResponse::unauthorized();
+return ApiResponse::notFound('User not found');
+return ApiResponse::validationError(['email' => ['Invalid email']]);
 ```
 
 ## 📚 API Endpoints

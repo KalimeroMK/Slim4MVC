@@ -11,11 +11,22 @@ final class Update{{controllerName}}Request extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      */
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             // Define your fields here
-            'name' => 'sometimes|string|max:255',
+            // Example: 'name' => 'sometimes|string|max:255',
+        ];
+    }
+
+    /**
+     * Get custom validation messages.
+     */
+    protected function messages(): array
+    {
+        return [
+            // Define custom messages here
+            // Example: 'email.email' => 'Please provide a valid email address.',
         ];
     }
 }
