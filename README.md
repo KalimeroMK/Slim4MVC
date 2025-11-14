@@ -18,7 +18,9 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Repository Pattern** - Clean data access layer abstraction for better testability and maintainability
 - **Exception Handling** - Custom exception classes with centralized exception handling middleware
 - **Testing Suite** - Comprehensive test coverage with PHPUnit (96 tests, 223 assertions)
-- **CLI Commands** - Artisan-like commands for scaffolding (models, controllers, requests)
+- **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
+- **Modular Architecture** - Feature-based module organization for better scalability
+- **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
 - **Docker Ready** - Complete Docker setup for development
 
 ## 📋 Requirements
@@ -84,22 +86,54 @@ The application will be available at [http://localhost:81](http://localhost:81)
 
 ## 📁 Project Structure
 
+The project uses a **modular architecture** where each feature is organized as an independent module:
+
 ```
 ├── app/
-│   ├── Actions/              # Business logic layer
-│   ├── DTO/                  # Data Transfer Objects
-│   ├── Exceptions/            # Custom exception classes
-│   ├── Http/
-│   │   ├── Controllers/      # Request handlers
-│   │   ├── Middleware/       # HTTP middleware
-│   │   └── Requests/         # Form request validation
-│   ├── Interface/            # Service contracts
-│   ├── Models/               # Eloquent models
-│   ├── Policies/            # Authorization policies
-│   ├── Repositories/          # Data access layer (Repository pattern)
-│   ├── Support/              # Helper classes (Auth, Logger, Mailer)
-│   └── View/                 # Blade integration
+│   ├── Console/               # CLI Commands
+│   │   └── Commands/         # Console commands (make:module, make:request, etc.)
+│   ├── Modules/              # Feature modules
+│   │   ├── Core/             # Core module (base classes, middleware, support)
+│   │   │   ├── Application/
+│   │   │   │   ├── Actions/  # Core actions (Auth actions)
+│   │   │   │   ├── DTOs/     # Core DTOs
+│   │   │   │   ├── Enums/    # Enums (HttpStatusCode, ApiResponseStatus)
+│   │   │   │   └── Interfaces/
+│   │   │   └── Infrastructure/
+│   │   │       ├── Events/   # Event system
+│   │   │       ├── Exceptions/ # Custom exceptions
+│   │   │       ├── Http/
+│   │   │       │   ├── Controllers/ # Base controllers
+│   │   │       │   ├── Middleware/  # Middleware
+│   │   │       │   ├── Requests/    # Base FormRequest
+│   │   │       │   └── Resources/   # Base Resource
+│   │   │       ├── Jobs/     # Queue jobs
+│   │   │       ├── Policies/ # Base Policy
+│   │   │       ├── Providers/ # Service providers
+│   │   │       ├── Queue/    # Queue system
+│   │   │       ├── Repositories/ # Base repositories
+│   │   │       ├── Support/  # Helper classes (Auth, Logger, Mailer)
+│   │   │       └── View/     # Blade integration
+│   │   ├── Auth/             # Authentication module
+│   │   │   ├── Application/
+│   │   │   │   ├── Actions/Auth/  # Login, Register, PasswordRecovery, etc.
+│   │   │   │   ├── DTOs/Auth/    # Auth DTOs
+│   │   │   │   └── Interfaces/Auth/
+│   │   │   └── Infrastructure/
+│   │   │       ├── Http/
+│   │   │       │   ├── Controllers/
+│   │   │       │   │   ├── Api/    # API AuthController (JWT)
+│   │   │       │   │   └── Web/    # Web AuthController (Session)
+│   │   │       │   └── Requests/Auth/
+│   │   │       ├── Providers/ # AuthServiceProvider
+│   │   │       └── Routes/    # API and Web routes
+│   │   ├── User/             # User module
+│   │   ├── Role/             # Role module
+│   │   └── Permission/      # Permission module
+│   └── Support/             # Legacy support (backward compatibility)
 ├── bootstrap/                # Application bootstrap files
+│   ├── modules.php          # Module loader
+│   └── modules-register.php # Module registration
 ├── database/
 │   ├── migrations/           # Database migrations
 │   └── seed/                 # Database seeders
@@ -107,7 +141,9 @@ The application will be available at [http://localhost:81](http://localhost:81)
 ├── resources/
 │   ├── views/                # Blade templates
 │   └── lang/                 # Translation files
-├── routes/                   # Route definitions
+├── routes/                   # Main route files (web.php, api.php)
+├── stubs/                    # Code generation stubs
+│   └── Module/              # Module structure stubs
 ├── storage/
 │   └── logs/                 # Application logs
 └── tests/                    # PHPUnit tests
@@ -115,7 +151,74 @@ The application will be available at [http://localhost:81](http://localhost:81)
     └── Feature/               # Feature tests
 ```
 
+### Module Structure
+
+Each module follows a consistent structure:
+
+```
+app/Modules/Example/
+├── Application/              # Business logic layer
+│   ├── Actions/             # Business logic actions
+│   ├── DTOs/                # Data Transfer Objects
+│   ├── Services/            # Service classes
+│   └── Interfaces/          # Service contracts
+├── Infrastructure/          # Infrastructure layer
+│   ├── Models/              # Eloquent models
+│   ├── Repositories/        # Data access layer
+│   ├── Http/
+│   │   ├── Controllers/     # Request handlers
+│   │   ├── Requests/       # Form request validation
+│   │   └── Resources/      # API resource transformers
+│   ├── Providers/          # Service providers
+│   └── Routes/             # Module routes (api.php, web.php)
+├── Exceptions/             # Module-specific exceptions
+├── Observers/              # Eloquent observers
+└── Policies/               # Authorization policies
+```
+
 ## 🎯 Usage
+
+### Creating Modules
+
+The recommended way to create new features is using the **modular architecture**:
+
+```bash
+# Create a new module
+php slim make:module Product
+
+# Create module with custom model name
+php slim make:module Product --model=Item
+
+# Create module with migration
+php slim make:module Product --migration
+```
+
+This will automatically create:
+- Complete module structure (Application, Infrastructure layers)
+- Actions (Create, Update, Delete, Get, List)
+- DTOs (Create, Update)
+- Interfaces (CreateActionInterface, UpdateActionInterface)
+- Model and Repository
+- Controller with CRUD methods
+- Form Requests (Create, Update)
+- API Resource
+- Policy
+- Service Provider
+- API Routes
+- **Automatic dependency registration** in `bootstrap/dependencies.php`
+- **Automatic module registration** in `bootstrap/modules-register.php`
+
+**Example:**
+```bash
+php slim make:module Blog --model=Post --migration
+```
+
+This creates:
+- `app/Modules/Blog/` with complete structure
+- `CreatePostAction`, `UpdatePostAction`, etc.
+- `PostRepository` automatically registered in Service Provider
+- `CreatePostActionInterface` and `UpdatePostActionInterface` automatically registered in `bootstrap/dependencies.php`
+- Module automatically registered in `bootstrap/modules-register.php`
 
 ### Creating Models and Migrations
 
@@ -170,9 +273,28 @@ php run_migrations.php rollback
 php run_migrations.php refresh
 ```
 
-### Listing Routes
+### Available Commands
 
 ```bash
+# Module creation
+php slim make:module <ModuleName> [--model=<ModelName>] [--migration]
+
+# Model creation
+php slim make:model <ModelName> [-m]
+
+# Controller creation
+php slim make:controller <ControllerName>
+
+# Request creation
+php slim make:request <Namespace/RequestName> [--model=<ModelName>] [--type=<create|update>]
+
+# Database seeding
+php slim seed:database
+
+# Queue processing
+php slim queue:work [--stop-when-empty] [--max-jobs=<number>]
+
+# List all routes
 php slim list-routes
 ```
 
@@ -192,6 +314,17 @@ composer test
 ```
 
 ## 🔐 Authentication
+
+The application includes a dedicated **Auth module** that handles both API and Web authentication.
+
+### Auth Module
+
+The Auth module (`app/Modules/Auth/`) provides:
+
+- **API Authentication** - JWT-based authentication for API endpoints
+- **Web Authentication** - Session-based authentication for web routes
+- **Password Recovery** - Token-based password reset functionality
+- **Event-driven** - Dispatches events for user registration and password reset
 
 ### API Authentication (JWT)
 
@@ -267,7 +400,7 @@ public function update(Request $request, Response $response, int $id): Response
 Rate limiting is automatically applied to authentication endpoints (5 requests per minute). You can apply it to any route:
 
 ```php
-use App\Http\Middleware\RateLimitMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\RateLimitMiddleware;
 
 $rateLimit = new RateLimitMiddleware(10, 60); // 10 requests per 60 seconds
 $app->post('/api/endpoint', [Controller::class, 'method'])
@@ -289,7 +422,7 @@ CORS_ORIGINS=http://localhost:3000,https://example.com
 The application uses Monolog for logging. Use the Logger helper:
 
 ```php
-use App\Support\Logger;
+use App\Modules\Core\Infrastructure\Support\Logger;
 
 Logger::error('Something went wrong', ['user_id' => 123]);
 Logger::warning('Suspicious activity detected');
@@ -313,14 +446,15 @@ The project includes a comprehensive test suite covering:
 - Repositories (UserRepository, RoleRepository, PermissionRepository)
 - Exception handling (Custom exceptions)
 - Form request validation
-- Console commands (MakeRequestCommand)
+- Console commands (MakeModuleCommand, MakeRequestCommand)
 - API Resources
 - Event system (Dispatcher, Listeners)
 - Queue system (FileQueue, Jobs)
+- Module creation and dependency registration
 
 **Test coverage:**
-- ✅ 96 tests
-- ✅ 223 assertions
+- ✅ 106+ tests
+- ✅ 280+ assertions
 - ✅ All tests passing
 
 Run tests:
@@ -370,7 +504,7 @@ CORS_ORIGINS=*
 The application uses Resource classes to format API responses consistently:
 
 ```php
-use App\Http\Resources\UserResource;
+use App\Modules\User\Infrastructure\Http\Resources\UserResource;
 
 // Single resource
 return ApiResponse::success(UserResource::make($user));
@@ -456,24 +590,84 @@ return ApiResponse::validationError(['email' => ['Invalid email']]);
 
 ## 🏗️ Architecture
 
-The project follows a clean architecture pattern:
+The project follows a **modular clean architecture** pattern:
 
-1. **Controllers** - Thin controllers that delegate to Actions
-2. **Actions** - Business logic layer
-3. **Repositories** - Data access layer abstraction (Repository pattern)
-4. **DTOs** - Data Transfer Objects for type-safe data handling
-5. **Models** - Eloquent models for database interaction
-6. **Middleware** - Request/response processing
-7. **Policies** - Authorization logic
-8. **Form Requests** - Input validation
-9. **Exceptions** - Custom exception classes for better error handling
+### Modular Architecture
+
+The application is organized into **independent modules**, each containing:
+
+1. **Application Layer** - Business logic
+   - **Actions** - Business logic operations
+   - **DTOs** - Data Transfer Objects for type-safe data handling
+   - **Interfaces** - Service contracts for dependency injection
+   - **Services** - Complex business logic services
+
+2. **Infrastructure Layer** - Technical implementation
+   - **Models** - Eloquent models for database interaction
+   - **Repositories** - Data access layer abstraction (Repository pattern)
+   - **Controllers** - Thin controllers that delegate to Actions
+   - **Requests** - Form request validation
+   - **Resources** - API response transformers
+   - **Providers** - Service providers for dependency registration
+   - **Routes** - Module-specific routes
+
+3. **Cross-cutting Concerns**
+   - **Middleware** - Request/response processing
+   - **Policies** - Authorization logic
+   - **Exceptions** - Custom exception classes for better error handling
+   - **Events** - Event-driven architecture
+   - **Jobs** - Asynchronous task processing
+
+### Module Registration
+
+Modules are automatically registered via `bootstrap/modules-register.php`:
+
+```php
+return [
+    // Core module must be loaded first
+    App\Modules\Core\Infrastructure\Providers\CoreServiceProvider::class,
+    
+    // Auth module
+    App\Modules\Auth\Infrastructure\Providers\AuthServiceProvider::class,
+    
+    // Feature modules
+    App\Modules\User\Infrastructure\Providers\UserServiceProvider::class,
+    App\Modules\Role\Infrastructure\Providers\RoleServiceProvider::class,
+    App\Modules\Permission\Infrastructure\Providers\PermissionServiceProvider::class,
+];
+```
+
+### Dependency Injection
+
+The application uses **PHP-DI** with automatic dependency registration:
+
+- **Repositories** - Automatically registered in Service Providers
+- **Action Interfaces** - Automatically registered in `bootstrap/dependencies.php` when using `make:module`
+- **Autowiring** - PHP-DI automatically resolves constructor dependencies
+
+**How it works:**
+
+1. **When creating a module** with `make:module`:
+   - Repository is registered in `ServiceProvider::register()`
+   - Action Interfaces are registered in `bootstrap/dependencies.php`
+   - Use statements are automatically added
+
+2. **PHP-DI Autowiring**:
+   - Automatically resolves concrete classes (no registration needed)
+   - Resolves constructor dependencies via type hints
+   - Example: `LoginAction` needs `UserRepository` → automatically injected
+
+3. **Interface-based injection**:
+   - Controllers use interfaces (e.g., `CreateUserActionInterface`)
+   - PHP-DI resolves to implementation via `dependencies.php`
+   - Allows for easy mocking in tests
 
 ### Repository Pattern
 
 The application uses the Repository pattern to abstract data access logic:
 
 ```php
-use App\Repositories\UserRepository;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 class UserController extends Controller
 {
@@ -489,21 +683,98 @@ class UserController extends Controller
 }
 ```
 
+**Automatic Registration:**
+When you create a module with `make:module`, the Repository is automatically registered in the Service Provider:
+
+```php
+// ServiceProvider::register()
+$container->set(UserRepository::class, \DI\autowire(UserRepository::class));
+```
+
 Available Repositories:
 - `UserRepository` - User data access with methods like `findByEmail()`, `findByPasswordResetToken()`
 - `RoleRepository` - Role data access with methods like `findByName()`, `paginateWithPermissions()`
 - `PermissionRepository` - Permission data access with methods like `findByName()`, `paginateWithRoles()`
+
+### Action Pattern with Interfaces
+
+Actions implement interfaces for better testability and flexibility:
+
+```php
+// Interface
+interface CreateUserActionInterface
+{
+    public function execute(CreateUserDTO $dto): User;
+}
+
+// Implementation
+final class CreateUserAction implements CreateUserActionInterface
+{
+    public function __construct(
+        private readonly UserRepository $repository
+    ) {}
+    
+    public function execute(CreateUserDTO $dto): User
+    {
+        return $this->repository->create([...]);
+    }
+}
+```
+
+**Automatic Registration:**
+When you create a module, Action Interfaces are automatically registered in `bootstrap/dependencies.php`:
+
+```php
+CreateUserActionInterface::class => \DI\autowire(CreateUserAction::class),
+```
+
+### Working with Modules
+
+**Creating a new module:**
+
+```bash
+php slim make:module Product --migration
+```
+
+This creates a complete module structure. After creation:
+
+1. **Update the Model** (`app/Modules/Product/Infrastructure/Models/Product.php`):
+   - Add `$fillable` fields
+   - Add `$casts` for type casting
+   - Add relationships if needed
+
+2. **Update the DTOs** (`app/Modules/Product/Application/DTOs/`):
+   - Add properties to `CreateProductDTO`
+   - Add optional properties to `UpdateProductDTO`
+
+3. **Update the Actions** (`app/Modules/Product/Application/Actions/`):
+   - Map DTO properties to model attributes in `CreateProductAction`
+   - Add business logic as needed
+
+4. **Update the Controller** (`app/Modules/Product/Infrastructure/Http/Controllers/ProductController.php`):
+   - Map request data to DTOs in `store()` and `update()` methods
+
+5. **Update the Resource** (`app/Modules/Product/Infrastructure/Http/Resources/ProductResource.php`):
+   - Add fields to the resource output
+
+6. **Update the Requests** (`app/Modules/Product/Infrastructure/Http/Requests/`):
+   - Add validation rules as needed
+
+7. **Update the Policy** (`app/Modules/Product/Policies/ProductPolicy.php`):
+   - Add authorization logic
+
+**Module is ready to use!** Routes are automatically loaded from `app/Modules/Product/Infrastructure/Routes/api.php`.
 
 ### Exception Handling
 
 Custom exception classes provide consistent error handling:
 
 ```php
-use App\Exceptions\NotFoundException;
-use App\Exceptions\InvalidCredentialsException;
-use App\Exceptions\UnauthorizedException;
-use App\Exceptions\ForbiddenException;
-use App\Exceptions\BadRequestException;
+use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
+use App\Modules\Core\Infrastructure\Exceptions\InvalidCredentialsException;
+use App\Modules\Core\Infrastructure\Exceptions\UnauthorizedException;
+use App\Modules\Core\Infrastructure\Exceptions\ForbiddenException;
+use App\Modules\Core\Infrastructure\Exceptions\BadRequestException;
 
 // In Actions
 throw new NotFoundException('User not found');
@@ -515,14 +786,18 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 ## 🔒 Security Features
 
 - ✅ Password hashing with bcrypt
-- ✅ JWT token authentication
+- ✅ JWT token authentication (API)
+- ✅ Session-based authentication (Web)
 - ✅ CSRF protection for web routes
-- ✅ Rate limiting on auth endpoints
+- ✅ Rate limiting on auth endpoints (5 requests/minute)
+- ✅ Rate limiting on all API endpoints (configurable)
 - ✅ Input validation with FormRequest
 - ✅ SQL injection protection (Eloquent ORM)
 - ✅ XSS protection (Blade templating)
 - ✅ Secure session handling
 - ✅ Centralized exception handling with proper error responses
+- ✅ Modular architecture for better code organization
+- ✅ Automatic dependency registration
 
 ## 📦 Dependencies
 
