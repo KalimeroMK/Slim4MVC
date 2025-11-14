@@ -15,6 +15,7 @@ use App\Enums\HttpStatusCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Support\ApiResponse;
 use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
@@ -45,7 +46,7 @@ class UserController extends Controller
     {
         $users = $this->listAction->execute();
 
-        return ApiResponse::success($users);
+        return ApiResponse::success(UserResource::collection($users));
     }
 
     /**
@@ -62,11 +63,14 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request, Response $response): Response
     {
-        $user = $this->createAction->execute(
+        $userData = $this->createAction->execute(
             CreateUserDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success($user, HttpStatusCode::CREATED);
+        // Reload user with relationships for resource
+        $user = \App\Models\User::with('roles')->find($userData['id']);
+
+        return ApiResponse::success(UserResource::make($user), HttpStatusCode::CREATED);
     }
 
     /**
@@ -80,7 +84,7 @@ class UserController extends Controller
     {
         $user = $this->getAction->execute($args['id']);
 
-        return ApiResponse::success($user);
+        return ApiResponse::success(UserResource::make($user));
     }
 
     /**
@@ -98,7 +102,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, Response $response, array $args): Response
     {
-        $user = $this->updateAction->execute(
+        $userData = $this->updateAction->execute(
             new UpdateUserDTO(
                 $args['id'],
                 $request->validated()['name'] ?? null,
@@ -108,7 +112,10 @@ class UserController extends Controller
             )
         );
 
-        return ApiResponse::success($user);
+        // Reload user with relationships for resource
+        $user = \App\Models\User::with('roles')->find($args['id']);
+
+        return ApiResponse::success(UserResource::make($user));
     }
 
     /**

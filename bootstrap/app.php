@@ -7,7 +7,6 @@ declare(strict_types=1);
 require __DIR__.'/../vendor/autoload.php';
 
 use App\Http\RequestHandlers\FormRequestStrategy;
-use App\Support\RequestResolver;
 use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Validation\Factory;
@@ -43,8 +42,7 @@ AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);
 
 // Configure request handler strategy
-$resolver = new RequestResolver($container, $container->get(Factory::class));
-$strategy = new FormRequestStrategy($container, $resolver);
+$strategy = new FormRequestStrategy($container, $container->get(Factory::class));
 $app->getRouteCollector()->setDefaultInvocationStrategy($strategy);
 
 // Load middleware

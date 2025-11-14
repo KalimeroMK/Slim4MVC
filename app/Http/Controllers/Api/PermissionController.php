@@ -11,9 +11,12 @@ use App\Actions\Permission\ListPermissionAction;
 use App\Actions\Permission\UpdatePermissionAction;
 use App\DTO\Permission\CreatePermissionDTO;
 use App\DTO\Permission\UpdatePermissionDTO;
+use App\Enums\HttpStatusCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Permission\CreatePermissionRequest;
 use App\Http\Requests\Permission\UpdatePermissionRequest;
+use App\Http\Resources\PermissionResource;
+use App\Support\ApiResponse;
 use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -39,12 +42,7 @@ class PermissionController extends Controller
     {
         $permissions = $this->listAction->execute();
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $permissions,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(PermissionResource::collection($permissions));
     }
 
     public function store(CreatePermissionRequest $request, Response $response): Response
@@ -53,24 +51,17 @@ class PermissionController extends Controller
             CreatePermissionDTO::fromRequest($request->validated())
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $permission,
-        ]));
+        // Load relationships for resource
+        $permission->load('roles');
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(PermissionResource::make($permission), HttpStatusCode::CREATED);
     }
 
     public function show(Request $request, Response $response, array $args): Response
     {
         $permission = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $permission,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(PermissionResource::make($permission));
     }
 
     public function update(UpdatePermissionRequest $request, Response $response, array $args): Response
@@ -79,23 +70,16 @@ class PermissionController extends Controller
             UpdatePermissionDTO::fromRequest($request->validated())
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $permission,
-        ]));
+        // Load relationships for resource
+        $permission->load('roles');
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(PermissionResource::make($permission));
     }
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'message' => 'Permission deleted successfully',
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Permission deleted successfully');
     }
 }

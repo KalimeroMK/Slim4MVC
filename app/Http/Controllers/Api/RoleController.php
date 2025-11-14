@@ -11,9 +11,12 @@ use App\Actions\Role\ListRolesAction;
 use App\Actions\Role\UpdateRoleAction;
 use App\DTO\Role\CreateRoleDTO;
 use App\DTO\Role\UpdateRoleDTO;
+use App\Enums\HttpStatusCode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\CreateRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
+use App\Http\Resources\RoleResource;
+use App\Support\ApiResponse;
 use App\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -38,63 +41,46 @@ class RoleController extends Controller
     {
         $roles = $this->listAction->execute();
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $roles,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(RoleResource::collection($roles));
     }
 
     public function store(CreateRoleRequest $request, Response $response): Response
     {
-        $role = $this->createAction->execute(
+        $roleData = $this->createAction->execute(
             CreateRoleDTO::fromRequest($request->validated())
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $role,
-        ]));
+        // CreateRoleAction returns Role model (load() returns the model, not array)
+        $role = $roleData instanceof \App\Models\Role 
+            ? $roleData 
+            : \App\Models\Role::with('permissions')->find($roleData['id'] ?? null);
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(RoleResource::make($role), HttpStatusCode::CREATED);
     }
 
     public function show(Request $request, Response $response, array $args): Response
     {
         $role = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $role,
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(RoleResource::make($role));
     }
 
     public function update(UpdateRoleRequest $request, Response $response, array $args): Response
     {
-        $role = $this->updateAction->execute(
+        $this->updateAction->execute(
             UpdateRoleDTO::fromRequest($request->validated())
         );
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'data' => $role,
-        ]));
+        // Reload role with relationships for resource
+        $role = \App\Models\Role::with('permissions')->find($args['id']);
 
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(RoleResource::make($role));
     }
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
-        $response->getBody()->write(json_encode([
-            'status' => 'success',
-            'message' => 'Role deleted successfully',
-        ]));
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Role deleted successfully');
     }
 }
