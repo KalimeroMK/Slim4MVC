@@ -9,3 +9,4 @@
 !/storage/queue/.gitkeep
 .phpunit.cache/
 .env.example.backup
+.rector.cache/
