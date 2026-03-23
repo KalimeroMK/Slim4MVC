@@ -13,8 +13,8 @@ if (! function_exists('view')) {
      */
     function view(string $template, Response $response, array $with = []): Response
     {
-        $cache = __DIR__.'/../../../../storage/cache/view';
-        $views = __DIR__.'/../../../../resources/views';
+        $cache = __DIR__.'/../../../../../storage/cache/view';
+        $views = __DIR__.'/../../../../../resources/views';
 
         $blade = new Blade($views, $cache);
 

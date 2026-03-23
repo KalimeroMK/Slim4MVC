@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\Controllers;
@@ -14,7 +13,7 @@ abstract class Controller
 {
     use AuthorizesRequests;
 
-    public function __construct(protected ContainerInterface $container, protected Request $request, protected Response $response) {}
+    public function __construct(protected ContainerInterface $container) {}
 
     /**
      * Get the container instance.
@@ -25,11 +24,28 @@ abstract class Controller
     }
 
     /**
+     * Get the request from container.
+     */
+    protected function getRequest(): Request
+    {
+        return $this->container->get(Request::class);
+    }
+
+    /**
+     * Get a fresh response instance.
+     */
+    protected function getResponse(): Response
+    {
+        return $this->container->get(Response::class);
+    }
+
+    /**
      * Redirect to a specific URL.
      */
     protected function redirect(string $url): Response
     {
-        return $this->response
+        $response = $this->getResponse();
+        return $response
             ->withHeader('Location', $url)
             ->withStatus(302);
     }
@@ -39,9 +55,10 @@ abstract class Controller
      */
     protected function respondWithJson(mixed $data, int $status = 200): Response
     {
-        $this->response->getBody()->write(json_encode($data));
+        $response = $this->getResponse();
+        $response->getBody()->write(json_encode($data));
 
-        return $this->response
+        return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus($status);
     }
@@ -85,7 +102,8 @@ abstract class Controller
      */
     protected function getPaginationParams(): array
     {
-        $queryParams = $this->request->getQueryParams();
+        $request = $this->getRequest();
+        $queryParams = $request->getQueryParams();
         $page = max(1, (int) ($queryParams['page'] ?? 1));
         $perPage = max(1, min(100, (int) ($queryParams['per_page'] ?? 15))); // Max 100 per page
 
@@ -100,7 +118,8 @@ abstract class Controller
      */
     protected function getPaginationBaseUrl(): string
     {
-        $uri = $this->request->getUri();
+        $request = $this->getRequest();
+        $uri = $request->getUri();
         $path = $uri->getPath();
         $query = $uri->getQuery();
 

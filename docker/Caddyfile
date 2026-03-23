@@ -1,11 +1,6 @@
 {
-	# Enable FrankenPHP
-	frankenphp {
-		worker /var/www/html/public/index.php 4
-	}
-	
-	# Automatic HTTPS (disable for local dev, enable for production)
-	# auto_https off
+	# Enable FrankenPHP (without worker mode for now)
+	frankenphp
 	
 	# Debug mode (disable in production)
 	debug
@@ -18,11 +13,8 @@
 	# Enable compression
 	encode gzip zstd
 	
-	# PHP files
-	php_server {
-		# Worker mode for better performance
-		worker /var/www/html/public/index.php
-	}
+	# PHP files - standard mode (not worker mode)
+	php_server
 	
 	# Static files with caching
 	@static {
@@ -41,7 +33,6 @@
 		X-Content-Type-Options "nosniff"
 		X-XSS-Protection "1; mode=block"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		# Content-Security-Policy "default-src 'self'" (enable in production)
 	}
 	
 	# Deny access to sensitive files
