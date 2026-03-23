@@ -32,9 +32,9 @@ use App\Modules\User\Application\Actions\UpdateUserAction;
 use App\Modules\User\Application\Interfaces\CreateUserActionInterface;
 use App\Modules\User\Application\Interfaces\UpdateUserActionInterface;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
-
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Response;
+
 use function DI\autowire;
 use function DI\factory;
 
@@ -66,4 +66,4 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
+    }), ];

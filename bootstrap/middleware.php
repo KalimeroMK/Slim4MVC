@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ClearFlashDataMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\CsrfMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ValidationExceptionMiddleware;
 use App\Modules\Core\Infrastructure\Support\RequestResolver;
@@ -13,6 +14,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Tuupola\Middleware\CorsMiddleware;
 
 return function ($app, DI\Container $container): void {
@@ -40,10 +42,13 @@ return function ($app, DI\Container $container): void {
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
 
+    // Add CSRF middleware (generates token for web routes, validates non-GET requests)
+    $app->add(new CsrfMiddleware($container->get(Session::class)));
+
     // Ensure body parsing works for form data
     $app->add(function ($request, $handler) {
         $contentType = $request->getHeaderLine('Content-Type');
-        if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
+        if (mb_strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
             $parsedBody = $request->getParsedBody();
             if ($parsedBody === null) {
                 $body = (string) $request->getBody();
@@ -51,6 +56,7 @@ return function ($app, DI\Container $container): void {
                 $request = $request->withParsedBody($data);
             }
         }
+
         return $handler->handle($request);
     });
 

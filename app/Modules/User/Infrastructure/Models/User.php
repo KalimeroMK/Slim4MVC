@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Infrastructure\Models;
 
+use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Infrastructure\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
@@ -44,34 +46,52 @@ class User extends Model
     protected $hidden = ['password'];
 
     /**
+     * Boot the model and register observers.
+     */
+    protected static function booted(): void
+    {
+        static::observe(UserObserver::class);
+    }
+
+    /**
      * @return BelongsToMany<\App\Modules\Role\Infrastructure\Models\Role, $this>
      */
     public function roles(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Modules\Role\Infrastructure\Models\Role::class, 'role_user');
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
     }
 
     /**
-     * @return \Illuminate\Support\Collection<int, mixed>
+     * Override save method to auto-assign client role.
      */
-    public function permissions(): \Illuminate\Support\Collection
+    public function save(array $options = []): bool
     {
-        return $this->roles()
-            ->with('permissions')
-            ->get()
-            ->pluck('permissions')
-            ->flatten()
-            ->unique('id')
-            ->values();
-    }
-
-    public function hasRole(string $role): bool
-    {
-        return $this->roles()->where('name', $role)->exists();
-    }
-
-    public function hasPermission(string $permission): bool
-    {
-        return $this->permissions()->contains('name', $permission);
+        $isNew = ! $this->exists;
+        
+        $saved = parent::save($options);
+        
+        // If new user was created, assign client role
+        if ($saved && $isNew) {
+            // Use the connection directly instead of DB facade
+            $connection = $this->getConnection();
+            
+            // Check if user already has any roles
+            $hasRoles = $connection->table('role_user')
+                ->where('user_id', $this->id)
+                ->exists();
+            
+            if (! $hasRoles) {
+                // Find or create client role
+                $clientRole = Role::firstOrCreate(['name' => 'client']);
+                
+                // Insert role_user relationship directly
+                $connection->table('role_user')->insert([
+                    'user_id' => $this->id,
+                    'role_id' => $clientRole->id,
+                ]);
+            }
+        }
+        
+        return $saved;
     }
 }

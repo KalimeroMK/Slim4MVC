@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\RequestHandlers;
 
+use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
 use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 use Illuminate\Validation\Factory as ValidatorFactory;
 use Psr\Container\ContainerInterface;
@@ -41,16 +42,21 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
         ResponseInterface $response,
         array $routeArguments
     ): ResponseInterface {
-        $callable = $this->resolveCallable($callable);
+        $callable = $this->resolveCallable($callable, $request);
         $parameters = $this->resolveParameters($callable, $request, $response, $routeArguments);
 
         return call_user_func_array($callable, $parameters);
     }
 
-    private function resolveCallable(callable $callable): callable
+    private function resolveCallable(callable $callable, ServerRequestInterface $request): callable
     {
         if (is_array($callable) && is_string($callable[0])) {
             $callable[0] = $this->container->get($callable[0]);
+        }
+
+        // Set request on controller for later use
+        if (is_array($callable) && $callable[0] instanceof Controller) {
+            $callable[0]->setRequest($request);
         }
 
         return $callable;

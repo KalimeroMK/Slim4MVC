@@ -20,10 +20,15 @@ $containerBuilder->useAutowiring(true);
 $containerBuilder->addDefinitions(require __DIR__.'/../bootstrap/dependencies.php');
 $container = $containerBuilder->build();
 
-// Start session
+// Start native PHP session (used by CSRF, flash messages, etc.)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Create Symfony Session wrapper around existing session
 $storage = new NativeSessionStorage();
 $session = new Session($storage);
-$session->start();
+// Don't start again - just use the already started native session
 $container->set(Session::class, fn (): Session => $session);
 
 // Configure database

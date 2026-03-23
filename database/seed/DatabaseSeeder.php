@@ -4,85 +4,87 @@ declare(strict_types=1);
 
 namespace Database\Seed;
 
-use App\Modules\Permission\Infrastructure\Database\Factories\PermissionFactory;
-use App\Modules\Role\Infrastructure\Database\Factories\RoleFactory;
-use App\Modules\User\Infrastructure\Database\Factories\UserFactory;
-use Illuminate\Database\Capsule\Manager as Capsule;
+use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Infrastructure\Models\User;
 
-/**
- * Database Seeder using Factories.
- */
 class DatabaseSeeder
 {
     public function run(): void
     {
-        $connection = Capsule::connection();
-        $driver = $connection->getDriverName();
-
-        // Disable foreign key checks (MySQL/MariaDB only)
-        if (in_array($driver, ['mysql', 'mariadb'])) {
-            Capsule::statement('SET FOREIGN_KEY_CHECKS=0;');
-        }
-
-        // Truncate tables
-        Capsule::table('role_user')->truncate();
-        Capsule::table('permission_role')->truncate();
-        \App\Modules\Permission\Infrastructure\Models\Permission::truncate();
-        \App\Modules\Role\Infrastructure\Models\Role::truncate();
-        \App\Modules\User\Infrastructure\Models\User::truncate();
-
-        // Re-enable foreign key checks (MySQL/MariaDB only)
-        if (in_array($driver, ['mysql', 'mariadb'])) {
-            Capsule::statement('SET FOREIGN_KEY_CHECKS=1;');
-        }
+        echo "Seeding database...\n";
 
         // Create roles
-        $adminRole = (new RoleFactory())->create(['name' => 'admin']);
-        $managerRole = (new RoleFactory())->create(['name' => 'manager']);
-        $userRole = (new RoleFactory())->create(['name' => 'user']);
+        $adminRole = Role::create(['name' => 'admin']);
+        $clientRole = Role::create(['name' => 'client']);
+        $managerRole = Role::create(['name' => 'manager']);
+        echo "✅ Roles created\n";
 
         // Create permissions
-        $actions = ['list', 'show', 'create', 'update', 'delete'];
-        $permissions = [];
+        $permissions = [
+            'view-users',
+            'create-users',
+            'edit-users',
+            'delete-users',
+            'view-roles',
+            'create-roles',
+            'edit-roles',
+            'delete-roles',
+            'view-permissions',
+            'create-permissions',
+            'edit-permissions',
+            'delete-permissions',
+        ];
 
-        foreach (['admin', 'manager', 'user'] as $roleName) {
-            foreach ($actions as $action) {
-                $permName = "{$action}-{$roleName}";
-                $permission = (new PermissionFactory())->create(['name' => $permName]);
-                $permissions[$permName] = $permission;
-
-                // Attach permission to matching role
-                $role = match ($roleName) {
-                    'admin' => $adminRole,
-                    'manager' => $managerRole,
-                    'user' => $userRole,
-                };
-                $role->permissions()->attach($permission->id);
-            }
+        foreach ($permissions as $permName) {
+            Permission::create(['name' => $permName]);
         }
+        echo "✅ Permissions created\n";
 
-        // Create users with roles
-        $adminUser = (new UserFactory())->create([
+        // Assign all permissions to admin
+        $adminRole->permissions()->sync(Permission::all()->pluck('id'));
+        
+        // Assign view permissions to client
+        $clientRole->permissions()->sync(
+            Permission::where('name', 'like', 'view-%')->pluck('id')
+        );
+
+        // Assign view and edit permissions to manager
+        $managerRole->permissions()->sync(
+            Permission::where('name', 'like', 'view-%')
+                ->orWhere('name', 'like', 'edit-%')
+                ->pluck('id')
+        );
+        echo "✅ Permissions assigned to roles\n";
+
+        // Create admin user
+        $admin = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@demo.com',
+            'email' => 'admin@example.com',
+            'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
-        $adminUser->roles()->attach($adminRole->id);
+        $admin->roles()->sync([$adminRole->id]);
 
-        $managerUser = (new UserFactory())->create([
+        // Create client user
+        $client = User::create([
+            'name' => 'Client User',
+            'email' => 'client@example.com',
+            'password' => password_hash('password123', PASSWORD_BCRYPT),
+        ]);
+        $client->roles()->sync([$clientRole->id]);
+
+        // Create manager user
+        $manager = User::create([
             'name' => 'Manager User',
-            'email' => 'manager@demo.com',
+            'email' => 'manager@example.com',
+            'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
-        $managerUser->roles()->attach($managerRole->id);
+        $manager->roles()->sync([$managerRole->id]);
 
-        $regularUser = (new UserFactory())->create([
-            'name' => 'Regular User',
-            'email' => 'user@demo.com',
-        ]);
-        $regularUser->roles()->attach($userRole->id);
-
-        // Create additional fake users
-        (new UserFactory())->createMany(10);
-
-        echo "✅ Seeded roles, permissions and users successfully using factories.\n";
+        echo "✅ Users created with roles\n";
+        echo "\nLogin credentials:\n";
+        echo "Admin: admin@example.com / password123\n";
+        echo "Client: client@example.com / password123\n";
+        echo "Manager: manager@example.com / password123\n";
     }
 }

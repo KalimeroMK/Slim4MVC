@@ -24,16 +24,6 @@ use Throwable;
 class ExceptionHandlerMiddleware implements MiddlewareInterface
 {
     /**
-     * Check if request is an API request.
-     */
-    private function isApiRequest(Request $request): bool
-    {
-        $path = $request->getUri()->getPath();
-
-        return str_starts_with($path, '/api');
-    }
-
-    /**
      * Process the request and handle exceptions.
      */
     public function process(Request $request, Handler $handler): Response
@@ -89,6 +79,16 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
                 ? ApiResponse::error('An unexpected error occurred', 500)
                 : $this->redirectResponse($request, '/500', 500);
         }
+    }
+
+    /**
+     * Check if request is an API request.
+     */
+    private function isApiRequest(Request $request): bool
+    {
+        $path = $request->getUri()->getPath();
+
+        return str_starts_with($path, '/api');
     }
 
     /**

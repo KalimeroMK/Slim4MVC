@@ -55,11 +55,18 @@ class Auth
 
         $this->session->migrate(true);
 
-        $this->session->set('user', [
+        // Store user data in session
+        $userData = [
             'id' => $user->id,
             'email' => $user->email,
             'name' => $user->name,
-        ]);
+        ];
+        $this->session->set('user', $userData);
+
+        // Also store in native $_SESSION for AuthHelper compatibility
+        $_SESSION['user_id'] = $user->id;
+        $_SESSION['user_email'] = $user->email;
+        $_SESSION['user_name'] = $user->name;
 
         $this->session->save();
 
@@ -69,6 +76,7 @@ class Auth
     public function logout(): void
     {
         $this->session->remove('user');
+        unset($_SESSION['user_id'], $_SESSION['user_email'], $_SESSION['user_name']);
     }
 
     public function user(): ?User
@@ -77,6 +85,19 @@ class Auth
             return $this->user;
         }
 
+        // First check session (for web authentication)
+        $sessionUser = $this->session->get('user');
+        if (is_array($sessionUser) && isset($sessionUser['id'])) {
+            /** @var User|null $user */
+            $user = User::find($sessionUser['id']);
+            if ($user instanceof User) {
+                $this->user = $user;
+
+                return $this->user;
+            }
+        }
+
+        // Then check JWT (for API authentication)
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 
         if (! str_starts_with((string) $authHeader, 'Bearer ')) {

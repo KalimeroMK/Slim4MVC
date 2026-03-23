@@ -9,12 +9,26 @@ use App\Modules\Core\Infrastructure\Traits\AuthorizesRequests;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use RuntimeException;
 
 abstract class Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Current request (set by FormRequestStrategy).
+     */
+    protected ?Request $currentRequest = null;
+
     public function __construct(protected ContainerInterface $container) {}
+
+    /**
+     * Set the current request.
+     */
+    final public function setRequest(Request $request): void
+    {
+        $this->currentRequest = $request;
+    }
 
     /**
      * Get the container instance.
@@ -29,7 +43,12 @@ abstract class Controller
      */
     protected function getRequest(): Request
     {
-        return $this->container->get(Request::class);
+        if ($this->currentRequest !== null) {
+            return $this->currentRequest;
+        }
+
+        // Fallback for edge cases
+        throw new RuntimeException('Request not available. Ensure FormRequestStrategy is used.');
     }
 
     /**
