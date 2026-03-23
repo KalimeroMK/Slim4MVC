@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Actions\User\CreateUserAction;
-use App\DTO\User\CreateUserDTO;
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Modules\User\Application\Actions\CreateUserAction;
+use App\Modules\User\Application\DTOs\CreateUserDTO;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Tests\TestCase;
 
 class CreateUserActionTest extends TestCase

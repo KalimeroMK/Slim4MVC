@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Models\User;
-use App\Support\Auth;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\Core\Infrastructure\Support\Auth;
 use Tests\TestCase;
 
 class AuthTest extends TestCase

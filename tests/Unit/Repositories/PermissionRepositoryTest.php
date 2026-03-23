@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
-use App\Models\Permission;
-use App\Repositories\PermissionRepository;
+use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 use Tests\TestCase;
 
 class PermissionRepositoryTest extends TestCase

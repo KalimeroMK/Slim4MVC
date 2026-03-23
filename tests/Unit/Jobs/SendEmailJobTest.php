@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Jobs;
 
-use App\Jobs\SendEmailJob;
-use App\Support\Mailer;
-use App\View\Blade;
+use App\Modules\Core\Infrastructure\Jobs\SendEmailJob;
+use App\Modules\Core\Infrastructure\Support\Mailer;
+use App\Modules\Core\Infrastructure\View\Blade;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -58,7 +58,7 @@ class SendEmailJobTest extends TestCase
     {
         $job = new SendEmailJob('test@example.com', 'Test', 'email.test', []);
 
-        $this->assertInstanceOf(\App\Jobs\Job::class, $job);
+        $this->assertInstanceOf(\App\Modules\Core\Infrastructure\Jobs\Job::class, $job);
         $this->assertTrue(method_exists($job, 'handle'));
     }
 }

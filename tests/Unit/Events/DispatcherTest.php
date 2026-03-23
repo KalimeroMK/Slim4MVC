@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Events;
 
-use App\Events\Dispatcher;
-use App\Events\PasswordResetRequested;
-use App\Events\UserRegistered;
-use App\Models\User;
+use App\Modules\Core\Infrastructure\Events\Dispatcher;
+use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
+use App\Modules\Core\Infrastructure\Events\UserRegistered;
+use App\Modules\User\Infrastructure\Models\User;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -69,16 +69,16 @@ class DispatcherTest extends TestCase
 
     public function test_dispatch_calls_class_listener(): void
     {
-        $listener = $this->createMock(\App\Listeners\SendWelcomeEmail::class);
+        $listener = $this->createMock(\App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class);
         $listener->expects($this->once())
             ->method('handle')
             ->with($this->isInstanceOf(UserRegistered::class));
 
         $this->container->method('get')
-            ->with(\App\Listeners\SendWelcomeEmail::class)
+            ->with(\App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class)
             ->willReturn($listener);
 
-        $this->dispatcher->listen(UserRegistered::class, \App\Listeners\SendWelcomeEmail::class);
+        $this->dispatcher->listen(UserRegistered::class, \App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class);
 
         $user = new User(['name' => 'Test', 'email' => 'test@example.com']);
         $event = new UserRegistered($user);

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Listeners;
 
-use App\Events\PasswordResetRequested;
-use App\Jobs\SendEmailJob;
-use App\Listeners\SendPasswordResetEmail;
-use App\Models\User;
-use App\Queue\Queue;
+use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
+use App\Modules\Core\Infrastructure\Jobs\SendEmailJob;
+use App\Modules\Core\Infrastructure\Listeners\SendPasswordResetEmail;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\Core\Infrastructure\Queue\Queue;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Tests\TestCase;

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Actions\Auth\RegisterAction;
-use App\DTO\Auth\RegisterDTO;
-use App\Events\Dispatcher;
-use App\Events\UserRegistered;
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Modules\Auth\Application\Actions\Auth\RegisterAction;
+use App\Modules\Auth\Application\DTOs\Auth\RegisterDTO;
+use App\Modules\Core\Infrastructure\Events\Dispatcher;
+use App\Modules\Core\Infrastructure\Events\UserRegistered;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 

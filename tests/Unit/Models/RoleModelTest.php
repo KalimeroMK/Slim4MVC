@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Models;
 
-use App\Models\Permission;
-use App\Models\Role;
-use App\Models\User;
+use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Infrastructure\Models\User;
 use Tests\TestCase;
 
 class RoleModelTest extends TestCase

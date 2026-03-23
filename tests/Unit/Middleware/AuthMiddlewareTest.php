@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Middleware;
 
-use App\Http\Middleware\AuthMiddleware;
-use App\Models\User;
-use App\Support\Auth;
+use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\Core\Infrastructure\Support\Auth;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;

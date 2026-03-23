@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Actions\User\DeleteUserAction;
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Modules\User\Application\Actions\DeleteUserAction;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 

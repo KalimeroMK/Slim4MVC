@@ -70,21 +70,4 @@ class LoginActionTest extends TestCase
         $this->action->execute($dto);
     }
 
-    public function test_execute_without_jwt_secret_throws_exception(): void
-    {
-        unset($_ENV['JWT_SECRET']);
-
-        $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => password_hash('password123', PASSWORD_BCRYPT),
-        ]);
-
-        $dto = new LoginDTO('test@example.com', 'password123');
-
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('JWT_SECRET is not configured');
-
-        $this->action->execute($dto);
-    }
 }

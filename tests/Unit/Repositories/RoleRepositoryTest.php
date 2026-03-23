@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Repositories;
 
-use App\Models\Role;
-use App\Repositories\RoleRepository;
+use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 use Tests\TestCase;
 
 class RoleRepositoryTest extends TestCase

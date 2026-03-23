@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Actions\User\GetUserAction;
-use App\Models\Role;
-use App\Models\User;
-use App\Repositories\UserRepository;
+use App\Modules\User\Application\Actions\GetUserAction;
+use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 

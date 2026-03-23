@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Exceptions;
 
-use App\Exceptions\BadRequestException;
-use App\Exceptions\ForbiddenException;
-use App\Exceptions\InvalidCredentialsException;
-use App\Exceptions\NotFoundException;
-use App\Exceptions\UnauthorizedException;
+use App\Modules\Core\Infrastructure\Exceptions\BadRequestException;
+use App\Modules\Core\Infrastructure\Exceptions\ForbiddenException;
+use App\Modules\Core\Infrastructure\Exceptions\InvalidCredentialsException;
+use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
+use App\Modules\Core\Infrastructure\Exceptions\UnauthorizedException;
 use PHPUnit\Framework\TestCase;
 
 class ExceptionTest extends TestCase
