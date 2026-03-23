@@ -24,6 +24,16 @@ use Throwable;
 class ExceptionHandlerMiddleware implements MiddlewareInterface
 {
     /**
+     * Check if request is an API request.
+     */
+    private function isApiRequest(Request $request): bool
+    {
+        $path = $request->getUri()->getPath();
+
+        return str_starts_with($path, '/api');
+    }
+
+    /**
      * Process the request and handle exceptions.
      */
     public function process(Request $request, Handler $handler): Response
@@ -31,27 +41,63 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
         try {
             return $handler->handle($request);
         } catch (NotFoundException $e) {
-            return ApiResponse::notFound($e->getMessage());
+            return $this->isApiRequest($request)
+                ? ApiResponse::notFound($e->getMessage())
+                : $this->redirectResponse($request, '/404', 404);
         } catch (UnauthorizedException|InvalidCredentialsException $e) {
-            return ApiResponse::unauthorized($e->getMessage());
+            return $this->isApiRequest($request)
+                ? ApiResponse::unauthorized($e->getMessage())
+                : $this->redirectResponse($request, '/login?error=unauthorized', 302);
         } catch (ForbiddenException $e) {
-            return ApiResponse::forbidden($e->getMessage());
+            return $this->isApiRequest($request)
+                ? ApiResponse::forbidden($e->getMessage())
+                : $this->redirectResponse($request, '/403', 403);
         } catch (BadRequestException $e) {
-            return ApiResponse::badRequest($e->getMessage());
+            return $this->isApiRequest($request)
+                ? ApiResponse::badRequest($e->getMessage())
+                : $this->redirectResponse($request, '/400?message='.urlencode($e->getMessage()), 302);
         } catch (ValidationException $e) {
-            return $e->getResponse();
+            // For API: return JSON error
+            // For Web: redirect back with error message
+            if ($this->isApiRequest($request)) {
+                return $e->getResponse();
+            }
+
+            // For web requests, redirect back with error
+            $_SESSION['errors'] = ['validation' => 'The given data was invalid.'];
+            $_SESSION['old_input'] = $request->getParsedBody() ?? [];
+
+            $referer = $request->getHeaderLine('Referer') ?: '/';
+
+            return $this->redirectResponse($request, $referer, 302);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
-            return ApiResponse::notFound('Resource not found');
+            return $this->isApiRequest($request)
+                ? ApiResponse::notFound('Resource not found')
+                : $this->redirectResponse($request, '/404', 404);
         } catch (RuntimeException $e) {
             // Log the exception for debugging
             error_log('RuntimeException: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
 
-            return ApiResponse::error($e->getMessage(), 500);
+            return $this->isApiRequest($request)
+                ? ApiResponse::error($e->getMessage(), 500)
+                : $this->redirectResponse($request, '/500?message='.urlencode($e->getMessage()), 302);
         } catch (Throwable $e) {
             // Log unexpected exceptions
             error_log('Unexpected exception: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
 
-            return ApiResponse::error('An unexpected error occurred', 500);
+            return $this->isApiRequest($request)
+                ? ApiResponse::error('An unexpected error occurred', 500)
+                : $this->redirectResponse($request, '/500', 500);
         }
+    }
+
+    /**
+     * Create a redirect response.
+     */
+    private function redirectResponse(Request $request, string $url, int $status): Response
+    {
+        $response = new \Slim\Psr7\Response($status);
+
+        return $response->withHeader('Location', $url)->withStatus($status);
     }
 }

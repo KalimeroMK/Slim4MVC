@@ -71,12 +71,12 @@ return function ($app, DI\Container $container): void {
 
     $container->set(AuthWebMiddleware::class, fn (): AuthWebMiddleware => new AuthWebMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class)));
 
-    // Add exception handler middleware (should be early to catch all exceptions)
-    $app->add(new ExceptionHandlerMiddleware());
+    // Add flash data clearing (outermost - executes last)
+    $app->add(new ClearFlashDataMiddleware());
 
     // Add validation exception handling
     $app->add(new ValidationExceptionMiddleware());
 
-    // Add flash data clearing
-    $app->add(new ClearFlashDataMiddleware());
+    // Add exception handler middleware (innermost - executes first to catch all)
+    $app->add(new ExceptionHandlerMiddleware());
 };
