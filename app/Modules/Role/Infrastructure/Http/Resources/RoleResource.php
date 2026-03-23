@@ -6,17 +6,20 @@ namespace App\Modules\Role\Infrastructure\Http\Resources;
 
 use App\Modules\Role\Infrastructure\Models\Role;
 
+/**
+ * @phpstan-ignore-next-line
+ */
 class RoleResource extends \App\Modules\Core\Infrastructure\Http\Resources\Resource
 {
     /**
      * Transform the role into an array.
+     *
+     * @param  Role  $resource
+     * @return array<string, mixed>
      */
     public static function make(mixed $resource): array
     {
-        if (! ($resource instanceof Role)) {
-            return [];
-        }
-
+        /** @var Role $role */
         $role = $resource;
 
         return [

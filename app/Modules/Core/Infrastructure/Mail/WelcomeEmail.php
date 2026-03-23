@@ -19,7 +19,10 @@ class WelcomeEmail extends Mailable
         protected User $user
     ) {
         parent::__construct($mailer, $blade);
-        $this->to($this->user->email);
+        $email = $this->user->email;
+        if ($email !== null) {
+            $this->to($email);
+        }
     }
 
     protected function template(): string

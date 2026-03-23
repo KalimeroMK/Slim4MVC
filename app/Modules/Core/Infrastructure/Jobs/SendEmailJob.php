@@ -10,6 +10,9 @@ use Psr\Container\ContainerInterface;
 
 class SendEmailJob extends BaseJob
 {
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function __construct(
         private readonly string $to,
         private readonly string $subject,

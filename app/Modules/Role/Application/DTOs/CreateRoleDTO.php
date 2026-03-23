@@ -6,14 +6,22 @@ namespace App\Modules\Role\Application\DTOs;
 
 final class CreateRoleDTO
 {
+    /**
+     * @param  list<int>|list<string>  $permissions
+     */
     public function __construct(
         public string $name,
+        public array $permissions = [],
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $validated
+     */
     public static function fromRequest(array $validated): self
     {
         return new self(
             name: $validated['name'],
+            permissions: $validated['permissions'] ?? [],
         );
     }
 }

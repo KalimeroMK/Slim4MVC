@@ -10,6 +10,8 @@ use Carbon\Carbon;
 
 /**
  * User Factory for generating fake user data.
+ *
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -38,11 +40,13 @@ class UserFactory extends Factory
      *
      * @param  string|int  $role  Role name or ID
      */
-    public function withRole($role): User
+    public function withRole(string|int $role): User
     {
+        /** @var User $model */
         $model = $this->create();
 
         if (is_string($role)) {
+            /** @var \App\Modules\Role\Infrastructure\Models\Role|null $roleModel */
             $roleModel = \App\Modules\Role\Infrastructure\Models\Role::where('name', $role)->first();
             if ($roleModel) {
                 $model->roles()->attach($roleModel->id);
@@ -51,7 +55,7 @@ class UserFactory extends Factory
             $model->roles()->attach($role);
         }
 
-        return $model->fresh();
+        return $model->fresh() ?? $model;
     }
 
     protected function model(): string

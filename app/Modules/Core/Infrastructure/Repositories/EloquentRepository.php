@@ -40,7 +40,10 @@ abstract class EloquentRepository implements Repository
      */
     final public function find(int $id): ?Model
     {
-        return $this->model()::find($id);
+        $modelClass = $this->model();
+
+        /** @phpstan-ignore-next-line */
+        return $modelClass::find($id);
     }
 
     /**
@@ -52,7 +55,10 @@ abstract class EloquentRepository implements Repository
      */
     final public function findOrFail(int $id): Model
     {
-        return $this->model()::findOrFail($id);
+        $modelClass = $this->model();
+
+        /** @phpstan-ignore-next-line */
+        return $modelClass::findOrFail($id);
     }
 
     /**
@@ -63,7 +69,10 @@ abstract class EloquentRepository implements Repository
      */
     final public function create(array $attributes): Model
     {
-        return $this->model()::create($attributes);
+        $modelClass = $this->model();
+
+        /** @phpstan-ignore-next-line */
+        return $modelClass::create($attributes);
     }
 
     /**
@@ -76,10 +85,12 @@ abstract class EloquentRepository implements Repository
      */
     final public function update(int $id, array $attributes): Model
     {
+        /** @var TModel $model */
         $model = $this->findOrFail($id);
         $model->update($attributes);
+        $fresh = $model->fresh();
 
-        return $model->fresh();
+        return $fresh ?? $model;
     }
 
     /**
@@ -89,24 +100,31 @@ abstract class EloquentRepository implements Repository
      */
     final public function delete(int $id): bool
     {
+        /** @var TModel $model */
         $model = $this->findOrFail($id);
 
-        return $model->delete();
+        return $model->delete() ?? false;
     }
 
     /**
      * Get paginated records.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<TModel>, total: int, page: int, perPage: int}
      */
     final public function paginate(int $page = 1, int $perPage = 15): array
     {
-        $lengthAwarePaginator = $this->model()::query()
+        $modelClass = $this->model();
+
+        /** @phpstan-ignore-next-line */
+        $lengthAwarePaginator = $modelClass::query()
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
+        /** @var list<TModel> $items */
+        $items = $lengthAwarePaginator->items();
+
         return [
-            'items' => $lengthAwarePaginator->items(),
+            'items' => $items,
             'total' => $lengthAwarePaginator->total(),
             'page' => $lengthAwarePaginator->currentPage(),
             'perPage' => $lengthAwarePaginator->perPage(),

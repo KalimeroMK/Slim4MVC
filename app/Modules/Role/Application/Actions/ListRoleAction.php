@@ -15,7 +15,7 @@ final readonly class ListRoleAction
     /**
      * Execute listing Roles with pagination.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<\App\Modules\Role\Infrastructure\Models\Role>, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {

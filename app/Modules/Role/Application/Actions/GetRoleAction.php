@@ -20,6 +20,7 @@ final readonly class GetRoleAction
      */
     public function execute(int $id): Role
     {
+        /** @var Role $role */
         $role = $this->roleRepository->findOrFail($id);
         $role->load('permissions');
 

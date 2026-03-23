@@ -46,9 +46,10 @@ class Auth
 
     public function attempt(string $email, string $password): bool
     {
+        /** @var User|null $user */
         $user = User::where('email', $email)->first();
 
-        if (! $user || ! password_verify($password, (string) $user->password)) {
+        if (! $user instanceof User || ! password_verify($password, (string) $user->password)) {
             return false;
         }
 
@@ -86,7 +87,9 @@ class Auth
 
         try {
             $decoded = $this->jwtService->decode($token);
-            $this->user = User::find($decoded->id);
+            /** @var User|null $user */
+            $user = User::find($decoded->id);
+            $this->user = $user;
 
             return $this->user;
         } catch (Exception $exception) {

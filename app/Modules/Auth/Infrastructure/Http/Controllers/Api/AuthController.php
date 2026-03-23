@@ -21,7 +21,7 @@ use OpenApi\Attributes as OA;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 
-#[OA\Tag(name: "Authentication", description: "Public authentication endpoints")]
+#[OA\Tag(name: 'Authentication', description: 'Public authentication endpoints')]
 class AuthController extends Controller
 {
     public function __construct(
@@ -35,25 +35,25 @@ class AuthController extends Controller
     }
 
     #[OA\Post(
-        path: "/register",
-        operationId: "register",
-        description: "Register a new user account",
+        path: '/register',
+        operationId: 'register',
+        description: 'Register a new user account',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["name", "email", "password", "password_confirmation"],
+                required: ['name', 'email', 'password', 'password_confirmation'],
                 properties: [
-                    new OA\Property(property: "name", type: "string", maxLength: 255, example: "John Doe"),
-                    new OA\Property(property: "email", type: "string", format: "email", example: "john@example.com"),
-                    new OA\Property(property: "password", type: "string", minLength: 8, example: "password123"),
-                    new OA\Property(property: "password_confirmation", type: "string", example: "password123"),
+                    new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'John Doe'),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
+                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'password123'),
+                    new OA\Property(property: 'password_confirmation', type: 'string', example: 'password123'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 201, description: "User created successfully"),
-            new OA\Response(response: 422, description: "Validation error"),
-            new OA\Response(response: 429, description: "Too many requests"),
+            new OA\Response(response: 201, description: 'User created successfully'),
+            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 429, description: 'Too many requests'),
         ]
     )]
     public function register(RegisterRequest $registerRequest, Response $response): Response
@@ -62,41 +62,42 @@ class AuthController extends Controller
             RegisterDTO::fromRequest($registerRequest->validated())
         );
 
-        $response->getBody()->write(json_encode([
+        $json = json_encode([
             'status' => 'success',
             'user' => $user,
-        ]));
+        ]);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     #[OA\Post(
-        path: "/login",
-        operationId: "login",
-        description: "Authenticate user and get access token",
+        path: '/login',
+        operationId: 'login',
+        description: 'Authenticate user and get access token',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["email", "password"],
+                required: ['email', 'password'],
                 properties: [
-                    new OA\Property(property: "email", type: "string", format: "email", example: "john@example.com"),
-                    new OA\Property(property: "password", type: "string", minLength: 8, example: "password123"),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
+                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'password123'),
                 ]
             )
         ),
         responses: [
             new OA\Response(
                 response: 200,
-                description: "Login successful",
+                description: 'Login successful',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: "token", type: "string", example: "eyJhbGciOiJIUzI1NiIs..."),
-                        new OA\Property(property: "user", type: "object"),
+                        new OA\Property(property: 'token', type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...'),
+                        new OA\Property(property: 'user', type: 'object'),
                     ]
                 )
             ),
-            new OA\Response(response: 401, description: "Invalid credentials"),
-            new OA\Response(response: 429, description: "Too many requests"),
+            new OA\Response(response: 401, description: 'Invalid credentials'),
+            new OA\Response(response: 429, description: 'Too many requests'),
         ]
     )]
     public function login(LoginRequest $loginRequest, Response $response): Response
@@ -105,27 +106,28 @@ class AuthController extends Controller
             LoginDTO::fromRequest($loginRequest->validated())
         );
 
-        $response->getBody()->write(json_encode($result));
+        $json = json_encode($result);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     #[OA\Post(
-        path: "/password-recovery",
-        operationId: "passwordRecovery",
+        path: '/password-recovery',
+        operationId: 'passwordRecovery',
         description: "Send password reset link to user's email",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["email"],
+                required: ['email'],
                 properties: [
-                    new OA\Property(property: "email", type: "string", format: "email", example: "user@example.com"),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'user@example.com'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Password reset link sent"),
-            new OA\Response(response: 429, description: "Too many requests"),
+            new OA\Response(response: 200, description: 'Password reset link sent'),
+            new OA\Response(response: 429, description: 'Too many requests'),
         ]
     )]
     public function passwordRecovery(PasswordRecoveryRequest $passwordRecoveryRequest, Response $response): Response
@@ -134,33 +136,34 @@ class AuthController extends Controller
             PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
-        $response->getBody()->write(json_encode([
+        $json = json_encode([
             'status' => 'success',
             'message' => 'Password reset link has been sent to your email',
-        ]));
+        ]);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response->withHeader('Content-Type', 'application/json');
     }
 
     #[OA\Post(
-        path: "/reset-password",
-        operationId: "resetPassword",
-        description: "Reset password using token from email",
+        path: '/reset-password',
+        operationId: 'resetPassword',
+        description: 'Reset password using token from email',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                required: ["token", "password", "password_confirmation"],
+                required: ['token', 'password', 'password_confirmation'],
                 properties: [
-                    new OA\Property(property: "token", type: "string", example: "reset-token-from-email"),
-                    new OA\Property(property: "password", type: "string", minLength: 8, example: "newpassword123"),
-                    new OA\Property(property: "password_confirmation", type: "string", example: "newpassword123"),
+                    new OA\Property(property: 'token', type: 'string', example: 'reset-token-from-email'),
+                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'newpassword123'),
+                    new OA\Property(property: 'password_confirmation', type: 'string', example: 'newpassword123'),
                 ]
             )
         ),
         responses: [
-            new OA\Response(response: 200, description: "Password reset successfully"),
-            new OA\Response(response: 422, description: "Validation error"),
-            new OA\Response(response: 429, description: "Too many requests"),
+            new OA\Response(response: 200, description: 'Password reset successfully'),
+            new OA\Response(response: 422, description: 'Validation error'),
+            new OA\Response(response: 429, description: 'Too many requests'),
         ]
     )]
     public function updatePassword(ResetPasswordRequest $resetPasswordRequest, Response $response): Response
@@ -169,10 +172,11 @@ class AuthController extends Controller
             ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
-        $response->getBody()->write(json_encode([
+        $json = json_encode([
             'status' => 'success',
             'message' => 'Password has been reset successfully',
-        ]));
+        ]);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response->withHeader('Content-Type', 'application/json');
     }

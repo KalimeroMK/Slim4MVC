@@ -16,11 +16,16 @@ class SendPasswordResetEmail
 
     public function handle(PasswordResetRequested $passwordResetRequested): void
     {
+        $email = $passwordResetRequested->user->email;
+        if ($email === null) {
+            return;
+        }
+
         $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:81';
 
         // Queue the email job instead of sending synchronously
         $this->queue->push(new SendEmailJob(
-            $passwordResetRequested->user->email,
+            $email,
             'Password Reset Request',
             'email.password-reset',
             [

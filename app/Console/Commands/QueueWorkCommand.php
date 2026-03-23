@@ -10,6 +10,7 @@ use App\Modules\Core\Infrastructure\Queue\Queue;
 use Exception;
 use Psr\Container\ContainerInterface;
 use ReflectionMethod;
+use ReflectionNamedType;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -71,15 +72,19 @@ class QueueWorkCommand extends Command
                 }
 
                 // Pass container to job if it accepts it
-                if (method_exists($job, 'handle')) {
-                    $reflection = new ReflectionMethod($job, 'handle');
-                    $params = $reflection->getParameters();
+                $reflection = new ReflectionMethod($job, 'handle');
+                $params = $reflection->getParameters();
 
-                    if (count($params) > 0 && $params[0]->getType()?->getName() === ContainerInterface::class) {
+                if (count($params) > 0) {
+                    $paramType = $params[0]->getType();
+                    if ($paramType instanceof ReflectionNamedType && $paramType->getName() === ContainerInterface::class) {
+                        /** @phpstan-ignore-next-line */
                         $job->handle($this->container);
                     } else {
                         $job->handle();
                     }
+                } else {
+                    $job->handle();
                 }
 
                 $processed++;
@@ -92,8 +97,8 @@ class QueueWorkCommand extends Command
                 }
             } catch (Exception $e) {
                 $failed++;
-                $attempts = method_exists($job, 'attempts') ? $job->attempts() : 1;
-                $shouldRetry = method_exists($job, 'shouldRetry') && $job->shouldRetry();
+                $attempts = $job->attempts();
+                $shouldRetry = $job->shouldRetry();
 
                 if ($shouldRetry) {
                     // Retry the job

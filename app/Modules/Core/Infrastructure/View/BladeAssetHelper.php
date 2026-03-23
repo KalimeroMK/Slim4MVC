@@ -12,7 +12,7 @@ if (! function_exists('asset')) {
 if (! function_exists('url')) {
     function url(string $path = ''): string
     {
-        return '/'.ltrim($path, '/');
+        return '/'.mb_ltrim($path, '/');
     }
 }
 
@@ -24,6 +24,6 @@ if (! function_exists('route')) {
      */
     function route(string $name, array $params = []): string
     {
-        return \App\Modules\Core\Infrastructure\Support\Route::url($name, $params);
+        return App\Modules\Core\Infrastructure\Support\Route::url($name, $params);
     }
 }

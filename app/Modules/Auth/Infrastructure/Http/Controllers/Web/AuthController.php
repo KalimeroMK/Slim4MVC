@@ -50,6 +50,9 @@ class AuthController extends Controller
         return view('auth.send-reset-password-link', $response);
     }
 
+    /**
+     * @param  array<string, mixed>  $token
+     */
     public function showPasswordUpdateForm(Request $request, Response $response, array $token): Response
     {
         return view('auth.reset-password', $response, $token);

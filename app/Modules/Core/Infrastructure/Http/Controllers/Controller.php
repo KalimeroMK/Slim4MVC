@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\Controllers;
@@ -45,6 +46,7 @@ abstract class Controller
     protected function redirect(string $url): Response
     {
         $response = $this->getResponse();
+
         return $response
             ->withHeader('Location', $url)
             ->withStatus(302);
@@ -56,7 +58,8 @@ abstract class Controller
     protected function respondWithJson(mixed $data, int $status = 200): Response
     {
         $response = $this->getResponse();
-        $response->getBody()->write(json_encode($data));
+        $json = json_encode($data);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -89,6 +92,9 @@ abstract class Controller
 
     /**
      * Return a 422 Unprocessable Entity response.
+     */
+    /**
+     * @param  array<string, mixed>  $errors
      */
     protected function validationError(array $errors, ?string $message = null): Response
     {

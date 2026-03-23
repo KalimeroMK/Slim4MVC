@@ -18,6 +18,12 @@ use Override;
  * @property string $exception_trace
  * @property int $failed_at
  * @property int $attempts
+ *
+ * @method static static|null find(int $id)
+ * @method static int count()
+ * @method static void truncate()
+ * @method static \Illuminate\Database\Eloquent\Builder<self> orderBy(string $column, string $direction = 'asc')
+ * @method static static create(array<string, mixed> $attributes)
  */
 class FailedJob extends Model
 {
@@ -35,6 +41,7 @@ class FailedJob extends Model
         'attempts',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'failed_at' => 'integer',
         'attempts' => 'integer',

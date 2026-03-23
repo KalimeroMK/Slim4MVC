@@ -57,7 +57,8 @@ class ApiResponse
             $body['data'] = $data;
         }
 
-        $response->getBody()->write(json_encode($body, JSON_UNESCAPED_UNICODE));
+        $json = json_encode($body, JSON_UNESCAPED_UNICODE);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -69,7 +70,7 @@ class ApiResponse
      *
      * @param  string  $message  Error message
      * @param  int  $statusCode  HTTP status code
-     * @param  array  $errors  Optional validation errors
+     * @param  array<string, mixed>  $errors  Optional validation errors
      * @param  string|null  $code  Optional error code
      */
     public static function error(
@@ -95,7 +96,8 @@ class ApiResponse
             $body['errors'] = $errors;
         }
 
-        $response->getBody()->write(json_encode($body, JSON_UNESCAPED_UNICODE));
+        $json = json_encode($body, JSON_UNESCAPED_UNICODE);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
         return $response
             ->withHeader('Content-Type', 'application/json')
@@ -105,7 +107,7 @@ class ApiResponse
     /**
      * Return a paginated JSON response.
      *
-     * @param  array  $data  Items data
+     * @param  array<int, mixed>  $data  Items data
      * @param  int  $total  Total items count
      * @param  int  $page  Current page
      * @param  int  $perPage  Items per page
@@ -137,13 +139,13 @@ class ApiResponse
             if ($page < $totalPages) {
                 $queryParams['page'] = $page + 1;
                 $queryParams['per_page'] = $perPage;
-                $nextPageUrl = $parsedUrl['path'].'?'.http_build_query($queryParams);
+                $nextPageUrl = ($parsedUrl['path'] ?? '').'?'.http_build_query($queryParams);
             }
 
             if ($page > 1) {
                 $queryParams['page'] = $page - 1;
                 $queryParams['per_page'] = $perPage;
-                $prevPageUrl = $parsedUrl['path'].'?'.http_build_query($queryParams);
+                $prevPageUrl = ($parsedUrl['path'] ?? '').'?'.http_build_query($queryParams);
             }
         }
 
@@ -203,6 +205,8 @@ class ApiResponse
 
     /**
      * Return a 422 Validation Error response.
+     *
+     * @param  array<string, mixed>  $errors
      */
     public static function validationError(array $errors, ?string $message = null): Response
     {

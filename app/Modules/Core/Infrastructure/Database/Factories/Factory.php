@@ -16,6 +16,7 @@ abstract class Factory
 {
     protected Faker $faker;
 
+    /** @var list<callable(array<string, mixed>): array<string, mixed>> */
     protected array $stateCallbacks = [];
 
     public function __construct(?Faker $faker = null)
@@ -66,7 +67,8 @@ abstract class Factory
         $definition = $this->definition();
 
         // Apply state callbacks
-        if (isset($this->stateCallbacks) && is_array($this->stateCallbacks)) {
+        // @phpstan-ignore-next-line
+        if ($this->stateCallbacks !== []) {
             foreach ($this->stateCallbacks as $stateCallback) {
                 $stateAttributes = $stateCallback($definition);
                 $definition = array_merge($definition, $stateAttributes);

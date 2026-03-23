@@ -83,10 +83,15 @@ class MakeRequestCommand extends Command
         }
 
         // Get stub content
-        $content = file_get_contents($stubPath);
+        $stubContent = file_get_contents($stubPath);
+        if ($stubContent === false) {
+            $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+
+            return Command::FAILURE;
+        }
 
         // Replace placeholders
-        $content = str_replace('{{controllerName}}', $namespace, $content);
+        $content = str_replace('{{controllerName}}', $namespace, $stubContent);
         $content = str_replace('{{className}}', $className, $content);
 
         // If model is provided, generate rules from model
@@ -105,6 +110,8 @@ class MakeRequestCommand extends Command
 
     /**
      * Generate validation rules from model's fillable fields.
+     *
+     * @return array<string, string>|null
      */
     private function generateRulesFromModel(string $modelName, OutputInterface $output, bool $isUpdate = false): ?array
     {
@@ -201,6 +208,8 @@ class MakeRequestCommand extends Command
 
     /**
      * Inject generated rules into stub content.
+     *
+     * @param  array<string, string>  $rules
      */
     private function injectRules(string $content, array $rules): string
     {
@@ -212,13 +221,13 @@ class MakeRequestCommand extends Command
         $rulesString .= '        ];';
 
         // Replace the rules section
-        $content = preg_replace(
+        $result = preg_replace(
             '/return\s*\[[\s\S]*?\];/',
             $rulesString,
             $content,
             1
         );
 
-        return $content;
+        return $result ?? $content;
     }
 }

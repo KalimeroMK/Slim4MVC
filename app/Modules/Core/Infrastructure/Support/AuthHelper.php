@@ -10,6 +10,7 @@ namespace App\Modules\Core\Infrastructure\Support;
  */
 class AuthHelper
 {
+    /** @var array<string, mixed>|null */
     private static ?array $user = null;
 
     /**
@@ -17,7 +18,7 @@ class AuthHelper
      */
     public static function check(): bool
     {
-        return isset($_SESSION['user_id']) && $_SESSION['user_id'] !== null;
+        return isset($_SESSION['user_id']);
     }
 
     /**

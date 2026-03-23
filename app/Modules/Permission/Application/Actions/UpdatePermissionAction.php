@@ -21,12 +21,15 @@ final readonly class UpdatePermissionAction implements UpdatePermissionActionInt
     public function execute(UpdatePermissionDTO $updatePermissionDTO): Permission
     {
         $attributes = [];
-        if ($updatePermissionDTO->name !== null) {
+        if ($updatePermissionDTO->name !== '') {
             $attributes['name'] = $updatePermissionDTO->name;
         }
 
         $this->permissionRepository->update($updatePermissionDTO->id, $attributes);
 
-        return Permission::find($updatePermissionDTO->id);
+        /** @var Permission|null $permission */
+        $permission = Permission::find($updatePermissionDTO->id);
+
+        return $permission ?? new Permission();
     }
 }

@@ -8,9 +8,7 @@ use Psr\Container\ContainerInterface;
 
 class Dispatcher
 {
-    /**
-     * @var array<string, array<string>>
-     */
+    /** @var array<string, list<string|callable>> */
     private array $listeners = [];
 
     public function __construct(
@@ -21,7 +19,7 @@ class Dispatcher
      * Register an event listener.
      *
      * @param  string  $event  Event class name
-     * @param  string|callable  $listener  Listener class name or callable
+     * @param  class-string|callable  $listener  Listener class name or callable
      */
     public function listen(string $event, string|callable $listener): void
     {
@@ -44,13 +42,14 @@ class Dispatcher
         }
 
         foreach ($this->listeners[$eventClass] as $listener) {
-            if (is_callable($listener)) {
-                $listener($event);
-            } elseif (is_string($listener)) {
+            if (is_string($listener)) {
                 $listenerInstance = $this->container->get($listener);
                 if (method_exists($listenerInstance, 'handle')) {
+                    /** @phpstan-ignore-next-line */
                     $listenerInstance->handle($event);
                 }
+            } elseif (is_callable($listener)) {
+                $listener($event);
             }
         }
     }
@@ -58,7 +57,7 @@ class Dispatcher
     /**
      * Get all registered listeners.
      *
-     * @return array<string, array<string>>
+     * @return array<string, list<string|callable>>
      */
     public function getListeners(): array
     {

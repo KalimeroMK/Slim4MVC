@@ -209,7 +209,13 @@ class MakeModuleCommand extends Command
                 continue;
             }
 
-            $content = file_get_contents($file['stub']);
+            $stubContent = file_get_contents($file['stub']);
+            if ($stubContent === false) {
+                $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $file['stub']));
+
+                continue;
+            }
+            $content = $stubContent;
             foreach ($file['vars'] as $key => $value) {
                 $content = str_replace($key, $value, $content);
             }
@@ -232,11 +238,16 @@ class MakeModuleCommand extends Command
 
         $stubPath = $projectRoot.'/stubs/migration.stub';
         if (file_exists($stubPath)) {
-            $content = file_get_contents($stubPath);
+            $stubContent = file_get_contents($stubPath);
+            if ($stubContent === false) {
+                $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+
+                return;
+            }
             $content = str_replace(
                 ['{{className}}', '{{tableName}}'],
                 [$className, $tableName],
-                $content
+                $stubContent
             );
             file_put_contents($migrationPath, $content);
             $output->writeln(sprintf('<info>Created migration: %s</info>', $migrationPath));
@@ -252,7 +263,13 @@ class MakeModuleCommand extends Command
             file_put_contents($modulesFile, $content);
         }
 
-        $content = file_get_contents($modulesFile);
+        $fileContent = file_get_contents($modulesFile);
+        if ($fileContent === false) {
+            $output->writeln(sprintf('<error>Failed to read file: %s</error>', $modulesFile));
+
+            return;
+        }
+        $content = $fileContent;
         $providerClass = sprintf('App\Modules\%s\Infrastructure\Providers\%sServiceProvider', $moduleName, $moduleName);
 
         if (mb_strpos($content, $providerClass) === false) {
@@ -342,7 +359,13 @@ class MakeModuleCommand extends Command
             return;
         }
 
-        $content = file_get_contents($depsFile);
+        $depsFileContent = file_get_contents($depsFile);
+        if ($depsFileContent === false) {
+            $output->writeln(sprintf('<error>Failed to read file: %s</error>', $depsFile));
+
+            return;
+        }
+        $content = $depsFileContent;
 
         // Collect all use statements to add
         $useStatementsToAdd = [];
@@ -361,8 +384,8 @@ class MakeModuleCommand extends Command
             // Find the last use statement
             if (preg_match_all('/^use\s+[^;]+;/m', $content, $matches)) {
                 $lastUse = end($matches[0]);
-                $lastUsePos = mb_strrpos($content, $lastUse);
-                $insertPos = $lastUsePos + mb_strlen($lastUse);
+                $lastUsePos = mb_strrpos($content, (string) $lastUse);
+                $insertPos = $lastUsePos + mb_strlen((string) $lastUse);
                 // Insert new use statements after the last one
                 $newUseStatements = "\n".implode("\n", $useStatementsToAdd);
                 $content = mb_substr($content, 0, $insertPos).$newUseStatements.mb_substr($content, $insertPos);

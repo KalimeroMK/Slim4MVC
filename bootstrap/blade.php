@@ -34,6 +34,9 @@ return function (Container $container): void {
             {
                 public function __construct(private Blade $blade) {}
 
+                /**
+                 * @param  array<string, mixed>  $data
+                 */
                 public function render(string $template, array $data = []): string
                 {
                     try {

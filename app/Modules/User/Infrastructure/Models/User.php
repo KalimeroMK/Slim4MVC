@@ -17,6 +17,12 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $email_verified_at
  * @property string|null $password
  * @property string|null $password_reset_token
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Role\Infrastructure\Models\Role> $roles
+ *
+ * @method static static|null find(int $id)
+ * @method static \Illuminate\Database\Eloquent\Builder<self> where(string $column, mixed $operator = null, mixed $value = null)
  */
 class User extends Model
 {
@@ -28,6 +34,7 @@ class User extends Model
         'email_verified_at',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'created_at' => 'datetime',
@@ -36,12 +43,18 @@ class User extends Model
 
     protected $hidden = ['password'];
 
+    /**
+     * @return BelongsToMany<\App\Modules\Role\Infrastructure\Models\Role, $this>
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(\App\Modules\Role\Infrastructure\Models\Role::class, 'role_user');
     }
 
-    public function permissions()
+    /**
+     * @return \Illuminate\Support\Collection<int, mixed>
+     */
+    public function permissions(): \Illuminate\Support\Collection
     {
         return $this->roles()
             ->with('permissions')
@@ -52,12 +65,12 @@ class User extends Model
             ->values();
     }
 
-    public function hasRole($role): bool
+    public function hasRole(string $role): bool
     {
         return $this->roles()->where('name', $role)->exists();
     }
 
-    public function hasPermission($permission): bool
+    public function hasPermission(string $permission): bool
     {
         return $this->permissions()->contains('name', $permission);
     }

@@ -9,13 +9,20 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 if (! function_exists('old')) {
+    /**
+     * @param  string|int  $key
+     * @return mixed
+     */
     function old($key)
     {
-        $input = app()->resolve('old_input');
+        /** @var array<array-key, mixed>|null $input */
+        $input = $_SESSION['old_input'] ?? null;
 
-        $field = collect($input)->filter(fn ($value, $field): bool => $key === $field);
+        if (! is_array($input)) {
+            return null;
+        }
 
-        return $field[$key] ?? null;
+        return $input[$key] ?? null;
     }
 }
 
@@ -27,6 +34,9 @@ if (! function_exists('base_path')) {
 }
 
 if (! function_exists('env')) {
+    /**
+     * @param  mixed  $default
+     */
     function env(string $key, $default = false): mixed
     {
         $value = getenv($key);
@@ -59,6 +69,9 @@ if (! function_exists('database_path')) {
 }
 
 if (! function_exists('throw_when')) {
+    /**
+     * @param  class-string<Throwable>  $exception
+     */
     function throw_when(bool $fails, string $message, string $exception = Exception::class): void
     {
         if (! $fails) {
@@ -70,11 +83,18 @@ if (! function_exists('throw_when')) {
 }
 
 if (! function_exists('config')) {
+    /**
+     * @param  int|array<string>|string|null  $path
+     */
     function config(int|array|string|null $path = null): mixed
     {
         $config = [];
+        /** @var list<string>|false $folder */
         $folder = scandir(config_path());
-        $config_files = array_slice($folder, 2, count($folder));
+        if ($folder === false) {
+            return null;
+        }
+        $config_files = array_slice($folder, 2);
 
         foreach ($config_files as $config_file) {
             throw_when(
@@ -91,6 +111,8 @@ if (! function_exists('config')) {
 if (! function_exists('data_get')) {
     /**
      * Get an item from an array or object using "dot" notation.
+     *
+     * @param  int|array<string>|string|null  $key
      */
     function data_get(mixed $target, int|array|string|null $key, mixed $default = null): mixed
     {
@@ -133,12 +155,15 @@ if (! function_exists('data_get')) {
 if (! function_exists('data_set')) {
     /**
      * Set an item on an array or object using dot notation.
+     *
+     * @param  array<string>|string  $key
      */
     function data_set(mixed &$target, array|string $key, mixed $value, bool $overwrite = true): mixed
     {
         $segments = is_array($key) ? $key : explode('.', $key);
 
-        if (($segment = array_shift($segments)) === '*') {
+        $segment = array_shift($segments);
+        if ($segment === '*') {
             if (! Arr::accessible($target)) {
                 $target = [];
             }
@@ -152,7 +177,7 @@ if (! function_exists('data_set')) {
                     $inner = $value;
                 }
             }
-        } elseif (Arr::accessible($target)) {
+        } elseif (Arr::accessible($target) && $segment !== null) {
             if ($segments !== []) {
                 if (! Arr::exists($target, $segment)) {
                     $target[$segment] = [];
@@ -162,7 +187,7 @@ if (! function_exists('data_set')) {
             } elseif ($overwrite || ! Arr::exists($target, $segment)) {
                 $target[$segment] = $value;
             }
-        } elseif (is_object($target)) {
+        } elseif (is_object($target) && $segment !== null) {
             if ($segments !== []) {
                 if (! isset($target->{$segment})) {
                     $target->{$segment} = [];
@@ -172,7 +197,7 @@ if (! function_exists('data_set')) {
             } elseif ($overwrite || ! isset($target->{$segment})) {
                 $target->{$segment} = $value;
             }
-        } else {
+        } elseif ($segment !== null) {
             $target = [];
 
             if ($segments !== []) {

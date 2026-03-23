@@ -20,7 +20,10 @@ class PasswordResetEmail extends Mailable
         protected string $token
     ) {
         parent::__construct($mailer, $blade);
-        $this->to($this->user->email);
+        $email = $this->user->email;
+        if ($email !== null) {
+            $this->to($email);
+        }
     }
 
     protected function template(): string

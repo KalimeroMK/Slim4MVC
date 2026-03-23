@@ -13,6 +13,7 @@ use ReflectionException;
 use ReflectionFunction;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
+use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionType;
 use Slim\Interfaces\RequestHandlerInvocationStrategyInterface;
@@ -57,6 +58,10 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
 
     /**
      * @throws ReflectionException
+     */
+    /**
+     * @param  array<string, mixed>  $routeArguments
+     * @return list<mixed>
      */
     private function resolveParameters(
         callable $callable,
@@ -115,11 +120,19 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
             return new ReflectionMethod($callable[0], $callable[1]);
         }
 
+        if (is_string($callable)) {
+            return new ReflectionFunction($callable);
+        }
+
+        /** @phpstan-ignore-next-line */
         return new ReflectionFunction($callable);
     }
 
     /**
      * Resolve a single parameter using optimized type checking order.
+     */
+    /**
+     * @param  array<string, mixed>  $routeArguments
      */
     private function resolveParameter(
         ReflectionParameter $reflectionParameter,
@@ -175,7 +188,11 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
      */
     private function getTypeName(ReflectionType $reflectionType): string
     {
-        return $reflectionType->getName();
+        if ($reflectionType instanceof ReflectionNamedType) {
+            return $reflectionType->getName();
+        }
+
+        return '';
     }
 
     /**
@@ -197,6 +214,9 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
      */
     private function resolveFormRequest(string $requestClass, ServerRequestInterface $serverRequest): FormRequest
     {
-        return new $requestClass($serverRequest, $this->validatorFactory);
+        /** @var FormRequest $instance */
+        $instance = new $requestClass($serverRequest, $this->validatorFactory);
+
+        return $instance;
     }
 }

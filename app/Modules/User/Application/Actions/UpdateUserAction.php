@@ -29,8 +29,8 @@ final readonly class UpdateUserAction implements UpdateUserActionInterface
             $attributes['email'] = $updateUserDTO->email;
         }
 
-        $this->userRepository->update($updateUserDTO->id, $attributes);
+        $user = $this->userRepository->update($updateUserDTO->id, $attributes);
 
-        return User::find($updateUserDTO->id);
+        return $user;
     }
 }

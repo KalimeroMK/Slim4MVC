@@ -15,7 +15,7 @@ final readonly class ListUserAction
     /**
      * Execute listing Users with pagination.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<\App\Modules\User\Infrastructure\Models\User>, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {

@@ -39,8 +39,11 @@ final class PermissionFactoryTest extends TestCase
 
     public function test_factory_creates_many_permissions(): void
     {
-        $permissionFactory = new PermissionFactory();
-        $permissions = $permissionFactory->createMany(4);
+        $permissions = [];
+        for ($i = 0; $i < 4; $i++) {
+            $factory = new PermissionFactory();
+            $permissions[] = $factory->withName('permission-'.uniqid())->create();
+        }
 
         $this->assertCount(4, $permissions);
         $this->assertContainsOnlyInstancesOf(Permission::class, $permissions);

@@ -3,10 +3,6 @@
 declare(strict_types=1);
 
 // config/dependencies.php
-use App\Modules\Permission\Application\Actions\CreatePermissionAction;
-use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
-use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterface;
-use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterface;
 use App\Modules\Auth\Application\Actions\Auth\LoginAction;
 use App\Modules\Auth\Application\Actions\Auth\PasswordRecoveryAction;
 use App\Modules\Auth\Application\Actions\Auth\RegisterAction;
@@ -21,6 +17,10 @@ use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Support\JwtService;
+use App\Modules\Permission\Application\Actions\CreatePermissionAction;
+use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
+use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterface;
+use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterface;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 use App\Modules\Role\Application\Actions\CreateRoleAction;
 use App\Modules\Role\Application\Actions\UpdateRoleAction;
@@ -35,6 +35,7 @@ use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 use function DI\autowire;
 use function DI\factory;
+
 return [
     RegisterActionInterface::class => autowire(RegisterAction::class),
     LoginActionInterface::class => autowire(LoginAction::class),
@@ -61,4 +62,4 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }),    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class),];
+    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];

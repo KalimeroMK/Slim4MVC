@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use App\Modules\Core\Infrastructure\Support\Route;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 final class RouteTest extends TestCase
@@ -32,7 +33,7 @@ final class RouteTest extends TestCase
 
     public function test_throws_exception_for_missing_route(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Route [missing] not found.');
 
         Route::url('missing');

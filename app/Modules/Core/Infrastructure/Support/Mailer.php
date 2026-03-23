@@ -14,6 +14,9 @@ class Mailer
         protected Blade $blade
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $data
+     */
     public function send(
         string $to,
         string $subject,

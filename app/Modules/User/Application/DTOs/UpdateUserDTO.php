@@ -8,6 +8,9 @@ class UpdateUserDTO
 {
     public function __construct(public int $id, public ?string $name = null, public ?string $email = null) {}
 
+    /**
+     * @param  array<string, mixed>  $validated
+     */
     public static function fromRequest(array $validated): self
     {
         return new self(

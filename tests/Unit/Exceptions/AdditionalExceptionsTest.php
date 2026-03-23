@@ -11,6 +11,7 @@ use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
 use App\Modules\Core\Infrastructure\Exceptions\UnauthorizedException;
 use App\Modules\Core\Infrastructure\Exceptions\ValidationException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 class AdditionalExceptionsTest extends TestCase
 {
@@ -55,7 +56,7 @@ class AdditionalExceptionsTest extends TestCase
         ];
 
         foreach ($exceptions as $exception) {
-            $this->assertInstanceOf(\RuntimeException::class, $exception);
+            $this->assertInstanceOf(RuntimeException::class, $exception);
         }
     }
 }

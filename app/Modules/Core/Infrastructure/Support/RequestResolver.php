@@ -16,6 +16,9 @@ class RequestResolver
 
     public function resolve(string $requestClass, ServerRequestInterface $serverRequest): FormRequest
     {
-        return new $requestClass($serverRequest, $this->validatorFactory);
+        /** @var FormRequest $instance */
+        $instance = new $requestClass($serverRequest, $this->validatorFactory);
+
+        return $instance;
     }
 }

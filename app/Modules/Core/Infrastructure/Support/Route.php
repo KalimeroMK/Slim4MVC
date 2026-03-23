@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Support;
 
+use InvalidArgumentException;
+
 /**
  * Route URL generator with named route support.
  */
@@ -32,7 +34,7 @@ class Route
     public static function url(string $name, array $params = []): string
     {
         if (! isset(self::$routes[$name])) {
-            throw new \InvalidArgumentException("Route [{$name}] not found.");
+            throw new InvalidArgumentException("Route [{$name}] not found.");
         }
 
         $url = self::$routes[$name];

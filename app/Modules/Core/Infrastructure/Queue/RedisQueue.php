@@ -29,7 +29,8 @@ class RedisQueue implements Queue
             'attempts' => 0,
         ];
 
-        $this->client->lpush($this->queueName, json_encode($jobData));
+        $json = json_encode($jobData);
+        $this->client->lpush($this->queueName, [$json !== false ? $json : '{}']);
     }
 
     public function pop(): ?Job

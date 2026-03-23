@@ -10,6 +10,8 @@ use Carbon\Carbon;
 
 /**
  * Permission Factory for generating fake permission data.
+ *
+ * @extends Factory<Permission>
  */
 class PermissionFactory extends Factory
 {

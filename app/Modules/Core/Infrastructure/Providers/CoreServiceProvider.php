@@ -24,6 +24,8 @@ class CoreServiceProvider
 
     /**
      * Boot module routes and any other boot-time logic.
+     *
+     * @param  App<ContainerInterface>  $app
      */
     public function boot(App $app): void
     {

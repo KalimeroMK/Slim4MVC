@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Queue;
 
-use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Queue\FileQueue;
+use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Queue\RedisQueue;
 use PHPUnit\Framework\TestCase;
 

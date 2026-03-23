@@ -26,6 +26,7 @@ class QueueFlushCommand extends Command
         $force = $input->getOption('force');
 
         if (! $force) {
+            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $confirmationQuestion = new ConfirmationQuestion(
                 'Are you sure you want to flush all failed jobs? (yes/no) ',

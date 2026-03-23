@@ -99,6 +99,7 @@ class CreateControllerCommand extends Command
             $stubContent = file_get_contents($stubPath);
             if ($stubContent === false) {
                 $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+
                 continue;
             }
             $content = str_replace('{{controllerName}}', $name, $stubContent);

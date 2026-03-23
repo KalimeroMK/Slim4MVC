@@ -13,7 +13,7 @@ trait RouteParamsTrait
      * associative array and returns its value cast to an integer. It trims the
      * value first to remove any extra spaces.
      *
-     * @param  array  $args  The associative array of route parameters.
+     * @param  array<string, mixed>  $args  The associative array of route parameters.
      * @param  string  $key  The key for the desired parameter (e.g., 'id').
      * @param  int  $default  The default value to return if the key is not found.
      */
@@ -32,7 +32,7 @@ trait RouteParamsTrait
      * This method fetches the parameter with the specified key from the given
      * associative array and returns its value as a trimmed string.
      *
-     * @param  array  $args  The associative array of route parameters.
+     * @param  array<string, mixed>  $args  The associative array of route parameters.
      * @param  string  $key  The key for the desired parameter.
      * @param  string  $default  The default value to return if the key is not found.
      */

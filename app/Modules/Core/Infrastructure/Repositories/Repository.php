@@ -66,7 +66,7 @@ interface Repository
     /**
      * Get paginated records.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<TModel>, total: int, page: int, perPage: int}
      */
     public function paginate(int $page = 1, int $perPage = 15): array;
 

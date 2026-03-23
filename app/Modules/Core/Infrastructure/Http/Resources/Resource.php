@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\Resources;
 
+/**
+ * @template T of object
+ */
 abstract class Resource
 {
     /**
      * Transform a single resource.
+     *
+     * @param  T  $resource
+     * @return array<string, mixed>
      */
     abstract public static function make(mixed $resource): array;
 
     /**
      * Transform a collection of resources.
      *
-     * @return array<int, array>
+     * @param  iterable<T>  $collection
+     * @return list<array<string, mixed>>
      */
     final public static function collection(iterable $collection): array
     {
@@ -29,6 +36,9 @@ abstract class Resource
 
     /**
      * Transform resource when it's not null, otherwise return null.
+     *
+     * @param  T|null  $resource
+     * @return array<string, mixed>|null
      */
     final public static function when(mixed $resource): ?array
     {

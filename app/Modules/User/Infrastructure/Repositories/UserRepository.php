@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * User repository for data access operations.
+ *
+ * @extends EloquentRepository<User>
  */
 class UserRepository extends EloquentRepository
 {
@@ -27,7 +29,7 @@ class UserRepository extends EloquentRepository
     /**
      * Get paginated users with roles.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<User>, total: int, page: int, perPage: int}
      */
     public function paginateWithRoles(int $page = 1, int $perPage = 15): array
     {
@@ -35,8 +37,11 @@ class UserRepository extends EloquentRepository
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
+        /** @var list<User> $items */
+        $items = $lengthAwarePaginator->items();
+
         return [
-            'items' => $lengthAwarePaginator->items(),
+            'items' => $items,
             'total' => $lengthAwarePaginator->total(),
             'page' => $lengthAwarePaginator->currentPage(),
             'perPage' => $lengthAwarePaginator->perPage(),
@@ -48,7 +53,10 @@ class UserRepository extends EloquentRepository
      */
     public function findByEmail(string $email): ?User
     {
-        return User::where('email', $email)->first();
+        /** @var User|null $user */
+        $user = User::where('email', $email)->first();
+
+        return $user;
     }
 
     /**
@@ -56,7 +64,10 @@ class UserRepository extends EloquentRepository
      */
     public function findByEmailWithRoles(string $email): ?User
     {
-        return User::with('roles')->where('email', $email)->first();
+        /** @var User|null $user */
+        $user = User::with('roles')->where('email', $email)->first();
+
+        return $user;
     }
 
     /**
@@ -64,7 +75,10 @@ class UserRepository extends EloquentRepository
      */
     public function findByPasswordResetToken(string $token): ?User
     {
-        return User::where('password_reset_token', $token)->first();
+        /** @var User|null $user */
+        $user = User::where('password_reset_token', $token)->first();
+
+        return $user;
     }
 
     /**

@@ -16,9 +16,14 @@ class SendWelcomeEmail
 
     public function handle(UserRegistered $userRegistered): void
     {
+        $email = $userRegistered->user->email;
+        if ($email === null) {
+            return;
+        }
+
         // Queue the email job instead of sending synchronously
         $this->queue->push(new SendEmailJob(
-            $userRegistered->user->email,
+            $email,
             'Welcome to our platform!',
             'email.welcome',
             ['user' => $userRegistered->user]

@@ -13,6 +13,9 @@ class ListRoutesCommand extends Command
 {
     protected static $defaultName = 'list-routes';
 
+    /**
+     * @param  App<\Psr\Container\ContainerInterface>  $app
+     */
     public function __construct(private readonly App $app)
     {
         parent::__construct();

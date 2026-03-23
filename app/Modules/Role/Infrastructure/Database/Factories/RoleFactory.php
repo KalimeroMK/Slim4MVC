@@ -10,21 +10,25 @@ use Carbon\Carbon;
 
 /**
  * Role Factory for generating fake role data.
+ *
+ * @extends Factory<Role>
  */
 class RoleFactory extends Factory
 {
     /**
      * Create a role with specific permissions.
      *
-     * @param  array<string|int>  $permissions  Permission names or IDs
+     * @param  list<string|int>  $permissions  Permission names or IDs
      */
     public function withPermissions(array $permissions): Role
     {
+        /** @var Role $model */
         $model = $this->create();
         $permissionIds = [];
 
         foreach ($permissions as $permission) {
             if (is_string($permission)) {
+                /** @var \App\Modules\Permission\Infrastructure\Models\Permission|null $permissionModel */
                 $permissionModel = \App\Modules\Permission\Infrastructure\Models\Permission::where('name', $permission)->first();
                 if ($permissionModel) {
                     $permissionIds[] = $permissionModel->id;
@@ -38,7 +42,7 @@ class RoleFactory extends Factory
             $model->permissions()->attach($permissionIds);
         }
 
-        return $model->fresh();
+        return $model->fresh() ?? $model;
     }
 
     protected function model(): string

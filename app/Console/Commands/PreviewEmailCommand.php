@@ -46,6 +46,7 @@ class PreviewEmailCommand extends Command
 
         // Create test user
         $userFactory = new UserFactory();
+        /** @var User $model */
         $model = $userFactory->make([
             'name' => 'Test User',
             'email' => 'test@example.com',

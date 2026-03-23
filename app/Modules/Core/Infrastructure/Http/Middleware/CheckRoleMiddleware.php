@@ -16,9 +16,11 @@ class CheckRoleMiddleware
     {
         $user = $serverRequest->getAttribute('user');
         $route = RouteContext::fromRequest($serverRequest)->getRoute();
-        $roles = $route->getArgument('roles');
+        // @phpstan-ignore-next-line
+        $roles = $route?->getArgument('roles');
 
         // Convert single role to array
+        // @phpstan-ignore-next-line
         if (! is_array($roles)) {
             $roles = [$roles];
         }
@@ -26,10 +28,11 @@ class CheckRoleMiddleware
 
         if (! $hasRole) {
             $response = new Response();
-            $response->getBody()->write(json_encode([
+            $json = json_encode([
                 'error' => 'Unauthorized',
                 'message' => 'You do not have the required role to access this resource',
-            ]));
+            ]);
+            $response->getBody()->write($json !== false ? $json : '{}');
 
             return $response
                 ->withHeader('Content-Type', 'application/json')

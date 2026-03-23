@@ -8,7 +8,6 @@ use App\Modules\Core\Infrastructure\Jobs\SendEmailJob;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Support\Mailer;
 use App\Modules\Core\Infrastructure\View\Blade;
-use Exception;
 use RuntimeException;
 
 /**
@@ -20,6 +19,7 @@ abstract class Mailable
 
     protected string $subject = '';
 
+    /** @var array<string, mixed> */
     protected array $data = [];
 
     public function __construct(
@@ -66,6 +66,8 @@ abstract class Mailable
 
     /**
      * Set email data.
+     *
+     * @param  array<string, mixed>  $data
      */
     final public function with(array $data): self
     {
@@ -110,12 +112,7 @@ abstract class Mailable
         );
 
         if (! $queue instanceof Queue) {
-            try {
-                $container = \DI\Container::getInstance();
-                $queue = $container->get(Queue::class);
-            } catch (Exception $e) {
-                throw new RuntimeException('Queue service not available. Please provide Queue instance or ensure it is registered in container.', $e->getCode(), $e);
-            }
+            throw new RuntimeException('Queue service not available. Please provide Queue instance.');
         }
 
         $queue->push($sendEmailJob);

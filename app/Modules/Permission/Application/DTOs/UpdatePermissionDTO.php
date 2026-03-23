@@ -11,11 +11,14 @@ final class UpdatePermissionDTO
         public string $name
     ) {}
 
+    /**
+     * @param  array<string, mixed>  $validated
+     */
     public static function fromRequest(array $validated): self
     {
         return new self(
             id: $validated['id'],
-            name: $validated['name'],
+            name: $validated['name'] ?? '',
         );
     }
 }

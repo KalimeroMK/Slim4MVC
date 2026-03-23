@@ -7,9 +7,9 @@ use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
 use App\Modules\Core\Infrastructure\Events\UserRegistered;
 use App\Modules\Core\Infrastructure\Listeners\SendPasswordResetEmail;
 use App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail;
-use Psr\Container\ContainerInterface;
+use DI\Container;
 
-return function (ContainerInterface $container): void {
+return function (Container $container): void {
     $dispatcher = $container->get(Dispatcher::class);
 
     // Register event listeners

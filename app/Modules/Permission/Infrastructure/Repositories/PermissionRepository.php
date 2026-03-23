@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Permission repository for data access operations.
+ *
+ * @extends EloquentRepository<Permission>
  */
 class PermissionRepository extends EloquentRepository
 {
@@ -27,7 +29,7 @@ class PermissionRepository extends EloquentRepository
     /**
      * Get paginated permissions with roles.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<Permission>, total: int, page: int, perPage: int}
      */
     public function paginateWithRoles(int $page = 1, int $perPage = 15): array
     {
@@ -35,8 +37,11 @@ class PermissionRepository extends EloquentRepository
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
+        /** @var list<Permission> $items */
+        $items = $lengthAwarePaginator->items();
+
         return [
-            'items' => $lengthAwarePaginator->items(),
+            'items' => $items,
             'total' => $lengthAwarePaginator->total(),
             'page' => $lengthAwarePaginator->currentPage(),
             'perPage' => $lengthAwarePaginator->perPage(),
@@ -48,7 +53,10 @@ class PermissionRepository extends EloquentRepository
      */
     public function findByName(string $name): ?Permission
     {
-        return Permission::where('name', $name)->first();
+        /** @var Permission|null $permission */
+        $permission = Permission::where('name', $name)->first();
+
+        return $permission;
     }
 
     /**
@@ -56,7 +64,10 @@ class PermissionRepository extends EloquentRepository
      */
     public function findByNameWithRoles(string $name): ?Permission
     {
-        return Permission::with('roles')->where('name', $name)->first();
+        /** @var Permission|null $permission */
+        $permission = Permission::with('roles')->where('name', $name)->first();
+
+        return $permission;
     }
 
     /**

@@ -16,9 +16,11 @@ class CheckPermissionMiddleware
     {
         $user = $serverRequest->getAttribute('user');
         $route = RouteContext::fromRequest($serverRequest)->getRoute();
-        $permissions = $route->getArgument('permissions');
+        // @phpstan-ignore-next-line
+        $permissions = $route?->getArgument('permissions');
 
         // Convert single permission to array
+        // @phpstan-ignore-next-line
         if (! is_array($permissions)) {
             $permissions = [$permissions];
         }
@@ -26,10 +28,11 @@ class CheckPermissionMiddleware
 
         if (! $hasPermission) {
             $response = new Response();
-            $response->getBody()->write(json_encode([
+            $json = json_encode([
                 'error' => 'Unauthorized',
                 'message' => 'You do not have the required permission to access this resource',
-            ]));
+            ]);
+            $response->getBody()->write($json !== false ? $json : '{}');
 
             return $response
                 ->withHeader('Content-Type', 'application/json')

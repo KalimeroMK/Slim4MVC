@@ -23,7 +23,7 @@ final readonly class UpdateRoleAction implements UpdateRoleActionInterface
     public function execute(UpdateRoleDTO $updateRoleDTO): Role
     {
         $attributes = [];
-        if ($updateRoleDTO->name !== null) {
+        if ($updateRoleDTO->name !== '') {
             $attributes['name'] = $updateRoleDTO->name;
         }
 

@@ -15,7 +15,7 @@ final readonly class ListPermissionAction
     /**
      * Execute listing permissions with pagination.
      *
-     * @return array{items: array, total: int, page: int, perPage: int}
+     * @return array{items: list<\App\Modules\Permission\Infrastructure\Models\Permission>, total: int, page: int, perPage: int}
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {

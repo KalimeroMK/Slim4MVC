@@ -8,6 +8,9 @@ class CreateUserDTO
 {
     public function __construct(public string $name, public string $email, public string $password) {}
 
+    /**
+     * @param  array<string, mixed>  $validated
+     */
     public static function fromRequest(array $validated): self
     {
         return new self(

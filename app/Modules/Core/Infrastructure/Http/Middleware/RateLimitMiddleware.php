@@ -12,6 +12,7 @@ use Slim\Psr7\Response as Psr7Response;
 
 class RateLimitMiddleware implements MiddlewareInterface
 {
+    /** @var array<string, array{count: int, start: int}> */
     private array $requests = [];
 
     public function __construct(
@@ -30,10 +31,11 @@ class RateLimitMiddleware implements MiddlewareInterface
         // Check rate limit
         if ($this->isRateLimited($identifier, $now)) {
             $response = new Psr7Response();
-            $response->getBody()->write(json_encode([
+            $json = json_encode([
                 'error' => 'Too Many Requests',
                 'message' => 'Rate limit exceeded. Please try again later.',
-            ]));
+            ]);
+            $response->getBody()->write($json !== false ? $json : '{}');
 
             return $response
                 ->withHeader('Content-Type', 'application/json')

@@ -68,6 +68,9 @@ class RoleController extends Controller
         return ApiResponse::success(RoleResource::make($role), HttpStatusCode::CREATED);
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function show(Request $request, Response $response, array $args): Response
     {
         $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
@@ -75,6 +78,9 @@ class RoleController extends Controller
         return ApiResponse::success(RoleResource::make($role));
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function update(UpdateRoleRequest $updateRoleRequest, Response $response, array $args): Response
     {
         $role = $this->updateRoleAction->execute(
@@ -84,6 +90,9 @@ class RoleController extends Controller
         return ApiResponse::success(RoleResource::make($role));
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));

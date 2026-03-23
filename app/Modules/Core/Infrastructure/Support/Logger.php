@@ -18,6 +18,9 @@ class Logger
         self::$container = $container;
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function log(string $level, string $message, array $context = []): void
     {
         $logger = self::getLogger();
@@ -26,21 +29,33 @@ class Logger
         }
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function error(string $message, array $context = []): void
     {
         self::log('error', $message, $context);
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function warning(string $message, array $context = []): void
     {
         self::log('warning', $message, $context);
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function info(string $message, array $context = []): void
     {
         self::log('info', $message, $context);
     }
 
+    /**
+     * @param  array<string, mixed>  $context
+     */
     public static function debug(string $message, array $context = []): void
     {
         self::log('debug', $message, $context);

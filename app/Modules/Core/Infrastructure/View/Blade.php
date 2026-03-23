@@ -16,6 +16,9 @@ class Blade
 {
     protected BladeOne $engine;
 
+    /**
+     * @param  array<string, mixed>  $sharedData
+     */
     public function __construct(
         protected string $viewsPath,
         protected string $cachePath,
@@ -27,6 +30,8 @@ class Blade
 
     /**
      * Render a view template.
+     *
+     * @param  array<string, mixed>  $data
      */
     public function make(string $template, array $data = []): string
     {
@@ -40,7 +45,7 @@ class Blade
     /**
      * Share data across all views.
      */
-    public function share(string $key, $value = null): void
+    public function share(string $key, mixed $value = null): void
     {
         $this->sharedData[$key] = $value;
         $this->engine->share($key, $value);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Mail;
 
-use App\Modules\Core\Infrastructure\Mail\WelcomeEmail;
 use App\Modules\Core\Infrastructure\Mail\PasswordResetEmail;
+use App\Modules\Core\Infrastructure\Mail\WelcomeEmail;
 use PHPUnit\Framework\TestCase;
 
 class WelcomeEmailTest extends TestCase

@@ -32,8 +32,7 @@ class PermissionController extends Controller
         private readonly UpdatePermissionAction $updatePermissionAction,
         private readonly DeletePermissionAction $deletePermissionAction,
         private readonly GetPermissionAction $getAction,
-        private readonly ListPermissionAction $listPermissionAction,
-        private readonly GetPermissionAction $rolesAction
+        private readonly ListPermissionAction $listPermissionAction
     ) {
         parent::__construct($container);
     }
@@ -69,6 +68,9 @@ class PermissionController extends Controller
         return ApiResponse::success(PermissionResource::make($permission), HttpStatusCode::CREATED);
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function show(Request $request, Response $response, array $args): Response
     {
         $permission = $this->getAction->execute($this->getParamAsInt($args, 'id'));
@@ -76,6 +78,9 @@ class PermissionController extends Controller
         return ApiResponse::success(PermissionResource::make($permission));
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function update(UpdatePermissionRequest $updatePermissionRequest, Response $response, array $args): Response
     {
         $permission = $this->updatePermissionAction->execute(
@@ -85,6 +90,9 @@ class PermissionController extends Controller
         return ApiResponse::success(PermissionResource::make($permission));
     }
 
+    /**
+     * @param  array<string, mixed>  $args
+     */
     public function destroy(Request $request, Response $response, array $args): Response
     {
         $this->deletePermissionAction->execute($this->getParamAsInt($args, 'id'));

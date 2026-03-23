@@ -59,6 +59,7 @@ class MakeModelCommand extends Command
             $stubContent = file_get_contents($stubPath);
             if ($stubContent === false) {
                 $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+
                 return;
             }
             $modelTemplate = str_replace('{{className}}', $modelName, $stubContent);
@@ -91,6 +92,7 @@ class MakeModelCommand extends Command
             $stubContent = file_get_contents($stubPath);
             if ($stubContent === false) {
                 $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+
                 return;
             }
             $migrationTemplate = str_replace(

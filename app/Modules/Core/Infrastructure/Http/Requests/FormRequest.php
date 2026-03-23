@@ -14,14 +14,17 @@ use Psr\Http\Message\ServerRequestInterface;
 
 abstract class FormRequest
 {
+    /** @var array<string, mixed> */
     protected array $rules = [];
 
+    /** @var array<string, string> */
     protected array $messages = [];
 
     protected Validator $validator;
 
     protected bool $isValidated = false;
 
+    /** @var array<string, mixed> */
     protected array $validatedData = [];
 
     public function __construct(
@@ -29,8 +32,14 @@ abstract class FormRequest
         protected ValidatorFactory $validatorFactory
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     abstract protected function rules(): array;
 
+    /**
+     * @return array<string, mixed>
+     */
     final public function validated(): array
     {
         if (! $this->isValidated) {
@@ -65,11 +74,20 @@ abstract class FormRequest
         $this->validatedData = $this->validator->validated();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function data(): array
     {
-        return $this->request->getParsedBody() ?? [];
+        /** @var array<string, mixed>|null $body */
+        $body = $this->request->getParsedBody();
+
+        return $body ?? [];
     }
 
+    /**
+     * @return array<string, string>
+     */
     protected function messages(): array
     {
         return $this->messages;

@@ -29,7 +29,11 @@ class CsrfMiddleware implements MiddlewareInterface
         }
 
         if ($request->getMethod() === 'POST') {
+            /** @var array<string, mixed>|object|null $data */
             $data = $request->getParsedBody();
+            if (! is_array($data)) {
+                throw new RuntimeException('Invalid request body', 400);
+            }
             $token = $data['_token'] ?? null;
 
             if (! $token || $token !== $_SESSION['csrf_token']) {
