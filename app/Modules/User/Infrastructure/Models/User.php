@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $password_reset_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Role\Infrastructure\Models\Role> $roles
+ * @property \Illuminate\Database\Eloquent\Collection<int, Role> $roles
  *
  * @method static static|null find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder<self> where(string $column, mixed $operator = null, mixed $value = null)
@@ -46,15 +46,7 @@ class User extends Model
     protected $hidden = ['password'];
 
     /**
-     * Boot the model and register observers.
-     */
-    protected static function booted(): void
-    {
-        static::observe(UserObserver::class);
-    }
-
-    /**
-     * @return BelongsToMany<\App\Modules\Role\Infrastructure\Models\Role, $this>
+     * @return BelongsToMany<Role, $this>
      */
     public function roles(): BelongsToMany
     {
@@ -67,23 +59,23 @@ class User extends Model
     public function save(array $options = []): bool
     {
         $isNew = ! $this->exists;
-        
+
         $saved = parent::save($options);
-        
+
         // If new user was created, assign client role
         if ($saved && $isNew) {
             // Use the connection directly instead of DB facade
             $connection = $this->getConnection();
-            
+
             // Check if user already has any roles
             $hasRoles = $connection->table('role_user')
                 ->where('user_id', $this->id)
                 ->exists();
-            
+
             if (! $hasRoles) {
                 // Find or create client role
                 $clientRole = Role::firstOrCreate(['name' => 'client']);
-                
+
                 // Insert role_user relationship directly
                 $connection->table('role_user')->insert([
                     'user_id' => $this->id,
@@ -91,7 +83,15 @@ class User extends Model
                 ]);
             }
         }
-        
+
         return $saved;
+    }
+
+    /**
+     * Boot the model and register observers.
+     */
+    protected static function booted(): void
+    {
+        static::observe(UserObserver::class);
     }
 }

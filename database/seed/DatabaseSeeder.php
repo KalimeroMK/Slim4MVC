@@ -43,7 +43,7 @@ class DatabaseSeeder
 
         // Assign all permissions to admin
         $adminRole->permissions()->sync(Permission::all()->pluck('id'));
-        
+
         // Assign view permissions to client
         $clientRole->permissions()->sync(
             Permission::where('name', 'like', 'view-%')->pluck('id')
