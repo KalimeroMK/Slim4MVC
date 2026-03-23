@@ -108,10 +108,12 @@
                             </a>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <div class="p-3 border rounded bg-white">
-                                <h5>API Docs</h5>
-                                <p class="small text-muted mb-0">Postman collection included</p>
-                            </div>
+                            <a href="{{ route('api.docs') }}" class="text-decoration-none">
+                                <div class="p-3 border rounded bg-white">
+                                    <h5>API Docs</h5>
+                                    <p class="small text-muted mb-0">Swagger UI Documentation</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
