@@ -17,7 +17,9 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Consistent API Responses** - Standardized JSON responses with enums and helper methods
 - **Repository Pattern** - Clean data access layer abstraction for better testability and maintainability
 - **Exception Handling** - Custom exception classes with centralized exception handling middleware
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (215+ tests, 461+ assertions)
+- **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
+- **Cookie Helper** - Encrypted cookie management with AES-256-CBC
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (268+ tests, 573+ assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -54,6 +56,8 @@ A modern, production-ready starter kit for building web applications with Slim F
    - JWT_SECRET (generate a strong secret key)
    - Mail settings
    - CORS origins (if needed)
+   - Cache driver (file/redis) and Redis settings (if using Redis)
+   - Cookie settings (encryption, secure flags for production)
 
 4. **Start Docker containers:**
    ```bash
@@ -119,7 +123,8 @@ The project uses a **modular architecture** where each feature is organized as a
 │   │   │       ├── Providers/ # Service providers
 │   │   │       ├── Queue/    # Queue system
 │   │   │       ├── Repositories/ # Base repositories
-│   │   │       ├── Support/  # Helper classes (Auth, Logger, Mailer)
+│   │   │       ├── Support/  # Helper classes (Auth, Logger, Mailer, Cookie)
+│   │   │       ├── Cache/    # Cache system (File, Redis, Null drivers)
 │   │   │       └── View/     # Blade integration
 │   │   ├── Auth/             # Authentication module
 │   │   │   ├── Application/
@@ -152,7 +157,12 @@ The project uses a **modular architecture** where each feature is organized as a
 ├── stubs/                    # Code generation stubs
 │   └── Module/              # Module structure stubs
 ├── storage/
-│   └── logs/                 # Application logs
+│   ├── cache/                # Application cache
+│   │   ├── data/             # File cache storage
+│   │   └── view/             # Blade compiled views
+│   ├── logs/                 # Application logs
+│   ├── queue/                # Queue storage (file driver)
+│   └── sessions/             # Session storage (file driver)
 └── tests/                    # PHPUnit tests
     ├── Unit/                  # Unit tests
     └── Feature/               # Feature tests
@@ -300,6 +310,9 @@ php slim seed:database
 
 # Queue processing
 php slim queue:work [--stop-when-empty] [--max-jobs=<number>]
+
+# Cache management
+php slim cache:clear [--tag=<tag>] [--driver=<driver>]
 
 # List all routes
 php slim list-routes
@@ -665,6 +678,29 @@ MAIL_ENCRYPTION=tls
 
 # CORS
 CORS_ORIGINS=*
+
+# Cache
+CACHE_DRIVER=redis
+CACHE_PREFIX=slim_cache
+CACHE_PATH=/var/www/html/storage/cache/data
+REDIS_CACHE_DATABASE=1
+
+# Queue
+QUEUE_DRIVER=redis
+QUEUE_RETRY_AFTER=90
+
+# Session
+SESSION_DRIVER=redis
+SESSION_LIFETIME=120
+
+# Cookies
+COOKIE_TTL=3600
+COOKIE_PATH=/
+COOKIE_DOMAIN=
+COOKIE_SECURE=true
+COOKIE_HTTP_ONLY=true
+COOKIE_SAME_SITE=Lax
+COOKIE_ENCRYPT=true
 ```
 
 ## 📦 API Resources
@@ -963,6 +999,7 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 - ✅ SQL injection protection (Eloquent ORM)
 - ✅ XSS protection (Blade templating)
 - ✅ Secure session handling
+- ✅ Cookie encryption (AES-256-CBC) for sensitive data
 - ✅ Centralized exception handling with proper error responses
 - ✅ Modular architecture for better code organization
 - ✅ Automatic dependency registration
@@ -1299,6 +1336,7 @@ $data = $helper->get('secret'); // 'sensitive data'
 - `vlucas/phpdotenv` - Environment variables
 - `illuminate/pagination` - Pagination support
 - `illuminate/support` - Laravel support package
+- `predis/predis` - Redis client (cache, queue, sessions)
 
 ### Development
 - `phpunit/phpunit` - Testing
@@ -1352,8 +1390,8 @@ server {
     server_name your-domain.com;
     root /var/www/html/public;
     
-    # Deny access to storage
-    location ~ ^/storage/ {
+    # Deny access to storage and cache
+    location ~ ^/(storage|cache)/ {
         deny all;
     }
     
