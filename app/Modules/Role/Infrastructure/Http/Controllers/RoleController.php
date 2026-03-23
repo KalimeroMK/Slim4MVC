@@ -61,14 +61,9 @@ class RoleController extends Controller
 
     public function store(CreateRoleRequest $createRoleRequest, Response $response): Response
     {
-        $roleData = $this->createRoleAction->execute(
+        $role = $this->createRoleAction->execute(
             CreateRoleDTO::fromRequest($createRoleRequest->validated())
         );
-
-        // CreateRoleAction returns Role model (load() returns the model, not array)
-        $role = $roleData instanceof \App\Modules\Role\Infrastructure\Models\Role
-            ? $roleData
-            : \App\Modules\Role\Infrastructure\Models\Role::with('permissions')->find($roleData['id'] ?? null);
 
         return ApiResponse::success(RoleResource::make($role), HttpStatusCode::CREATED);
     }
@@ -82,12 +77,9 @@ class RoleController extends Controller
 
     public function update(UpdateRoleRequest $updateRoleRequest, Response $response, array $args): Response
     {
-        $this->updateRoleAction->execute(
+        $role = $this->updateRoleAction->execute(
             UpdateRoleDTO::fromRequest($updateRoleRequest->validated())
         );
-
-        // Reload role with relationships for resource
-        $role = \App\Modules\Role\Infrastructure\Models\Role::with('permissions')->find($args['id']);
 
         return ApiResponse::success(RoleResource::make($role));
     }

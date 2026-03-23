@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\User\Application\Interfaces;
 
 use App\Modules\User\Application\DTOs\CreateUserDTO;
+use App\Modules\User\Infrastructure\Models\User;
 use RuntimeException;
 
 interface CreateUserActionInterface
 {
     /**
-     * Authenticate user and return token
+     * Create a new user
      *
-     * @throws RuntimeException On invalid credentials
+     * @throws RuntimeException On creation failure
      */
-    public function execute(CreateUserDTO $createUserDTO): ?array;
+    public function execute(CreateUserDTO $createUserDTO): User;
 }

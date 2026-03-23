@@ -6,6 +6,7 @@ namespace App\Modules\User\Application\Actions;
 
 use App\Modules\User\Application\DTOs\UpdateUserDTO;
 use App\Modules\User\Application\Interfaces\UpdateUserActionInterface;
+use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 final readonly class UpdateUserAction implements UpdateUserActionInterface
@@ -16,10 +17,8 @@ final readonly class UpdateUserAction implements UpdateUserActionInterface
 
     /**
      * Execute user update.
-     *
-     * @return array<string, mixed>
      */
-    public function execute(UpdateUserDTO $updateUserDTO): array
+    public function execute(UpdateUserDTO $updateUserDTO): User
     {
         $attributes = [];
         if ($updateUserDTO->name !== null) {
@@ -30,8 +29,8 @@ final readonly class UpdateUserAction implements UpdateUserActionInterface
             $attributes['email'] = $updateUserDTO->email;
         }
 
-        $user = $this->userRepository->update($updateUserDTO->id, $attributes);
+        $this->userRepository->update($updateUserDTO->id, $attributes);
 
-        return $user->toArray();
+        return User::find($updateUserDTO->id);
     }
 }

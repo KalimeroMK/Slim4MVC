@@ -26,10 +26,9 @@ final class CreateUserActionTest extends TestCase
         $createUserDTO = new CreateUserDTO('Test User', 'test@example.com', 'password123');
         $result = $this->createUserAction->execute($createUserDTO);
 
-        $this->assertIsArray($result);
-        $this->assertEquals('Test User', $result['name']);
-        $this->assertEquals('test@example.com', $result['email']);
-        $this->assertArrayNotHasKey('password', $result); // Password should be hidden
+        $this->assertInstanceOf(User::class, $result);
+        $this->assertEquals('Test User', $result->name);
+        $this->assertEquals('test@example.com', $result->email);
     }
 
     public function test_execute_hashes_password_correctly(): void

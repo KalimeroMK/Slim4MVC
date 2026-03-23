@@ -25,9 +25,8 @@ final readonly class UpdatePermissionAction implements UpdatePermissionActionInt
             $attributes['name'] = $updatePermissionDTO->name;
         }
 
-        /** @var Permission $permission */
-        $permission = $this->permissionRepository->update($updatePermissionDTO->id, $attributes);
+        $this->permissionRepository->update($updatePermissionDTO->id, $attributes);
 
-        return $permission;
+        return Permission::find($updatePermissionDTO->id);
     }
 }

@@ -66,9 +66,6 @@ class PermissionController extends Controller
             CreatePermissionDTO::fromRequest($createPermissionRequest->validated())
         );
 
-        // Load relationships for resource
-        $permission->load('roles');
-
         return ApiResponse::success(PermissionResource::make($permission), HttpStatusCode::CREATED);
     }
 
@@ -84,9 +81,6 @@ class PermissionController extends Controller
         $permission = $this->updatePermissionAction->execute(
             UpdatePermissionDTO::fromRequest($updatePermissionRequest->validated())
         );
-
-        // Load relationships for resource
-        $permission->load('roles');
 
         return ApiResponse::success(PermissionResource::make($permission));
     }

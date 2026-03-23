@@ -7,6 +7,7 @@ namespace App\Modules\Role\Application\Actions;
 use App\Modules\Role\Application\DTOs\CreateRoleDTO;
 use App\Modules\Role\Application\Interfaces\CreateRoleActionInterface;
 use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
 final readonly class CreateRoleAction implements CreateRoleActionInterface
@@ -17,10 +18,8 @@ final readonly class CreateRoleAction implements CreateRoleActionInterface
 
     /**
      * Execute role creation.
-     *
-     * @return array<string, mixed>|null
      */
-    public function execute(CreateRoleDTO $createRoleDTO): ?array
+    public function execute(CreateRoleDTO $createRoleDTO): Role
     {
         $role = $this->roleRepository->create([
             'name' => $createRoleDTO->name,
@@ -30,6 +29,6 @@ final readonly class CreateRoleAction implements CreateRoleActionInterface
             $role->givePermissionTo($createRoleDTO->permissions);
         }
 
-        return $role->load('permissions')->toArray();
+        return $role->load('permissions');
     }
 }

@@ -6,6 +6,7 @@ namespace App\Modules\User\Application\Actions;
 
 use App\Modules\User\Application\DTOs\CreateUserDTO;
 use App\Modules\User\Application\Interfaces\CreateUserActionInterface;
+use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 final readonly class CreateUserAction implements CreateUserActionInterface
@@ -16,10 +17,8 @@ final readonly class CreateUserAction implements CreateUserActionInterface
 
     /**
      * Execute user creation.
-     *
-     * @return array<string, mixed>
      */
-    public function execute(CreateUserDTO $createUserDTO): array
+    public function execute(CreateUserDTO $createUserDTO): User
     {
         // Hash the password and create user
         $user = $this->userRepository->create([
@@ -28,6 +27,6 @@ final readonly class CreateUserAction implements CreateUserActionInterface
             'password' => password_hash($createUserDTO->password, PASSWORD_BCRYPT),
         ]);
 
-        return $user->toArray();
+        return $user;
     }
 }

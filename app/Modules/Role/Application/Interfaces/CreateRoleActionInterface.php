@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Role\Application\Interfaces;
 
 use App\Modules\Role\Application\DTOs\CreateRoleDTO;
+use App\Modules\Role\Infrastructure\Models\Role;
 use RuntimeException;
 
 interface CreateRoleActionInterface
 {
     /**
-     * Authenticate user and return token
+     * Create a new role
      *
-     * @throws RuntimeException On invalid credentials
+     * @throws RuntimeException On creation failure
      */
-    public function execute(CreateRoleDTO $createRoleDTO): ?array;
+    public function execute(CreateRoleDTO $createRoleDTO): Role;
 }

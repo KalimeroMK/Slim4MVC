@@ -4,6 +4,7 @@
 declare(strict_types=1);
 
 use App\Console\Commands\CreateControllerCommand;
+use App\Console\Commands\GenerateSwaggerCommand;
 use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
 use App\Console\Commands\MakeModuleCommand;
@@ -53,6 +54,7 @@ $application->add(new QueueFailedCommand());
 $application->add(new QueueRetryCommand($container->get(\App\Modules\Core\Infrastructure\Queue\QueueManager::class)));
 $application->add(new QueueFlushCommand());
 $application->add(new SeedDatabaseCommand());
+$application->add(new GenerateSwaggerCommand());
 
 
 // Run the console application

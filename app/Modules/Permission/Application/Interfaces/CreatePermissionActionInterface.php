@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Modules\Permission\Application\Interfaces;
 
 use App\Modules\Permission\Application\DTOs\CreatePermissionDTO;
+use App\Modules\Permission\Infrastructure\Models\Permission;
 use RuntimeException;
 
 interface CreatePermissionActionInterface
 {
     /**
-     * Authenticate user and return token
+     * Create a new permission
      *
-     * @throws RuntimeException On invalid credentials
+     * @throws RuntimeException On creation failure
      */
-    public function execute(CreatePermissionDTO $createPermissionDTO): ?array;
+    public function execute(CreatePermissionDTO $createPermissionDTO): Permission;
 }
