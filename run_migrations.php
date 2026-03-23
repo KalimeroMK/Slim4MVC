@@ -10,16 +10,21 @@ use Database\Migrations\CreatePermissionTable;
 use Database\Migrations\CreateRoleTable;
 use Database\Migrations\CreateRoleUserTable;
 use Database\Migrations\CreateUsersTable;
+use Dotenv\Dotenv;
 use Illuminate\Database\Capsule\Manager as Capsule;
+
+// Load .env file
+$dotenv = Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv->safeLoad();
 
 // 1. Setup Eloquent
 $capsule = new Capsule;
 $capsule->addConnection([
-    'driver' => $_ENV['DB_CONNECTION'],
-    'host' => $_ENV['DB_HOST'],
-    'database' => $_ENV['DB_DATABASE'],
-    'username' => $_ENV['DB_USERNAME'],
-    'password' => $_ENV['DB_PASSWORD'],
+    'driver' => $_ENV['DB_CONNECTION'] ?? 'mysql',
+    'host' => $_ENV['DB_HOST'] ?? 'localhost',
+    'database' => $_ENV['DB_DATABASE'] ?? 'slim',
+    'username' => $_ENV['DB_USERNAME'] ?? 'slim',
+    'password' => $_ENV['DB_PASSWORD'] ?? 'secret',
     'charset' => 'utf8',
     'collation' => 'utf8_unicode_ci',
     'prefix' => '',
