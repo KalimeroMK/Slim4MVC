@@ -9,7 +9,7 @@
                 </div>
                 @include('partials.error')
                 <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                    <form method="POST" action="/login">
+                    <form method="POST" action="{{ route('login.post') }}">
                         @csrf
                         <!-- Email input -->
                         <div class="form-outline mb-4">
@@ -32,13 +32,13 @@
                                     Remember me
                                 </label>
                             </div>
-                            <a href="/forgot-password" class="text-body">Forgot password?</a>
+                            <a href="{{ route('password.request') }}" class="text-body">Forgot password?</a>
                         </div>
 
                         <div class="text-center text-lg-start mt-4 pt-2">
                             <button type="submit" class="btn btn-primary btn-lg"
                                     style="padding-left: 2.5rem; padding-right: 2.5rem;">Login</button>
-                            <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="/register"
+                            <p class="small fw-bold mt-2 pt-1 mb-0">Don't have an account? <a href="{{ route('register') }}"
                                                                                               class="link-danger">Register</a></p>
                         </div>
 

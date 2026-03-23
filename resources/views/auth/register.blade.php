@@ -5,7 +5,7 @@
         <div class="row d-flex justify-content-center align-items-center h-100">
             @include('partials.error')
             <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form method="POST" action="/register">
+                <form method="POST" action="{{ route('register.post') }}">
                     @csrf
                     <!-- Email input -->
                     <div class="form-floating">

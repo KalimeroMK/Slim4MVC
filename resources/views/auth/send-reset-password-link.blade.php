@@ -9,7 +9,7 @@
             </div>
             @include('partials.error')
             <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
-                <form method="POST" action="/forgot-password">
+                <form method="POST" action="{{ route('password.email') }}">
                     @csrf
                     <!-- Email input -->
                     <div class="form-outline mb-4">

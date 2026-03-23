@@ -17,7 +17,7 @@ use App\Modules\Auth\Infrastructure\Http\Requests\Auth\PasswordRecoveryRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\RegisterRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\ResetPasswordRequest;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Core\Infrastructure\Support\Auth;
+use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -79,7 +79,7 @@ class AuthController extends Controller
 
     public function logout(Request $request, Response $response): Response
     {
-        Auth::logout();
+        AuthHelper::logout();
 
         return $this->redirect('/');
     }
