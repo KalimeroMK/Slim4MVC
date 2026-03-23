@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\View;
 
+use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use eftec\bladeone\BladeOne;
 use RuntimeException;
 
@@ -112,5 +113,68 @@ class Blade
             : BladeOne::MODE_AUTO;
         
         $this->engine = new BladeOne($this->viewsPath, $this->cachePath, $mode);
+        
+        $this->registerDirectives();
+    }
+
+    /**
+     * Register custom Blade directives.
+     */
+    protected function registerDirectives(): void
+    {
+        // @csrf - CSRF token field
+        $this->engine->directive('csrf', function () {
+            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::csrfField(); ?>';
+        });
+
+        // @csrfToken - CSRF token value only
+        $this->engine->directive('csrfToken', function () {
+            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::csrfToken(); ?>';
+        });
+
+        // @method('PUT') - HTTP method spoofing
+        $this->engine->directive('method', function ($method) {
+            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::methodField(' . $method . '); ?>';
+        });
+
+        // @auth - Check if user is authenticated
+        $this->engine->directive('auth', function () {
+            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::check()): ?>';
+        });
+
+        // @endauth
+        $this->engine->directive('endauth', function () {
+            return '<?php endif; ?>';
+        });
+
+        // @guest - Check if user is not authenticated
+        $this->engine->directive('guest', function () {
+            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::guest()): ?>';
+        });
+
+        // @endguest
+        $this->engine->directive('endguest', function () {
+            return '<?php endif; ?>';
+        });
+
+        // @can('permission') - Check if user has permission
+        $this->engine->directive('can', function ($permission) {
+            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::can(' . $permission . ')): ?>';
+        });
+
+        // @endcan
+        $this->engine->directive('endcan', function () {
+            return '<?php endif; ?>';
+        });
+
+        // @role('admin') - Check if user has role
+        $this->engine->directive('role', function ($role) {
+            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::hasRole(' . $role . ')): ?>';
+        });
+
+        // @endrole
+        $this->engine->directive('endrole', function () {
+            return '<?php endif; ?>';
+        });
     }
 }

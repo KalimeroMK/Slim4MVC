@@ -434,6 +434,135 @@ Logs are written to `storage/logs/slim.log`. Log level is automatically set base
 - `production`: Warning and above
 - `local`/`development`: Debug and above
 
+## 🎨 Blade Templating
+
+This project uses **BladeOne** - a lightweight, standalone Blade engine optimized for Slim 4. It provides the same Blade syntax as Laravel but without the heavy dependencies.
+
+### Custom Blade Directives
+
+The following Laravel-like directives are available:
+
+#### Authentication Directives
+
+```blade
+@guest
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+@endguest
+
+@auth
+    <p>Welcome, {{ AuthHelper::user()['name'] }}!</p>
+    <form method="POST" action="/logout">
+        @csrf
+        <button type="submit">Logout</button>
+    </form>
+@endauth
+```
+
+#### CSRF Protection
+
+```blade
+<form method="POST" action="/profile">
+    @csrf
+    <!-- or manually: -->
+    <input type="hidden" name="_token" value="{{ AuthHelper::csrfToken() }}">
+</form>
+```
+
+#### HTTP Method Spoofing
+
+```blade
+<form method="POST" action="/users/1">
+    @csrf
+    @method('DELETE')
+    <button type="submit">Delete User</button>
+</form>
+```
+
+#### Authorization Directives
+
+```blade
+@can('edit-posts')
+    <a href="/posts/1/edit">Edit Post</a>
+@endcan
+
+@role('admin')
+    <a href="/admin">Admin Panel</a>
+@endrole
+```
+
+### AuthHelper Class
+
+The `AuthHelper` class provides static methods for authentication:
+
+```php
+use App\Modules\Core\Infrastructure\Support\AuthHelper;
+
+// Check authentication
+if (AuthHelper::check()) {
+    // User is logged in
+}
+
+// Check if guest
+if (AuthHelper::guest()) {
+    // User is not logged in
+}
+
+// Get current user
+$user = AuthHelper::user();
+echo $user['name'];
+
+// Get user ID
+$userId = AuthHelper::id();
+
+// Check permissions and roles
+if (AuthHelper::can('create-posts')) {
+    // User can create posts
+}
+
+if (AuthHelper::hasRole('admin')) {
+    // User is admin
+}
+
+// Set user data after login
+AuthHelper::setUser([
+    'id' => $user->id,
+    'name' => $user->name,
+    'email' => $user->email,
+    'roles' => ['user', 'editor'],
+    'permissions' => ['view-posts', 'create-posts']
+]);
+
+// Logout user
+AuthHelper::logout();
+```
+
+### Standard Blade Syntax
+
+All standard Blade directives work as expected:
+
+```blade
+@extends('layouts.app')
+
+@section('content')
+    <h1>{{ $title }}</h1>
+    
+    @foreach($users as $user)
+        <p>{{ $user->name }}</p>
+    @endforeach
+    
+    @if($condition)
+        <span>{{ $message }}</span>
+    @elseif($otherCondition)
+        <span>Other message</span>
+    @else
+        <span>Default message</span>
+    @endif
+    
+    @include('partials.footer')
+@endsection
+```
+
 ## 🧪 Testing
 
 The project includes a comprehensive test suite covering:
@@ -798,6 +927,7 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 - ✅ Centralized exception handling with proper error responses
 - ✅ Modular architecture for better code organization
 - ✅ Automatic dependency registration
+- ✅ Custom Blade directives (@auth, @guest, @csrf, @method, @can, @role)
 
 ## 📦 Dependencies
 
@@ -805,7 +935,7 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 - `slim/slim` - Slim Framework 4
 - `illuminate/database` - Eloquent ORM
 - `illuminate/validation` - Validation
-- `illuminate/view` - Blade templating
+- `eftec/bladeone` - Lightweight Blade templating engine
 - `php-di/slim-bridge` - Dependency injection
 
 ### Authentication & Security

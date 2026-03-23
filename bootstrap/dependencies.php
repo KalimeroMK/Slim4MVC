@@ -65,4 +65,4 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }),    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class),];
+    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
