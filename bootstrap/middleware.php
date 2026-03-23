@@ -40,6 +40,20 @@ return function ($app, DI\Container $container): void {
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
 
+    // Ensure body parsing works for form data
+    $app->add(function ($request, $handler) {
+        $contentType = $request->getHeaderLine('Content-Type');
+        if (strpos($contentType, 'application/x-www-form-urlencoded') !== false) {
+            $parsedBody = $request->getParsedBody();
+            if ($parsedBody === null) {
+                $body = (string) $request->getBody();
+                parse_str($body, $data);
+                $request = $request->withParsedBody($data);
+            }
+        }
+        return $handler->handle($request);
+    });
+
     // Add CORS middleware (should be early in the stack)
     $app->add($cors);
 
