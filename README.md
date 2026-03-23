@@ -6,7 +6,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 
 - **MVC Architecture** - Clean separation of concerns with Slim 4
 - **Eloquent ORM** - Laravel's powerful database toolkit
-- **Blade Templating** - Laravel's elegant templating engine
+- **Blade Templating** - Lightweight BladeOne engine with custom directives (@auth, @guest, @csrf, @method, @can, @role)
 - **Authentication System** - JWT-based API auth and session-based web auth
 - **Authorization** - Role and permission-based access control with middleware and policies
 - **Form Request Validation** - Laravel-style validation with automatic error handling
@@ -17,15 +17,16 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Consistent API Responses** - Standardized JSON responses with enums and helper methods
 - **Repository Pattern** - Clean data access layer abstraction for better testability and maintainability
 - **Exception Handling** - Custom exception classes with centralized exception handling middleware
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (96 tests, 223 assertions)
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (215+ tests, 461+ assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
+- **PHP 8.4 Ready** - Modern PHP features and Rector automated refactoring
 - **Docker Ready** - Complete Docker setup for development
 
 ## 📋 Requirements
 
-- PHP >= 8.3
+- PHP >= 8.4
 - Composer
 - Docker & Docker Compose (for development)
 - MySQL/MariaDB (or SQLite for testing)
@@ -567,30 +568,62 @@ All standard Blade directives work as expected:
 
 The project includes a comprehensive test suite covering:
 
-- Authentication (Auth class, LoginAction, RegisterAction)
-- User management (CreateUserAction, GetUserAction, DeleteUserAction)
-- Password reset (ResetPasswordAction)
-- Middleware (AuthMiddleware, RateLimitMiddleware)
-- Models (User, Role, Permission relationships)
-- Repositories (UserRepository, RoleRepository, PermissionRepository)
-- Exception handling (Custom exceptions)
-- Form request validation
-- Console commands (MakeModuleCommand, MakeRequestCommand)
-- API Resources
-- Event system (Dispatcher, Listeners)
-- Queue system (FileQueue, Jobs)
-- Module creation and dependency registration
+- **Actions** - LoginAction, RegisterAction, ResetPasswordAction, CreateUserAction, GetUserAction, DeleteUserAction
+- **Authentication** - Auth class, AuthHelper, JWT Service, Session handling
+- **Controllers** - AuthController (API & Web)
+- **DTOs** - All Data Transfer Objects
+- **Enums** - ApiResponseStatus, HttpStatusCode
+- **Events** - Dispatcher, Listeners (SendWelcomeEmail, SendPasswordResetEmail)
+- **Factories** - UserFactory, RoleFactory, PermissionFactory
+- **Jobs** - SendEmailJob, Queue system (FileQueue, RedisQueue)
+- **Mail** - Mailable, WelcomeEmail, PasswordResetEmail
+- **Middleware** - AuthMiddleware, RateLimitMiddleware, CsrfMiddleware, and more
+- **Models** - User, Role, Permission relationships
+- **Policies** - Policy base class
+- **Providers** - All Service Providers
+- **Repositories** - UserRepository, RoleRepository, PermissionRepository
+- **Resources** - API Resource classes
+- **Validation** - Form request validation
+- **Console** - All CLI commands (MakeModule, MakeRequest, Queue commands, etc.)
+- **View** - BladeOne integration with custom directives
+- **Module system** - Creation and dependency registration
 
 **Test coverage:**
-- ✅ 106+ tests
-- ✅ 280+ assertions
+- ✅ 215+ tests
+- ✅ 461+ assertions
 - ✅ All tests passing
+- ✅ PHP 8.4 optimized with Rector
 
 Run tests:
 ```bash
 composer test
 # or
 ./vendor/bin/phpunit --testdox
+```
+
+### Code Quality Tools
+
+**Laravel Pint** (Code formatting):
+```bash
+# Check code style
+./vendor/bin/pint --test
+
+# Fix code style
+./vendor/bin/pint
+```
+
+**Rector** (Automated refactoring):
+```bash
+# Check what would be changed
+./vendor/bin/rector process --dry-run
+
+# Apply refactoring
+./vendor/bin/rector process
+```
+
+**Combined (CI/CD ready):**
+```bash
+./vendor/bin/pint && ./vendor/bin/rector process && ./vendor/bin/phpunit
 ```
 
 ## 🔧 Configuration
