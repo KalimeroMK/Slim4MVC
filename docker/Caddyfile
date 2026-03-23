@@ -1,0 +1,84 @@
+{
+	# Enable FrankenPHP
+	frankenphp {
+		worker /var/www/html/public/index.php 4
+	}
+	
+	# Automatic HTTPS (disable for local dev, enable for production)
+	# auto_https off
+	
+	# Debug mode (disable in production)
+	debug
+}
+
+:80 {
+	# Root directory
+	root * /var/www/html/public
+	
+	# Enable compression
+	encode gzip zstd
+	
+	# PHP files
+	php_server {
+		# Worker mode for better performance
+		worker /var/www/html/public/index.php
+	}
+	
+	# Static files with caching
+	@static {
+		path *.css *.js *.png *.jpg *.jpeg *.gif *.ico *.svg *.woff *.woff2 *.ttf *.eot
+	}
+	file_server @static {
+		root /var/www/html/public
+	}
+	header @static {
+		Cache-Control "public, max-age=31536000, immutable"
+	}
+	
+	# Security headers
+	header {
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		X-XSS-Protection "1; mode=block"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Content-Security-Policy "default-src 'self'" (enable in production)
+	}
+	
+	# Deny access to sensitive files
+	@denied {
+		path /.env /composer.json /composer.lock /package.json /.git/*
+	}
+	respond @denied 403
+	
+	# Deny access to storage
+	@storage {
+		path /storage/*
+	}
+	respond @storage 403
+	
+	# Health check endpoint
+	handle /health {
+		respond "OK" 200
+	}
+	
+	# File server for other requests
+	file_server
+	
+	# Logging
+	log {
+		output file /var/www/html/storage/logs/caddy.log
+		format json
+	}
+}
+
+# Production HTTPS configuration (uncomment for production)
+# :443 {
+# 	root * /var/www/html/public
+# 	encode gzip zstd
+# 	php_server
+# 	file_server
+# 	
+# 	tls {
+# 		# Automatic Let's Encrypt
+# 	}
+# }

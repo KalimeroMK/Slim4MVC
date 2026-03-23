@@ -4,8 +4,13 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     volumes:
       - .:/var/www/html
+      - ./storage/logs:/var/www/html/storage/logs
     depends_on:
       db:
         condition: service_healthy
@@ -14,10 +19,11 @@ services:
     networks:
       - slim
     healthcheck:
-      test: ["CMD", "php", "-v"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 30s
 
   db:
     container_name: slim_db
@@ -57,26 +63,6 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
-      retries: 3
-
-  nginx:
-    image: nginx:alpine
-    container_name: slim_nginx
-    restart: unless-stopped
-    ports:
-      - "81:80"
-    volumes:
-      - ./:/var/www/html
-      - ./docker/nginx:/etc/nginx/conf.d
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - slim
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
-      interval: 10s
-      timeout: 5s
       retries: 3
 
 networks:
