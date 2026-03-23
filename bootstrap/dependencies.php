@@ -33,10 +33,14 @@ use App\Modules\User\Application\Interfaces\CreateUserActionInterface;
 use App\Modules\User\Application\Interfaces\UpdateUserActionInterface;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
+use Psr\Http\Message\ResponseInterface;
+use Slim\Psr7\Response;
 use function DI\autowire;
 use function DI\factory;
 
 return [
+    // PSR-7 Response factory
+    ResponseInterface::class => factory(fn (): Response => new Response()),
     RegisterActionInterface::class => autowire(RegisterAction::class),
     LoginActionInterface::class => autowire(LoginAction::class),
     PasswordRecoveryActionInterface::class => autowire(PasswordRecoveryAction::class),
