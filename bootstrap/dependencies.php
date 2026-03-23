@@ -16,6 +16,8 @@ use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
+use App\Modules\Core\Infrastructure\Cache\CacheInterface;
+use App\Modules\Core\Infrastructure\Cache\CacheManager;
 use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\Permission\Application\Actions\CreatePermissionAction;
 use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
@@ -66,4 +68,7 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }), ];
+    }),
+    // Cache system
+    CacheManager::class => autowire(CacheManager::class),
+    CacheInterface::class => factory(fn (CacheManager $manager): CacheInterface => $manager->driver()),    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class),];

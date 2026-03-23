@@ -54,7 +54,9 @@
     "files": [
       "app/Modules/Core/Infrastructure/View/BladeViewHelper.php",
       "app/Modules/Core/Infrastructure/View/BladeAssetHelper.php",
-      "app/Modules/Core/Infrastructure/Support/helper.php"
+      "app/Modules/Core/Infrastructure/Support/helper.php",
+      "app/Modules/Core/Infrastructure/Cache/helpers.php",
+      "app/Modules/Core/Infrastructure/Support/cookie_helpers.php"
     ]
   },
   "config": {

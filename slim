@@ -3,6 +3,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\CacheClearCommand;
 use App\Console\Commands\CreateControllerCommand;
 use App\Console\Commands\GenerateSwaggerCommand;
 use App\Console\Commands\ListRoutesCommand;
@@ -55,7 +56,7 @@ $application->add(new QueueRetryCommand($container->get(\App\Modules\Core\Infras
 $application->add(new QueueFlushCommand());
 $application->add(new SeedDatabaseCommand());
 $application->add(new GenerateSwaggerCommand());
-
+$application->add(new CacheClearCommand());
 
 // Run the console application
 $application->run();

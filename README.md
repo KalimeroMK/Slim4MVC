@@ -968,6 +968,317 @@ The `ExceptionHandlerMiddleware` automatically converts exceptions to appropriat
 - ✅ Automatic dependency registration
 - ✅ Custom Blade directives (@auth, @guest, @csrf, @method, @can, @role)
 
+## 💾 Caching
+
+The application includes a powerful caching layer with multiple driver support:
+
+### Features
+
+- **Multiple Drivers**: File, Redis, and Null (for testing)
+- **Simple API**: Laravel-like helper functions
+- **Repository Integration**: Built-in trait for easy model caching
+- **Tag-based Cache Clearing**: Flush cache by tags
+- **PSR-16 Compatible**: Standard caching interface
+
+### Configuration
+
+Configure caching in your `.env` file:
+
+```env
+# Cache Driver: file, redis, null
+CACHE_DRIVER=redis
+CACHE_PREFIX=slim_cache
+CACHE_PATH=/var/www/html/storage/cache/data
+
+# Redis Cache Database (separate from queue/session)
+REDIS_CACHE_DATABASE=1
+```
+
+### Usage
+
+#### Helper Functions
+
+```php
+// Store a value
+cache_put('key', 'value', 3600); // TTL in seconds (null = forever)
+
+// Retrieve a value
+$value = cache('key');
+$value = cache('key', 'default'); // With default
+
+// Remember pattern (cache or compute)
+$users = cache_remember('users', 300, function () {
+    return User::all();
+});
+
+// Check existence
+if (cache_has('key')) {
+    // ...
+}
+
+// Delete a value
+cache_forget('key');
+
+// Clear all cache
+cache_flush();
+
+// Clear by tag
+cache_flush('users');
+cache_flush(['users', 'posts']);
+```
+
+#### Dependency Injection
+
+```php
+use App\Modules\Core\Infrastructure\Cache\CacheInterface;
+
+class UserController extends Controller
+{
+    public function __construct(
+        private readonly CacheInterface $cache
+    ) {}
+    
+    public function index(): Response
+    {
+        $users = $this->cache->remember('users', 300, function () {
+            return User::all();
+        });
+        
+        return ApiResponse::success($users);
+    }
+}
+```
+
+#### Repository Caching
+
+```php
+use App\Modules\Core\Infrastructure\Cache\RepositoryCacheExample;
+use App\Modules\Core\Infrastructure\Repositories\EloquentRepository;
+
+class UserRepository extends EloquentRepository
+{
+    use RepositoryCacheExample;
+    
+    protected string $cacheTag = 'users';
+    protected int $repositoryCacheTtl = 600; // 10 minutes
+    
+    protected function model(): string
+    {
+        return User::class;
+    }
+    
+    // Use cached methods
+    public function findCached(int $id): ?User
+    {
+        return $this->findCached($id);
+    }
+    
+    // Custom cached query
+    public function findByEmailCached(string $email): ?User
+    {
+        return $this->remember("email:{$email}", function () use ($email) {
+            return $this->findByEmail($email);
+        });
+    }
+}
+```
+
+#### Cacheable Trait
+
+```php
+use App\Modules\Core\Infrastructure\Cache\Cacheable;
+
+class ProductService
+{
+    use Cacheable;
+    
+    protected string $cacheTag = 'products';
+    protected int $cacheTtl = 3600;
+    
+    public function getFeaturedProducts()
+    {
+        return $this->remember('featured', function () {
+            // Expensive query
+            return Product::featured()->with('category')->get();
+        });
+    }
+    
+    public function clearProductCache()
+    {
+        $this->cacheFlush();
+    }
+}
+```
+
+### Cache Drivers
+
+#### File Driver
+Stores cache in filesystem. Good for single-server setups.
+```env
+CACHE_DRIVER=file
+CACHE_PATH=/var/www/html/storage/cache/data
+```
+
+#### Redis Driver
+Recommended for production and multi-server setups.
+```env
+CACHE_DRIVER=redis
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+REDIS_CACHE_DATABASE=1
+```
+
+#### Null Driver
+Disables caching. Useful for testing.
+```env
+CACHE_DRIVER=null
+```
+
+### CLI Commands
+
+```bash
+# Clear application cache
+php slim cache:clear
+
+# Clear cache by tag
+php slim cache:clear --tag=users
+```
+
+## 🍪 Cookies
+
+The application includes a powerful Cookie Helper with encryption support:
+
+### Features
+
+- **Easy API**: Simple get/set methods with helper functions
+- **Encryption**: AES-256-CBC encryption for sensitive data
+- **Flexible**: Support for arrays, objects, and primitives
+- **Secure**: Configurable secure, httpOnly, and SameSite options
+- **Framework Agnostic**: Works with any PHP application
+
+### Configuration
+
+Configure cookies in your `.env` file:
+
+```env
+# Cookie Settings
+COOKIE_TTL=3600
+COOKIE_PATH=/
+COOKIE_DOMAIN=
+COOKIE_SECURE=true
+COOKIE_HTTP_ONLY=true
+COOKIE_SAME_SITE=Lax
+COOKIE_ENCRYPT=true
+```
+
+### Usage
+
+#### Helper Functions
+
+```php
+// Set a cookie
+cookie_set('user_id', 123, 3600);
+cookie_set('preferences', ['theme' => 'dark'], 86400);
+
+// Get a cookie
+$userId = cookie_get('user_id');
+$userId = cookie_get('user_id', 0); // With default
+
+// Check if exists
+if (cookie_has('user_id')) {
+    // ...
+}
+
+// Delete a cookie
+cookie_delete('user_id');
+
+// Delete all cookies
+cookie_flush();
+
+// Forever cookie (10 years)
+cookie_forever('remember_me', 'yes');
+
+// Remember pattern (get or set)
+$settings = cookie_remember('app_settings', 3600, function () {
+    return Settings::getDefaults();
+});
+```
+
+#### Using the Class Directly
+
+```php
+use App\Modules\Core\Infrastructure\Support\CookieHelper;
+
+$cookie = CookieHelper::getInstance();
+
+// Set with custom options
+$cookie->set('session', $data, 3600, [
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Strict'
+]);
+
+// Get value
+$value = $cookie->get('session');
+
+// Make cookie for Slim Response
+$cookieData = $cookie->make('name', 'value', 3600);
+$response = $response->withHeader('Set-Cookie', 
+    'name=' . $cookieData['value'] . '; Path=' . $cookieData['path']
+);
+```
+
+#### In Controllers
+
+```php
+class UserController extends Controller
+{
+    public function login(Request $request, Response $response): Response
+    {
+        // Set user preference cookie
+        cookie_set('last_login', date('Y-m-d H:i:s'), 86400 * 30);
+        
+        // Set encrypted session data
+        cookie_set('user_prefs', [
+            'theme' => 'dark',
+            'lang' => 'en'
+        ], 3600);
+        
+        return $response;
+    }
+    
+    public function logout(Request $request, Response $response): Response
+    {
+        // Clear user cookies
+        cookie_delete('user_prefs');
+        cookie_delete('last_login');
+        
+        return $response;
+    }
+}
+```
+
+### Cookie Encryption
+
+Cookies are automatically encrypted using AES-256-CBC when `COOKIE_ENCRYPT=true`:
+
+```php
+// Encryption is transparent - works the same way
+$helper = new CookieHelper(encryptionEnabled: true);
+$helper->set('secret', 'sensitive data');
+
+// Automatically decrypted on get
+$data = $helper->get('secret'); // 'sensitive data'
+```
+
+### Security Best Practices
+
+1. **Always use encryption** for sensitive data
+2. **Set httpOnly** to prevent XSS attacks
+3. **Use secure flag** in production (HTTPS only)
+4. **SameSite=Lax** or **Strict** for CSRF protection
+5. **Reasonable TTL** - don't make cookies live forever
+
 ## 📦 Dependencies
 
 ### Core
