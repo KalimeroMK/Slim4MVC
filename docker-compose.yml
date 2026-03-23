@@ -7,12 +7,21 @@ services:
     volumes:
       - .:/var/www/html
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - slim
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   db:
     container_name: slim_db
-    image: mariadb:latest
+    image: mariadb:11
     restart: unless-stopped
     ports:
       - "3307:3306"
@@ -27,19 +36,53 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - slim
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis:
+    container_name: slim_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - slim
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
   nginx:
-    image: nginx:latest
-    container_name: nginx_slim
+    image: nginx:alpine
+    container_name: slim_nginx
     restart: unless-stopped
     ports:
       - "81:80"
     volumes:
       - ./:/var/www/html
       - ./docker/nginx:/etc/nginx/conf.d
+    depends_on:
+      app:
+        condition: service_healthy
     networks:
       - slim
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
 networks:
   slim:
     driver: bridge
+
 volumes:
   db_data:
+  redis_data:
