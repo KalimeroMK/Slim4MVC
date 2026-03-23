@@ -29,20 +29,18 @@ class BladeFactory
 
     private function setupBlade(): void
     {
-        $files = new Filesystem();
-        $config = new Repository([
+        $filesystem = new Filesystem();
+        $repository = new Repository([
             'view.paths' => [__DIR__.'/../../resources/views'],
             'view.compiled' => __DIR__.'/../../storage/cache/view',
         ]);
 
-        $compiler = new BladeCompiler($files, $config->get('view.compiled'));
+        $bladeCompiler = new BladeCompiler($filesystem, $repository->get('view.compiled'));
 
-        $resolver = new EngineResolver();
-        $resolver->register('blade', function () use ($compiler): CompilerEngine {
-            return new CompilerEngine($compiler);
-        });
+        $engineResolver = new EngineResolver();
+        $engineResolver->register('blade', fn (): CompilerEngine => new CompilerEngine($bladeCompiler));
 
-        $finder = new FileViewFinder($files, $config->get('view.paths'));
-        $this->factory = new Factory($resolver, $finder, new Dispatcher);
+        $fileViewFinder = new FileViewFinder($filesystem, $repository->get('view.paths'));
+        $this->factory = new Factory($engineResolver, $fileViewFinder, new Dispatcher);
     }
 }

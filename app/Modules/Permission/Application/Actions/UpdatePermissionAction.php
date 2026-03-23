@@ -9,24 +9,24 @@ use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterfac
 use App\Modules\Permission\Infrastructure\Models\Permission;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
-final class UpdatePermissionAction implements UpdatePermissionActionInterface
+final readonly class UpdatePermissionAction implements UpdatePermissionActionInterface
 {
     public function __construct(
-        private readonly PermissionRepository $repository
+        private PermissionRepository $permissionRepository
     ) {}
 
     /**
      * Execute permission update.
      */
-    public function execute(UpdatePermissionDTO $dto): Permission
+    public function execute(UpdatePermissionDTO $updatePermissionDTO): Permission
     {
         $attributes = [];
-        if ($dto->name !== null) {
-            $attributes['name'] = $dto->name;
+        if ($updatePermissionDTO->name !== null) {
+            $attributes['name'] = $updatePermissionDTO->name;
         }
 
         /** @var Permission $permission */
-        $permission = $this->repository->update($dto->id, $attributes);
+        $permission = $this->permissionRepository->update($updatePermissionDTO->id, $attributes);
 
         return $permission;
     }

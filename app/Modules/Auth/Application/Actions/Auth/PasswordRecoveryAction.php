@@ -10,19 +10,19 @@ use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class PasswordRecoveryAction implements PasswordRecoveryActionInterface
+final readonly class PasswordRecoveryAction implements PasswordRecoveryActionInterface
 {
     public function __construct(
-        private readonly UserRepository $repository,
-        private readonly Dispatcher $dispatcher
+        private UserRepository $userRepository,
+        private Dispatcher $dispatcher
     ) {}
 
     /**
      * Execute password recovery action.
      */
-    public function execute(PasswordRecoveryDTO $dto): void
+    public function execute(PasswordRecoveryDTO $passwordRecoveryDTO): void
     {
-        $user = $this->repository->findByEmail($dto->email);
+        $user = $this->userRepository->findByEmail($passwordRecoveryDTO->email);
 
         if (! $user instanceof \App\Modules\User\Infrastructure\Models\User) {
             // Don't reveal if email exists for security

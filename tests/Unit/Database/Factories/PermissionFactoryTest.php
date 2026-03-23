@@ -8,43 +8,41 @@ use App\Modules\Permission\Infrastructure\Database\Factories\PermissionFactory;
 use App\Modules\Permission\Infrastructure\Models\Permission;
 use Tests\TestCase;
 
-class PermissionFactoryTest extends TestCase
+final class PermissionFactoryTest extends TestCase
 {
     public function test_factory_creates_permission_with_default_attributes(): void
     {
-        $factory = new PermissionFactory();
-        $permission = $factory->create();
+        $permissionFactory = new PermissionFactory();
+        $model = $permissionFactory->create();
 
-        $this->assertInstanceOf(Permission::class, $permission);
-        $this->assertNotNull($permission->id);
-        $this->assertNotNull($permission->name);
-        $this->assertStringContainsString('-', $permission->name);
+        $this->assertInstanceOf(Permission::class, $model);
+        $this->assertNotNull($model->id);
+        $this->assertNotNull($model->name);
+        $this->assertStringContainsString('-', (string) $model->name);
     }
 
     public function test_factory_creates_permission_with_custom_attributes(): void
     {
-        $factory = new PermissionFactory();
-        $permission = $factory->create(['name' => 'custom-permission']);
+        $permissionFactory = new PermissionFactory();
+        $model = $permissionFactory->create(['name' => 'custom-permission']);
 
-        $this->assertEquals('custom-permission', $permission->name);
+        $this->assertEquals('custom-permission', $model->name);
     }
 
     public function test_factory_with_name(): void
     {
-        $factory = new PermissionFactory();
-        $permission = $factory->withName('test-permission')->create();
+        $permissionFactory = new PermissionFactory();
+        $model = $permissionFactory->withName('test-permission')->create();
 
-        $this->assertEquals('test-permission', $permission->name);
+        $this->assertEquals('test-permission', $model->name);
     }
 
     public function test_factory_creates_many_permissions(): void
     {
-        $factory = new PermissionFactory();
-        $permissions = $factory->createMany(4);
+        $permissionFactory = new PermissionFactory();
+        $permissions = $permissionFactory->createMany(4);
 
         $this->assertCount(4, $permissions);
-        foreach ($permissions as $permission) {
-            $this->assertInstanceOf(Permission::class, $permission);
-        }
+        $this->assertContainsOnlyInstancesOf(Permission::class, $permissions);
     }
 }

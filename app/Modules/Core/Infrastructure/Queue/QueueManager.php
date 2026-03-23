@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Queue;
 
+use InvalidArgumentException;
 use Predis\Client;
 
 class QueueManager
 {
-    private string $defaultDriver;
+    private readonly string $defaultDriver;
 
     public function __construct(?string $defaultDriver = null)
     {
@@ -20,12 +21,12 @@ class QueueManager
      */
     public function queue(?string $driver = null, ?string $queueName = null): Queue
     {
-        $driver = $driver ?? $this->defaultDriver;
+        $driver ??= $this->defaultDriver;
 
         return match ($driver) {
             'redis' => $this->createRedisQueue($queueName),
             'file' => $this->createFileQueue(),
-            default => throw new \InvalidArgumentException("Unsupported queue driver: {$driver}"),
+            default => throw new InvalidArgumentException('Unsupported queue driver: '.$driver),
         };
     }
 
@@ -34,10 +35,10 @@ class QueueManager
      */
     private function createRedisQueue(?string $queueName = null): RedisQueue
     {
-        $redis = $this->createRedisClient();
-        $queueName = $queueName ?? $_ENV['QUEUE_NAME'] ?? 'default';
+        $client = $this->createRedisClient();
+        $queueName ??= $_ENV['QUEUE_NAME'] ?? 'default';
 
-        return new RedisQueue($redis, $queueName);
+        return new RedisQueue($client, $queueName);
     }
 
     /**
@@ -71,4 +72,3 @@ class QueueManager
         return new Client($parameters);
     }
 }
-

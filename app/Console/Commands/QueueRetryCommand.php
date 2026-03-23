@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Modules\Core\Infrastructure\Queue\FailedJob;
-use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -53,7 +52,7 @@ class QueueRetryCommand extends Command
         $failedJob = FailedJob::find($id);
 
         if ($failedJob === null) {
-            $output->writeln("<error>Failed job with ID {$id} not found</error>");
+            $output->writeln(sprintf('<error>Failed job with ID %d not found</error>', $id));
 
             return Command::FAILURE;
         }
@@ -61,12 +60,12 @@ class QueueRetryCommand extends Command
         $queue = $this->queueManager->queue();
 
         if ($failedJob->retry($queue)) {
-            $output->writeln("<info>✓ Retried failed job #{$id}</info>");
+            $output->writeln(sprintf('<info>✓ Retried failed job #%d</info>', $id));
 
             return Command::SUCCESS;
         }
 
-        $output->writeln("<error>✗ Failed to retry job #{$id}</error>");
+        $output->writeln(sprintf('<error>✗ Failed to retry job #%d</error>', $id));
 
         return Command::FAILURE;
     }
@@ -86,13 +85,12 @@ class QueueRetryCommand extends Command
             }
         }
 
-        $output->writeln("<info>✓ Retried {$retried} jobs</info>");
+        $output->writeln(sprintf('<info>✓ Retried %d jobs</info>', $retried));
 
         if ($failed > 0) {
-            $output->writeln("<error>✗ Failed to retry {$failed} jobs</error>");
+            $output->writeln(sprintf('<error>✗ Failed to retry %d jobs</error>', $failed));
         }
 
         return Command::SUCCESS;
     }
 }
-

@@ -15,13 +15,11 @@ use stdClass;
  */
 class JwtService
 {
-    private JwtEncoder $encoder;
+    private readonly JwtEncoder $jwtEncoder;
 
-    private JwtDecoder $decoder;
+    private readonly JwtDecoder $jwtDecoder;
 
-    private string $secret;
-
-    private string $algorithm;
+    private readonly string $secret;
 
     /**
      * @param  string|null  $secret  The JWT secret key (defaults to JWT_SECRET env var)
@@ -29,11 +27,10 @@ class JwtService
      *
      * @throws RuntimeException If secret is not configured
      */
-    public function __construct(?string $secret = null, string $algorithm = 'HS256')
+    public function __construct(?string $secret = null, private readonly string $algorithm = 'HS256')
     {
-        $this->encoder = new JwtEncoder();
-        $this->decoder = new JwtDecoder();
-        $this->algorithm = $algorithm;
+        $this->jwtEncoder = new JwtEncoder();
+        $this->jwtDecoder = new JwtDecoder();
         $this->secret = $secret ?? $_ENV['JWT_SECRET'] ?? '';
 
         if ($this->secret === '' || $this->secret === '0') {
@@ -56,7 +53,7 @@ class JwtService
             $payload['exp'] = time() + $expirationTime;
         }
 
-        return $this->encoder->encode($payload, $this->secret, $this->algorithm);
+        return $this->jwtEncoder->encode($payload, $this->secret, $this->algorithm);
     }
 
     /**
@@ -69,7 +66,7 @@ class JwtService
      */
     public function decode(string $token): stdClass
     {
-        return $this->decoder->decode($token, $this->secret, $this->algorithm);
+        return $this->jwtDecoder->decode($token, $this->secret, $this->algorithm);
     }
 
     /**

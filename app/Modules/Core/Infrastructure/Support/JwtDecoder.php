@@ -32,7 +32,7 @@ class JwtDecoder
         }
 
         if ($algorithm !== 'HS256') {
-            throw new RuntimeException("Unsupported algorithm: {$algorithm}. Only HS256 is supported.");
+            throw new RuntimeException(sprintf('Unsupported algorithm: %s. Only HS256 is supported.', $algorithm));
         }
 
         $parts = explode('.', $token);
@@ -47,11 +47,11 @@ class JwtDecoder
         $header = json_decode($this->base64UrlDecode($headerEncoded), false, 512, JSON_THROW_ON_ERROR);
 
         if (! isset($header->alg) || $header->alg !== $algorithm) {
-            throw new RuntimeException("Token algorithm mismatch. Expected: {$algorithm}, Got: {$header->alg}");
+            throw new RuntimeException(sprintf('Token algorithm mismatch. Expected: %s, Got: %s', $algorithm, $header->alg));
         }
 
         // Verify signature
-        $expectedSignature = hash_hmac('sha256', "{$headerEncoded}.{$payloadEncoded}", $secret, true);
+        $expectedSignature = hash_hmac('sha256', sprintf('%s.%s', $headerEncoded, $payloadEncoded), $secret, true);
         $expectedSignatureEncoded = $this->base64UrlEncode($expectedSignature);
 
         if (! hash_equals($expectedSignatureEncoded, $signatureEncoded)) {

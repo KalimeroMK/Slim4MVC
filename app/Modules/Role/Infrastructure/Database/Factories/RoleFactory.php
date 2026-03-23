@@ -20,7 +20,7 @@ class RoleFactory extends Factory
      */
     public function withPermissions(array $permissions): Role
     {
-        $role = $this->create();
+        $model = $this->create();
         $permissionIds = [];
 
         foreach ($permissions as $permission) {
@@ -35,10 +35,10 @@ class RoleFactory extends Factory
         }
 
         if ($permissionIds !== []) {
-            $role->permissions()->attach($permissionIds);
+            $model->permissions()->attach($permissionIds);
         }
 
-        return $role->fresh();
+        return $model->fresh();
     }
 
     protected function model(): string

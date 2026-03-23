@@ -11,45 +11,45 @@ use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
 use App\Modules\Core\Infrastructure\Exceptions\UnauthorizedException;
 use PHPUnit\Framework\TestCase;
 
-class ExceptionTest extends TestCase
+final class ExceptionTest extends TestCase
 {
     public function test_not_found_exception_has_correct_code(): void
     {
-        $exception = new NotFoundException('Test message');
+        $notFoundException = new NotFoundException('Test message');
 
-        $this->assertEquals(404, $exception->getCode());
-        $this->assertEquals('Test message', $exception->getMessage());
+        $this->assertEquals(404, $notFoundException->getCode());
+        $this->assertSame('Test message', $notFoundException->getMessage());
     }
 
     public function test_unauthorized_exception_has_correct_code(): void
     {
-        $exception = new UnauthorizedException('Test message');
+        $unauthorizedException = new UnauthorizedException('Test message');
 
-        $this->assertEquals(401, $exception->getCode());
-        $this->assertEquals('Test message', $exception->getMessage());
+        $this->assertEquals(401, $unauthorizedException->getCode());
+        $this->assertSame('Test message', $unauthorizedException->getMessage());
     }
 
     public function test_forbidden_exception_has_correct_code(): void
     {
-        $exception = new ForbiddenException('Test message');
+        $forbiddenException = new ForbiddenException('Test message');
 
-        $this->assertEquals(403, $exception->getCode());
-        $this->assertEquals('Test message', $exception->getMessage());
+        $this->assertEquals(403, $forbiddenException->getCode());
+        $this->assertSame('Test message', $forbiddenException->getMessage());
     }
 
     public function test_bad_request_exception_has_correct_code(): void
     {
-        $exception = new BadRequestException('Test message');
+        $badRequestException = new BadRequestException('Test message');
 
-        $this->assertEquals(400, $exception->getCode());
-        $this->assertEquals('Test message', $exception->getMessage());
+        $this->assertEquals(400, $badRequestException->getCode());
+        $this->assertSame('Test message', $badRequestException->getMessage());
     }
 
     public function test_invalid_credentials_exception_has_correct_code(): void
     {
-        $exception = new InvalidCredentialsException('Test message');
+        $invalidCredentialsException = new InvalidCredentialsException('Test message');
 
-        $this->assertEquals(401, $exception->getCode());
-        $this->assertEquals('Test message', $exception->getMessage());
+        $this->assertEquals(401, $invalidCredentialsException->getCode());
+        $this->assertSame('Test message', $invalidCredentialsException->getMessage());
     }
 }

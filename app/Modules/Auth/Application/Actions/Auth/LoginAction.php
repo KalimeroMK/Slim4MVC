@@ -11,11 +11,11 @@ use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use RuntimeException;
 
-final class LoginAction implements LoginActionInterface
+final readonly class LoginAction implements LoginActionInterface
 {
     public function __construct(
-        private readonly UserRepository $repository,
-        private readonly JwtService $jwtService
+        private UserRepository $userRepository,
+        private JwtService $jwtService
     ) {}
 
     /**
@@ -26,11 +26,11 @@ final class LoginAction implements LoginActionInterface
      * @throws InvalidCredentialsException
      * @throws RuntimeException
      */
-    public function execute(LoginDTO $dto): array
+    public function execute(LoginDTO $loginDTO): array
     {
-        $user = $this->repository->findByEmail($dto->email);
+        $user = $this->userRepository->findByEmail($loginDTO->email);
 
-        if (! $user || ! password_verify($dto->password, $user->password)) {
+        if (! $user || ! password_verify($loginDTO->password, (string) $user->password)) {
             throw new InvalidCredentialsException('Invalid credentials');
         }
 

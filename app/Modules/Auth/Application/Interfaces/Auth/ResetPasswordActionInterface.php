@@ -11,5 +11,5 @@ interface ResetPasswordActionInterface
     /**
      * Execute password reset action.
      */
-    public function execute(ResetPasswordDTO $dto): void;
+    public function execute(ResetPasswordDTO $resetPasswordDTO): void;
 }

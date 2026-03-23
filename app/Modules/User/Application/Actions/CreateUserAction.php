@@ -8,10 +8,10 @@ use App\Modules\User\Application\DTOs\CreateUserDTO;
 use App\Modules\User\Application\Interfaces\CreateUserActionInterface;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class CreateUserAction implements CreateUserActionInterface
+final readonly class CreateUserAction implements CreateUserActionInterface
 {
     public function __construct(
-        private readonly UserRepository $repository
+        private UserRepository $userRepository
     ) {}
 
     /**
@@ -19,13 +19,13 @@ final class CreateUserAction implements CreateUserActionInterface
      *
      * @return array<string, mixed>
      */
-    public function execute(CreateUserDTO $dto): array
+    public function execute(CreateUserDTO $createUserDTO): array
     {
         // Hash the password and create user
-        $user = $this->repository->create([
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => password_hash($dto->password, PASSWORD_BCRYPT),
+        $user = $this->userRepository->create([
+            'name' => $createUserDTO->name,
+            'email' => $createUserDTO->email,
+            'password' => password_hash($createUserDTO->password, PASSWORD_BCRYPT),
         ]);
 
         return $user->toArray();

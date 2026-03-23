@@ -6,10 +6,10 @@ namespace App\Modules\Permission\Application\Actions;
 
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
-final class DeletePermissionAction
+final readonly class DeletePermissionAction
 {
     public function __construct(
-        private readonly PermissionRepository $repository
+        private PermissionRepository $permissionRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class DeletePermissionAction
      */
     public function execute(int $id): void
     {
-        $this->repository->delete($id);
+        $this->permissionRepository->delete($id);
     }
 }

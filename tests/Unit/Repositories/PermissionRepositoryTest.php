@@ -8,14 +8,14 @@ use App\Modules\Permission\Infrastructure\Models\Permission;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 use Tests\TestCase;
 
-class PermissionRepositoryTest extends TestCase
+final class PermissionRepositoryTest extends TestCase
 {
-    private PermissionRepository $repository;
+    private PermissionRepository $permissionRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new PermissionRepository();
+        $this->permissionRepository = new PermissionRepository();
     }
 
     public function test_all_returns_all_permissions(): void
@@ -23,7 +23,7 @@ class PermissionRepositoryTest extends TestCase
         Permission::create(['name' => 'Permission 1']);
         Permission::create(['name' => 'Permission 2']);
 
-        $permissions = $this->repository->all();
+        $permissions = $this->permissionRepository->all();
 
         $this->assertCount(2, $permissions);
     }
@@ -32,7 +32,7 @@ class PermissionRepositoryTest extends TestCase
     {
         $permission = Permission::create(['name' => 'Test Permission']);
 
-        $found = $this->repository->find($permission->id);
+        $found = $this->permissionRepository->find($permission->id);
 
         $this->assertNotNull($found);
         $this->assertEquals($permission->id, $found->id);
@@ -41,7 +41,7 @@ class PermissionRepositoryTest extends TestCase
 
     public function test_create_creates_new_permission(): void
     {
-        $permission = $this->repository->create(['name' => 'New Permission']);
+        $permission = $this->permissionRepository->create(['name' => 'New Permission']);
 
         $this->assertInstanceOf(Permission::class, $permission);
         $this->assertEquals('New Permission', $permission->name);
@@ -52,7 +52,7 @@ class PermissionRepositoryTest extends TestCase
     {
         $permission = Permission::create(['name' => 'Old Name']);
 
-        $updated = $this->repository->update($permission->id, ['name' => 'New Name']);
+        $updated = $this->permissionRepository->update($permission->id, ['name' => 'New Name']);
 
         $this->assertEquals('New Name', $updated->name);
         $this->assertDatabaseHas('permissions', ['id' => $permission->id, 'name' => 'New Name']);
@@ -62,7 +62,7 @@ class PermissionRepositoryTest extends TestCase
     {
         $permission = Permission::create(['name' => 'To Delete']);
 
-        $result = $this->repository->delete($permission->id);
+        $result = $this->permissionRepository->delete($permission->id);
 
         $this->assertTrue($result);
         $this->assertDatabaseMissing('permissions', ['id' => $permission->id]);
@@ -72,7 +72,7 @@ class PermissionRepositoryTest extends TestCase
     {
         $permission = Permission::create(['name' => 'Find Me']);
 
-        $found = $this->repository->findByName('Find Me');
+        $found = $this->permissionRepository->findByName('Find Me');
 
         $this->assertNotNull($found);
         $this->assertEquals($permission->id, $found->id);
@@ -80,7 +80,7 @@ class PermissionRepositoryTest extends TestCase
 
     public function test_find_by_name_returns_null_when_not_found(): void
     {
-        $found = $this->repository->findByName('Nonexistent');
+        $found = $this->permissionRepository->findByName('Nonexistent');
 
         $this->assertNull($found);
     }

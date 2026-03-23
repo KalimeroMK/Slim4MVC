@@ -20,30 +20,30 @@ class Mailer
         string $template,
         array $data = []
     ): bool {
-        $mail = new PHPMailer(true);
+        $phpMailer = new PHPMailer(true);
 
         try {
             // SMTP settings
-            $mail->isSMTP();
-            $mail->Host = $_ENV['MAIL_HOST'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $_ENV['MAIL_USERNAME'];
-            $mail->Password = $_ENV['MAIL_PASSWORD'];
-            $mail->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
-            $mail->Port = (int) $_ENV['MAIL_PORT'];
+            $phpMailer->isSMTP();
+            $phpMailer->Host = $_ENV['MAIL_HOST'];
+            $phpMailer->SMTPAuth = true;
+            $phpMailer->Username = $_ENV['MAIL_USERNAME'];
+            $phpMailer->Password = $_ENV['MAIL_PASSWORD'];
+            $phpMailer->SMTPSecure = $_ENV['MAIL_ENCRYPTION'];
+            $phpMailer->Port = (int) $_ENV['MAIL_PORT'];
 
-            $mail->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
-            $mail->addAddress($to);
+            $phpMailer->setFrom($_ENV['MAIL_FROM_ADDRESS'], $_ENV['MAIL_FROM_NAME']);
+            $phpMailer->addAddress($to);
 
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
+            $phpMailer->isHTML(true);
+            $phpMailer->Subject = $subject;
 
             $html = $this->blade->make($template, $data);
-            $mail->Body = $html;
+            $phpMailer->Body = $html;
 
-            return $mail->send();
-        } catch (Exception $e) {
-            error_log('MailService error: '.$mail->ErrorInfo);
+            return $phpMailer->send();
+        } catch (Exception) {
+            error_log('MailService error: '.$phpMailer->ErrorInfo);
 
             return false;
         }

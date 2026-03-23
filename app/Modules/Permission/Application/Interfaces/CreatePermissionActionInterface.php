@@ -14,5 +14,5 @@ interface CreatePermissionActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(CreatePermissionDTO $dto): ?array;
+    public function execute(CreatePermissionDTO $createPermissionDTO): ?array;
 }

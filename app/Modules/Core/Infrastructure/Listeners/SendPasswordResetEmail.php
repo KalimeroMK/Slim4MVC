@@ -14,19 +14,19 @@ class SendPasswordResetEmail
         private readonly Queue $queue
     ) {}
 
-    public function handle(PasswordResetRequested $event): void
+    public function handle(PasswordResetRequested $passwordResetRequested): void
     {
         $appUrl = $_ENV['APP_URL'] ?? 'http://localhost:81';
 
         // Queue the email job instead of sending synchronously
         $this->queue->push(new SendEmailJob(
-            $event->user->email,
+            $passwordResetRequested->user->email,
             'Password Reset Request',
             'email.password-reset',
             [
-                'user' => $event->user,
-                'token' => $event->token,
-                'resetUrl' => mb_rtrim($appUrl, '/').'/reset-password/'.$event->token,
+                'user' => $passwordResetRequested->user,
+                'token' => $passwordResetRequested->token,
+                'resetUrl' => mb_rtrim($appUrl, '/').'/reset-password/'.$passwordResetRequested->token,
             ]
         ));
     }

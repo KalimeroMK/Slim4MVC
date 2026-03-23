@@ -8,10 +8,10 @@ use App\Modules\User\Application\DTOs\UpdateUserDTO;
 use App\Modules\User\Application\Interfaces\UpdateUserActionInterface;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class UpdateUserAction implements UpdateUserActionInterface
+final readonly class UpdateUserAction implements UpdateUserActionInterface
 {
     public function __construct(
-        private readonly UserRepository $repository
+        private UserRepository $userRepository
     ) {}
 
     /**
@@ -19,17 +19,18 @@ final class UpdateUserAction implements UpdateUserActionInterface
      *
      * @return array<string, mixed>
      */
-    public function execute(UpdateUserDTO $dto): array
+    public function execute(UpdateUserDTO $updateUserDTO): array
     {
         $attributes = [];
-        if ($dto->name !== null) {
-            $attributes['name'] = $dto->name;
-        }
-        if ($dto->email !== null) {
-            $attributes['email'] = $dto->email;
+        if ($updateUserDTO->name !== null) {
+            $attributes['name'] = $updateUserDTO->name;
         }
 
-        $user = $this->repository->update($dto->id, $attributes);
+        if ($updateUserDTO->email !== null) {
+            $attributes['email'] = $updateUserDTO->email;
+        }
+
+        $user = $this->userRepository->update($updateUserDTO->id, $attributes);
 
         return $user->toArray();
     }

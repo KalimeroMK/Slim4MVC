@@ -13,12 +13,7 @@ use Psr\Http\Server\RequestHandlerInterface as Handler;
 
 class AuthMiddleware implements MiddlewareInterface
 {
-    protected Auth $auth;
-
-    public function __construct(Auth $auth)
-    {
-        $this->auth = $auth;
-    }
+    public function __construct(protected Auth $auth) {}
 
     public function process(Request $request, Handler $handler): Response
     {

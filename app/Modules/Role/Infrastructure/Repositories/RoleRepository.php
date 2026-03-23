@@ -31,15 +31,15 @@ class RoleRepository extends EloquentRepository
      */
     public function paginateWithPermissions(int $page = 1, int $perPage = 15): array
     {
-        $paginator = Role::with('permissions')
+        $lengthAwarePaginator = Role::with('permissions')
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return [
-            'items' => $paginator->items(),
-            'total' => $paginator->total(),
-            'page' => $paginator->currentPage(),
-            'perPage' => $paginator->perPage(),
+            'items' => $lengthAwarePaginator->items(),
+            'total' => $lengthAwarePaginator->total(),
+            'page' => $lengthAwarePaginator->currentPage(),
+            'perPage' => $lengthAwarePaginator->perPage(),
         ];
     }
 

@@ -8,24 +8,24 @@ use App\Modules\Role\Infrastructure\Database\Factories\RoleFactory;
 use App\Modules\Role\Infrastructure\Models\Role;
 use Tests\TestCase;
 
-class RoleFactoryTest extends TestCase
+final class RoleFactoryTest extends TestCase
 {
     public function test_factory_creates_role_with_default_attributes(): void
     {
-        $factory = new RoleFactory();
-        $role = $factory->create();
+        $roleFactory = new RoleFactory();
+        $model = $roleFactory->create();
 
-        $this->assertInstanceOf(Role::class, $role);
-        $this->assertNotNull($role->id);
-        $this->assertNotNull($role->name);
+        $this->assertInstanceOf(Role::class, $model);
+        $this->assertNotNull($model->id);
+        $this->assertNotNull($model->name);
     }
 
     public function test_factory_creates_role_with_custom_attributes(): void
     {
-        $factory = new RoleFactory();
-        $role = $factory->create(['name' => 'custom-role']);
+        $roleFactory = new RoleFactory();
+        $model = $roleFactory->create(['name' => 'custom-role']);
 
-        $this->assertEquals('custom-role', $role->name);
+        $this->assertEquals('custom-role', $model->name);
     }
 
     public function test_factory_with_permissions(): void
@@ -33,8 +33,8 @@ class RoleFactoryTest extends TestCase
         $permission1 = $this->createPermission(['name' => 'create-users']);
         $permission2 = $this->createPermission(['name' => 'edit-users']);
 
-        $factory = new RoleFactory();
-        $role = $factory->withPermissions([$permission1->id, $permission2->id]);
+        $roleFactory = new RoleFactory();
+        $role = $roleFactory->withPermissions([$permission1->id, $permission2->id]);
 
         $this->assertCount(2, $role->permissions);
         $this->assertTrue($role->permissions->contains('id', $permission1->id));
@@ -46,8 +46,8 @@ class RoleFactoryTest extends TestCase
         $permission1 = $this->createPermission(['name' => 'delete-users']);
         $permission2 = $this->createPermission(['name' => 'view-users']);
 
-        $factory = new RoleFactory();
-        $role = $factory->withPermissions(['delete-users', 'view-users']);
+        $roleFactory = new RoleFactory();
+        $role = $roleFactory->withPermissions(['delete-users', 'view-users']);
 
         $this->assertCount(2, $role->permissions);
         $this->assertTrue($role->permissions->contains('id', $permission1->id));
@@ -56,12 +56,10 @@ class RoleFactoryTest extends TestCase
 
     public function test_factory_creates_many_roles(): void
     {
-        $factory = new RoleFactory();
-        $roles = $factory->createMany(3);
+        $roleFactory = new RoleFactory();
+        $roles = $roleFactory->createMany(3);
 
         $this->assertCount(3, $roles);
-        foreach ($roles as $role) {
-            $this->assertInstanceOf(Role::class, $role);
-        }
+        $this->assertContainsOnlyInstancesOf(Role::class, $roles);
     }
 }

@@ -9,10 +9,10 @@ use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
 use App\Modules\Core\Infrastructure\Support\Auth;
 use RuntimeException;
 
-final class WebLoginAction implements WebLoginActionInterface
+final readonly class WebLoginAction implements WebLoginActionInterface
 {
     public function __construct(
-        private readonly Auth $auth
+        private Auth $auth
     ) {}
 
     /**
@@ -20,9 +20,9 @@ final class WebLoginAction implements WebLoginActionInterface
      *
      * @throws RuntimeException
      */
-    public function execute(LoginDTO $dto): void
+    public function execute(LoginDTO $loginDTO): void
     {
-        if (! $this->auth->attempt($dto->email, $dto->password)) {
+        if (! $this->auth->attempt($loginDTO->email, $loginDTO->password)) {
             throw new RuntimeException('Invalid credentials');
         }
     }

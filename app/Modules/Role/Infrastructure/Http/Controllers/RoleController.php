@@ -28,11 +28,11 @@ class RoleController extends Controller
 
     public function __construct(
         ContainerInterface $container,
-        private readonly CreateRoleAction $createAction,
-        private readonly UpdateRoleAction $updateAction,
-        private readonly DeleteRoleAction $deleteAction,
-        private readonly GetRoleAction $getAction,
-        private readonly ListRolesAction $listAction
+        private readonly CreateRoleAction $createRoleAction,
+        private readonly UpdateRoleAction $updateRoleAction,
+        private readonly DeleteRoleAction $deleteRoleAction,
+        private readonly GetRoleAction $getRoleAction,
+        private readonly ListRolesAction $listRolesAction
     ) {
         parent::__construct($container);
     }
@@ -45,7 +45,7 @@ class RoleController extends Controller
     public function index(Request $request, Response $response): Response
     {
         $params = $this->getPaginationParams();
-        $result = $this->listAction->execute($params['page'], $params['perPage']);
+        $result = $this->listRolesAction->execute($params['page'], $params['perPage']);
 
         $items = RoleResource::collection($result['items']);
 
@@ -59,10 +59,10 @@ class RoleController extends Controller
         );
     }
 
-    public function store(CreateRoleRequest $request, Response $response): Response
+    public function store(CreateRoleRequest $createRoleRequest, Response $response): Response
     {
-        $roleData = $this->createAction->execute(
-            CreateRoleDTO::fromRequest($request->validated())
+        $roleData = $this->createRoleAction->execute(
+            CreateRoleDTO::fromRequest($createRoleRequest->validated())
         );
 
         // CreateRoleAction returns Role model (load() returns the model, not array)
@@ -75,15 +75,15 @@ class RoleController extends Controller
 
     public function show(Request $request, Response $response, array $args): Response
     {
-        $role = $this->getAction->execute($this->getParamAsInt($args, 'id'));
+        $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(RoleResource::make($role));
     }
 
-    public function update(UpdateRoleRequest $request, Response $response, array $args): Response
+    public function update(UpdateRoleRequest $updateRoleRequest, Response $response, array $args): Response
     {
-        $this->updateAction->execute(
-            UpdateRoleDTO::fromRequest($request->validated())
+        $this->updateRoleAction->execute(
+            UpdateRoleDTO::fromRequest($updateRoleRequest->validated())
         );
 
         // Reload role with relationships for resource
@@ -94,7 +94,7 @@ class RoleController extends Controller
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
+        $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Role deleted successfully');
     }

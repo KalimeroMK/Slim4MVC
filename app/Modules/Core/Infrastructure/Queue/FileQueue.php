@@ -9,11 +9,11 @@ use Exception;
 
 class FileQueue implements Queue
 {
-    private string $queueFile;
+    private readonly string $queueFile;
 
     public function __construct(?string $queuePath = null)
     {
-        $queuePath = $queuePath ?? dirname(__DIR__, 2).'/storage/queue/jobs.json';
+        $queuePath ??= dirname(__DIR__, 2).'/storage/queue/jobs.json';
         $this->queueFile = $queuePath;
 
         // Ensure directory exists
@@ -32,7 +32,7 @@ class FileQueue implements Queue
     {
         $jobs = $this->loadJobs();
         $jobs[] = [
-            'class' => get_class($job),
+            'class' => $job::class,
             'data' => serialize($job),
             'created_at' => time(),
         ];
@@ -52,7 +52,7 @@ class FileQueue implements Queue
 
         try {
             return unserialize($jobData['data']);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
     }

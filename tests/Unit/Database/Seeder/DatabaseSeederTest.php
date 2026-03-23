@@ -7,12 +7,12 @@ namespace Tests\Unit\Database\Seeder;
 use Database\Seed\DatabaseSeeder;
 use Tests\TestCase;
 
-class DatabaseSeederTest extends TestCase
+final class DatabaseSeederTest extends TestCase
 {
     public function test_seeder_creates_roles(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $this->assertDatabaseHas('roles', ['name' => 'admin']);
         $this->assertDatabaseHas('roles', ['name' => 'manager']);
@@ -21,8 +21,8 @@ class DatabaseSeederTest extends TestCase
 
     public function test_seeder_creates_permissions(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $this->assertDatabaseHas('permissions', ['name' => 'list-admin']);
         $this->assertDatabaseHas('permissions', ['name' => 'create-manager']);
@@ -31,8 +31,8 @@ class DatabaseSeederTest extends TestCase
 
     public function test_seeder_creates_users(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $this->assertDatabaseHas('users', ['email' => 'admin@demo.com']);
         $this->assertDatabaseHas('users', ['email' => 'manager@demo.com']);
@@ -41,8 +41,8 @@ class DatabaseSeederTest extends TestCase
 
     public function test_seeder_assigns_roles_to_users(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $adminUser = \App\Modules\User\Infrastructure\Models\User::where('email', 'admin@demo.com')->first();
         $this->assertNotNull($adminUser);
@@ -55,8 +55,8 @@ class DatabaseSeederTest extends TestCase
 
     public function test_seeder_attaches_permissions_to_roles(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $adminRole = \App\Modules\Role\Infrastructure\Models\Role::where('name', 'admin')->first();
         $this->assertNotNull($adminRole);
@@ -65,8 +65,8 @@ class DatabaseSeederTest extends TestCase
 
     public function test_seeder_creates_additional_fake_users(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
 
         $userCount = \App\Modules\User\Infrastructure\Models\User::count();
         $this->assertGreaterThanOrEqual(13, $userCount); // 3 demo + 10 fake

@@ -12,25 +12,17 @@ use Slim\Routing\RouteContext;
 
 class CheckPermissionMiddleware
 {
-    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function __invoke(ServerRequestInterface $serverRequest, RequestHandlerInterface $requestHandler): ResponseInterface
     {
-        $user = $request->getAttribute('user');
-        $route = RouteContext::fromRequest($request)->getRoute();
+        $user = $serverRequest->getAttribute('user');
+        $route = RouteContext::fromRequest($serverRequest)->getRoute();
         $permissions = $route->getArgument('permissions');
 
         // Convert single permission to array
         if (! is_array($permissions)) {
             $permissions = [$permissions];
         }
-
-        // Check if user has any of the required permissions
-        $hasPermission = false;
-        foreach ($permissions as $permission) {
-            if ($user && $user->hasPermission($permission)) {
-                $hasPermission = true;
-                break;
-            }
-        }
+        $hasPermission = array_any($permissions, fn ($permission): bool => $user && $user->hasPermission($permission));
 
         if (! $hasPermission) {
             $response = new Response();
@@ -44,6 +36,6 @@ class CheckPermissionMiddleware
                 ->withStatus(403);
         }
 
-        return $handler->handle($request);
+        return $requestHandler->handle($serverRequest);
     }
 }

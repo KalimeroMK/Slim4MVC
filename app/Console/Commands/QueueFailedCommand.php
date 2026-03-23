@@ -23,7 +23,7 @@ class QueueFailedCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $io = new SymfonyStyle($input, $output);
+        $symfonyStyle = new SymfonyStyle($input, $output);
         $limit = (int) $input->getOption('limit');
 
         $failedJobs = FailedJob::orderBy('failed_at', 'desc')
@@ -31,12 +31,12 @@ class QueueFailedCommand extends Command
             ->get();
 
         if ($failedJobs->isEmpty()) {
-            $io->success('No failed jobs found.');
+            $symfonyStyle->success('No failed jobs found.');
 
             return Command::SUCCESS;
         }
 
-        $io->title('Failed Jobs');
+        $symfonyStyle->title('Failed Jobs');
 
         $rows = [];
         foreach ($failedJobs as $failedJob) {
@@ -50,15 +50,14 @@ class QueueFailedCommand extends Command
             ];
         }
 
-        $io->table(
+        $symfonyStyle->table(
             ['ID', 'Job Class', 'Exception', 'Message', 'Failed At', 'Attempts'],
             $rows
         );
 
         $total = FailedJob::count();
-        $io->note("Total failed jobs: {$total}");
+        $symfonyStyle->note('Total failed jobs: '.$total);
 
         return Command::SUCCESS;
     }
 }
-

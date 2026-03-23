@@ -8,55 +8,55 @@ use App\Modules\User\Infrastructure\Database\Factories\UserFactory;
 use App\Modules\User\Infrastructure\Models\User;
 use Tests\TestCase;
 
-class UserFactoryTest extends TestCase
+final class UserFactoryTest extends TestCase
 {
     public function test_factory_creates_user_with_default_attributes(): void
     {
-        $factory = new UserFactory();
-        $user = $factory->create();
+        $userFactory = new UserFactory();
+        $model = $userFactory->create();
 
-        $this->assertInstanceOf(User::class, $user);
-        $this->assertNotNull($user->id);
-        $this->assertNotNull($user->name);
-        $this->assertNotNull($user->email);
-        $this->assertNotNull($user->password);
-        $this->assertTrue(password_verify('password', $user->password));
+        $this->assertInstanceOf(User::class, $model);
+        $this->assertNotNull($model->id);
+        $this->assertNotNull($model->name);
+        $this->assertNotNull($model->email);
+        $this->assertNotNull($model->password);
+        $this->assertTrue(password_verify('password', $model->password));
     }
 
     public function test_factory_creates_user_with_custom_attributes(): void
     {
-        $factory = new UserFactory();
-        $user = $factory->create([
+        $userFactory = new UserFactory();
+        $model = $userFactory->create([
             'name' => 'John Doe',
             'email' => 'john@example.com',
         ]);
 
-        $this->assertEquals('John Doe', $user->name);
-        $this->assertEquals('john@example.com', $user->email);
+        $this->assertEquals('John Doe', $model->name);
+        $this->assertEquals('john@example.com', $model->email);
     }
 
     public function test_factory_unverified_state(): void
     {
-        $factory = new UserFactory();
-        $user = $factory->unverified()->create();
+        $userFactory = new UserFactory();
+        $model = $userFactory->unverified()->create();
 
-        $this->assertNull($user->email_verified_at);
+        $this->assertNull($model->email_verified_at);
     }
 
     public function test_factory_with_custom_password(): void
     {
-        $factory = new UserFactory();
-        $user = $factory->withPassword('custom-password')->create();
+        $userFactory = new UserFactory();
+        $model = $userFactory->withPassword('custom-password')->create();
 
-        $this->assertTrue(password_verify('custom-password', $user->password));
+        $this->assertTrue(password_verify('custom-password', $model->password));
     }
 
     public function test_factory_with_role(): void
     {
         $role = $this->createRole(['name' => 'admin']);
 
-        $factory = new UserFactory();
-        $user = $factory->withRole($role->id);
+        $userFactory = new UserFactory();
+        $user = $userFactory->withRole($role->id);
 
         $this->assertNotNull($user);
         $user->load('roles');
@@ -67,8 +67,8 @@ class UserFactoryTest extends TestCase
     {
         $role = $this->createRole(['name' => 'manager']);
 
-        $factory = new UserFactory();
-        $user = $factory->withRole('manager');
+        $userFactory = new UserFactory();
+        $user = $userFactory->withRole('manager');
 
         $this->assertNotNull($user);
         $user->load('roles');
@@ -77,12 +77,10 @@ class UserFactoryTest extends TestCase
 
     public function test_factory_creates_many_users(): void
     {
-        $factory = new UserFactory();
-        $users = $factory->createMany(5);
+        $userFactory = new UserFactory();
+        $users = $userFactory->createMany(5);
 
         $this->assertCount(5, $users);
-        foreach ($users as $user) {
-            $this->assertInstanceOf(User::class, $user);
-        }
+        $this->assertContainsOnlyInstancesOf(User::class, $users);
     }
 }

@@ -24,23 +24,23 @@ class MakeModuleCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $moduleName = ucfirst($input->getArgument('name'));
-        $modelName = $input->getOption('model') ? ucfirst($input->getOption('model')) : $moduleName;
+        $moduleName = ucfirst((string) $input->getArgument('name'));
+        $modelName = $input->getOption('model') ? ucfirst((string) $input->getOption('model')) : $moduleName;
         $createMigration = $input->getOption('migration');
 
         // Get project root (3 levels up from app/Console/Commands)
         $projectRoot = dirname(__DIR__, 3);
-        $modulePath = "$projectRoot/app/Modules/$moduleName";
-        $stubPath = "$projectRoot/stubs/Module";
+        $modulePath = sprintf('%s/app/Modules/%s', $projectRoot, $moduleName);
+        $stubPath = $projectRoot.'/stubs/Module';
 
         // Check if module already exists
         if (is_dir($modulePath)) {
-            $output->writeln("<error>Module '$moduleName' already exists!</error>");
+            $output->writeln(sprintf("<error>Module '%s' already exists!</error>", $moduleName));
 
             return Command::FAILURE;
         }
 
-        $output->writeln("<info>Creating module '$moduleName'...</info>");
+        $output->writeln(sprintf("<info>Creating module '%s'...</info>", $moduleName));
 
         // Create directory structure
         $this->createDirectories($modulePath, $output);
@@ -59,7 +59,7 @@ class MakeModuleCommand extends Command
         // Register dependencies (Action Interfaces and Repositories)
         $this->registerDependencies($moduleName, $modelName, $output, $projectRoot);
 
-        $output->writeln("<info>Module '$moduleName' created successfully!</info>");
+        $output->writeln(sprintf("<info>Module '%s' created successfully!</info>", $moduleName));
         $output->writeln('<comment>Module has been automatically registered in bootstrap/modules-register.php</comment>');
         $output->writeln('<comment>Dependencies have been automatically registered in bootstrap/dependencies.php</comment>');
 
@@ -69,28 +69,28 @@ class MakeModuleCommand extends Command
     private function createDirectories(string $modulePath, OutputInterface $output): void
     {
         $directories = [
-            "$modulePath/Application/Actions",
-            "$modulePath/Application/DTOs",
-            "$modulePath/Application/Services",
-            "$modulePath/Application/Interfaces",
-            "$modulePath/Infrastructure/Models",
-            "$modulePath/Infrastructure/Repositories",
-            "$modulePath/Infrastructure/Http/Controllers",
-            "$modulePath/Infrastructure/Http/Requests",
-            "$modulePath/Infrastructure/Http/Resources",
-            "$modulePath/Infrastructure/Providers",
-            "$modulePath/Infrastructure/Routes",
-            "$modulePath/Exceptions",
-            "$modulePath/Observers",
-            "$modulePath/Policies",
-            "$modulePath/database/migrations",
-            "$modulePath/database/factories",
+            $modulePath.'/Application/Actions',
+            $modulePath.'/Application/DTOs',
+            $modulePath.'/Application/Services',
+            $modulePath.'/Application/Interfaces',
+            $modulePath.'/Infrastructure/Models',
+            $modulePath.'/Infrastructure/Repositories',
+            $modulePath.'/Infrastructure/Http/Controllers',
+            $modulePath.'/Infrastructure/Http/Requests',
+            $modulePath.'/Infrastructure/Http/Resources',
+            $modulePath.'/Infrastructure/Providers',
+            $modulePath.'/Infrastructure/Routes',
+            $modulePath.'/Exceptions',
+            $modulePath.'/Observers',
+            $modulePath.'/Policies',
+            $modulePath.'/database/migrations',
+            $modulePath.'/database/factories',
         ];
 
-        foreach ($directories as $dir) {
-            if (! is_dir($dir)) {
-                mkdir($dir, 0755, true);
-                $output->writeln("<comment>Created directory: $dir</comment>");
+        foreach ($directories as $directory) {
+            if (! is_dir($directory)) {
+                mkdir($directory, 0755, true);
+                $output->writeln(sprintf('<comment>Created directory: %s</comment>', $directory));
             }
         }
     }
@@ -102,109 +102,109 @@ class MakeModuleCommand extends Command
         string $stubPath,
         OutputInterface $output
     ): void {
-        $namespace = "App\\Modules\\$moduleName";
+        $namespace = 'App\Modules\\'.$moduleName;
         $lowerModuleName = mb_strtolower($moduleName);
         $lowerModelName = mb_strtolower($modelName);
 
         $files = [
             // Application Layer
             [
-                'stub' => "$stubPath/Application/Actions/CreateAction.stub",
-                'dest' => "$modulePath/Application/Actions/Create{$modelName}Action.php",
+                'stub' => $stubPath.'/Application/Actions/CreateAction.stub',
+                'dest' => sprintf('%s/Application/Actions/Create%sAction.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Application/Actions/UpdateAction.stub",
-                'dest' => "$modulePath/Application/Actions/Update{$modelName}Action.php",
+                'stub' => $stubPath.'/Application/Actions/UpdateAction.stub',
+                'dest' => sprintf('%s/Application/Actions/Update%sAction.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Application/Actions/DeleteAction.stub",
-                'dest' => "$modulePath/Application/Actions/Delete{$modelName}Action.php",
+                'stub' => $stubPath.'/Application/Actions/DeleteAction.stub',
+                'dest' => sprintf('%s/Application/Actions/Delete%sAction.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Application/Actions/GetAction.stub",
-                'dest' => "$modulePath/Application/Actions/Get{$modelName}Action.php",
+                'stub' => $stubPath.'/Application/Actions/GetAction.stub',
+                'dest' => sprintf('%s/Application/Actions/Get%sAction.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Application/Actions/ListAction.stub",
-                'dest' => "$modulePath/Application/Actions/List{$modelName}Action.php",
+                'stub' => $stubPath.'/Application/Actions/ListAction.stub',
+                'dest' => sprintf('%s/Application/Actions/List%sAction.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Application/DTOs/CreateDTO.stub",
-                'dest' => "$modulePath/Application/DTOs/Create{$modelName}DTO.php",
+                'stub' => $stubPath.'/Application/DTOs/CreateDTO.stub',
+                'dest' => sprintf('%s/Application/DTOs/Create%sDTO.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Application/DTOs/UpdateDTO.stub",
-                'dest' => "$modulePath/Application/DTOs/Update{$modelName}DTO.php",
+                'stub' => $stubPath.'/Application/DTOs/UpdateDTO.stub',
+                'dest' => sprintf('%s/Application/DTOs/Update%sDTO.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             // Interfaces
             [
-                'stub' => "$stubPath/Application/Interfaces/CreateActionInterface.stub",
-                'dest' => "$modulePath/Application/Interfaces/Create{$modelName}ActionInterface.php",
+                'stub' => $stubPath.'/Application/Interfaces/CreateActionInterface.stub',
+                'dest' => sprintf('%s/Application/Interfaces/Create%sActionInterface.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Application/Interfaces/UpdateActionInterface.stub",
-                'dest' => "$modulePath/Application/Interfaces/Update{$modelName}ActionInterface.php",
+                'stub' => $stubPath.'/Application/Interfaces/UpdateActionInterface.stub',
+                'dest' => sprintf('%s/Application/Interfaces/Update%sActionInterface.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             // Infrastructure Layer
             [
-                'stub' => "$stubPath/Infrastructure/Models/Model.stub",
-                'dest' => "$modulePath/Infrastructure/Models/{$modelName}.php",
+                'stub' => $stubPath.'/Infrastructure/Models/Model.stub',
+                'dest' => sprintf('%s/Infrastructure/Models/%s.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{tableName}}' => $lowerModelName.'s'],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Repositories/Repository.stub",
-                'dest' => "$modulePath/Infrastructure/Repositories/{$modelName}Repository.php",
+                'stub' => $stubPath.'/Infrastructure/Repositories/Repository.stub',
+                'dest' => sprintf('%s/Infrastructure/Repositories/%sRepository.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Http/Controllers/Controller.stub",
-                'dest' => "$modulePath/Infrastructure/Http/Controllers/{$modelName}Controller.php",
+                'stub' => $stubPath.'/Infrastructure/Http/Controllers/Controller.stub',
+                'dest' => sprintf('%s/Infrastructure/Http/Controllers/%sController.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Http/Requests/CreateRequest.stub",
-                'dest' => "$modulePath/Infrastructure/Http/Requests/Create{$modelName}Request.php",
+                'stub' => $stubPath.'/Infrastructure/Http/Requests/CreateRequest.stub',
+                'dest' => sprintf('%s/Infrastructure/Http/Requests/Create%sRequest.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Http/Requests/UpdateRequest.stub",
-                'dest' => "$modulePath/Infrastructure/Http/Requests/Update{$modelName}Request.php",
+                'stub' => $stubPath.'/Infrastructure/Http/Requests/UpdateRequest.stub',
+                'dest' => sprintf('%s/Infrastructure/Http/Requests/Update%sRequest.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Http/Resources/Resource.stub",
-                'dest' => "$modulePath/Infrastructure/Http/Resources/{$modelName}Resource.php",
+                'stub' => $stubPath.'/Infrastructure/Http/Resources/Resource.stub',
+                'dest' => sprintf('%s/Infrastructure/Http/Resources/%sResource.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Providers/ServiceProvider.stub",
-                'dest' => "$modulePath/Infrastructure/Providers/{$moduleName}ServiceProvider.php",
+                'stub' => $stubPath.'/Infrastructure/Providers/ServiceProvider.stub',
+                'dest' => sprintf('%s/Infrastructure/Providers/%sServiceProvider.php', $modulePath, $moduleName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModuleName}}' => $lowerModuleName],
             ],
             [
-                'stub' => "$stubPath/Infrastructure/Routes/api.stub",
-                'dest' => "$modulePath/Infrastructure/Routes/api.php",
+                'stub' => $stubPath.'/Infrastructure/Routes/api.stub',
+                'dest' => $modulePath.'/Infrastructure/Routes/api.php',
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModuleName}}' => $lowerModuleName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
-                'stub' => "$stubPath/Policies/Policy.stub",
-                'dest' => "$modulePath/Policies/{$modelName}Policy.php",
+                'stub' => $stubPath.'/Policies/Policy.stub',
+                'dest' => sprintf('%s/Policies/%sPolicy.php', $modulePath, $modelName),
                 'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{lowerModelName}}' => $lowerModelName],
             ],
         ];
 
         foreach ($files as $file) {
             if (! file_exists($file['stub'])) {
-                $output->writeln("<error>Stub not found: {$file['stub']}</error>");
+                $output->writeln(sprintf('<error>Stub not found: %s</error>', $file['stub']));
 
                 continue;
             }
@@ -215,13 +215,13 @@ class MakeModuleCommand extends Command
             }
 
             file_put_contents($file['dest'], $content);
-            $output->writeln("<info>Created: {$file['dest']}</info>");
+            $output->writeln(sprintf('<info>Created: %s</info>', $file['dest']));
         }
     }
 
     private function createMigration(string $modelName, OutputInterface $output, string $projectRoot): void
     {
-        $migrationDir = "$projectRoot/database/migrations/";
+        $migrationDir = $projectRoot.'/database/migrations/';
         $className = 'Create'.ucfirst($modelName).'Table';
         $tableName = mb_strtolower($modelName).'s';
         $migrationPath = $migrationDir.$className.'.php';
@@ -230,7 +230,7 @@ class MakeModuleCommand extends Command
             mkdir($migrationDir, 0755, true);
         }
 
-        $stubPath = "$projectRoot/stubs/migration.stub";
+        $stubPath = $projectRoot.'/stubs/migration.stub';
         if (file_exists($stubPath)) {
             $content = file_get_contents($stubPath);
             $content = str_replace(
@@ -239,13 +239,13 @@ class MakeModuleCommand extends Command
                 $content
             );
             file_put_contents($migrationPath, $content);
-            $output->writeln("<info>Created migration: $migrationPath</info>");
+            $output->writeln(sprintf('<info>Created migration: %s</info>', $migrationPath));
         }
     }
 
     private function registerModule(string $moduleName, OutputInterface $output, string $projectRoot): void
     {
-        $modulesFile = "$projectRoot/bootstrap/modules-register.php";
+        $modulesFile = $projectRoot.'/bootstrap/modules-register.php';
 
         if (! file_exists($modulesFile)) {
             $content = "<?php\n\ndeclare(strict_types=1);\n\n// Register modules\n// This file is auto-generated by make:module command\n// You can manually add or remove modules from this array\n\nreturn [\n    // Add your module service providers here\n];\n";
@@ -253,7 +253,7 @@ class MakeModuleCommand extends Command
         }
 
         $content = file_get_contents($modulesFile);
-        $providerClass = "App\\Modules\\$moduleName\\Infrastructure\\Providers\\{$moduleName}ServiceProvider";
+        $providerClass = sprintf('App\Modules\%s\Infrastructure\Providers\%sServiceProvider', $moduleName, $moduleName);
 
         if (mb_strpos($content, $providerClass) === false) {
             // Find the return array and add the provider
@@ -267,14 +267,14 @@ class MakeModuleCommand extends Command
                     // Empty array or only comments
                     $newContent = preg_replace(
                         '/return\s*\[(.*?)\];/s',
-                        "return [\n    $providerClass::class,\n];",
+                        "return [\n    {$providerClass}::class,\n];",
                         $content
                     );
                 } else {
                     // Array has content, add after last item
                     $newContent = preg_replace(
                         '/return\s*\[(.*?)\];/s',
-                        "return [\n    $providerClass::class,\n$1];",
+                        "return [\n    {$providerClass}::class,\n$1];",
                         $content
                     );
                 }
@@ -296,7 +296,7 @@ class MakeModuleCommand extends Command
         OutputInterface $output,
         string $projectRoot
     ): void {
-        $depsFile = "$projectRoot/bootstrap/dependencies.php";
+        $depsFile = $projectRoot.'/bootstrap/dependencies.php';
 
         if (! file_exists($depsFile)) {
             $output->writeln('<error>dependencies.php file not found!</error>');
@@ -304,16 +304,16 @@ class MakeModuleCommand extends Command
             return;
         }
 
-        $namespace = "App\\Modules\\$moduleName";
+        $namespace = 'App\Modules\\'.$moduleName;
         $dependencies = [];
 
         // Check for CreateAction and CreateActionInterface
-        $createActionInterface = "$namespace\\Application\\Interfaces\\Create{$modelName}ActionInterface";
-        $createAction = "$namespace\\Application\\Actions\\Create{$modelName}Action";
+        $createActionInterface = sprintf('%s\Application\Interfaces\Create%sActionInterface', $namespace, $modelName);
+        $createAction = sprintf('%s\Application\Actions\Create%sAction', $namespace, $modelName);
 
         // Check if files exist (they should, as we just created them)
-        $createActionPath = "$projectRoot/app/Modules/$moduleName/Application/Actions/Create{$modelName}Action.php";
-        $createInterfacePath = "$projectRoot/app/Modules/$moduleName/Application/Interfaces/Create{$modelName}ActionInterface.php";
+        $createActionPath = sprintf('%s/app/Modules/%s/Application/Actions/Create%sAction.php', $projectRoot, $moduleName, $modelName);
+        $createInterfacePath = sprintf('%s/app/Modules/%s/Application/Interfaces/Create%sActionInterface.php', $projectRoot, $moduleName, $modelName);
 
         if (file_exists($createActionPath) && file_exists($createInterfacePath)) {
             $dependencies[] = [
@@ -323,11 +323,11 @@ class MakeModuleCommand extends Command
         }
 
         // Check for UpdateAction and UpdateActionInterface
-        $updateActionInterface = "$namespace\\Application\\Interfaces\\Update{$modelName}ActionInterface";
-        $updateAction = "$namespace\\Application\\Actions\\Update{$modelName}Action";
+        $updateActionInterface = sprintf('%s\Application\Interfaces\Update%sActionInterface', $namespace, $modelName);
+        $updateAction = sprintf('%s\Application\Actions\Update%sAction', $namespace, $modelName);
 
-        $updateActionPath = "$projectRoot/app/Modules/$moduleName/Application/Actions/Update{$modelName}Action.php";
-        $updateInterfacePath = "$projectRoot/app/Modules/$moduleName/Application/Interfaces/Update{$modelName}ActionInterface.php";
+        $updateActionPath = sprintf('%s/app/Modules/%s/Application/Actions/Update%sAction.php', $projectRoot, $moduleName, $modelName);
+        $updateInterfacePath = sprintf('%s/app/Modules/%s/Application/Interfaces/Update%sActionInterface.php', $projectRoot, $moduleName, $modelName);
 
         if (file_exists($updateActionPath) && file_exists($updateInterfacePath)) {
             $dependencies[] = [
@@ -347,11 +347,12 @@ class MakeModuleCommand extends Command
         // Collect all use statements to add
         $useStatementsToAdd = [];
         foreach ($dependencies as $dep) {
-            if (mb_strpos($content, "use {$dep['interface']};") === false) {
-                $useStatementsToAdd[] = "use {$dep['interface']};";
+            if (mb_strpos($content, sprintf('use %s;', $dep['interface'])) === false) {
+                $useStatementsToAdd[] = sprintf('use %s;', $dep['interface']);
             }
-            if (mb_strpos($content, "use {$dep['implementation']};") === false) {
-                $useStatementsToAdd[] = "use {$dep['implementation']};";
+
+            if (mb_strpos($content, sprintf('use %s;', $dep['implementation'])) === false) {
+                $useStatementsToAdd[] = sprintf('use %s;', $dep['implementation']);
             }
         }
 
@@ -375,13 +376,13 @@ class MakeModuleCommand extends Command
 
         // Add to return array
         $newEntries = [];
-        foreach ($dependencies as $dep) {
-            $interfaceShort = $this->getShortClassName($dep['interface']);
-            $implementationShort = $this->getShortClassName($dep['implementation']);
+        foreach ($dependencies as $dependency) {
+            $interfaceShort = $this->getShortClassName($dependency['interface']);
+            $implementationShort = $this->getShortClassName($dependency['implementation']);
 
             // Check if already registered
-            if (mb_strpos($content, "{$interfaceShort}::class") === false) {
-                $newEntries[] = "    {$interfaceShort}::class => \\DI\\autowire({$implementationShort}::class),";
+            if (mb_strpos($content, $interfaceShort.'::class') === false) {
+                $newEntries[] = sprintf('    %s::class => \DI\autowire(%s::class),', $interfaceShort, $implementationShort);
             }
         }
 

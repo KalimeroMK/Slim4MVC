@@ -40,18 +40,18 @@ class UserFactory extends Factory
      */
     public function withRole($role): User
     {
-        $user = $this->create();
+        $model = $this->create();
 
         if (is_string($role)) {
             $roleModel = \App\Modules\Role\Infrastructure\Models\Role::where('name', $role)->first();
             if ($roleModel) {
-                $user->roles()->attach($roleModel->id);
+                $model->roles()->attach($roleModel->id);
             }
         } else {
-            $user->roles()->attach($role);
+            $model->roles()->attach($role);
         }
 
-        return $user->fresh();
+        return $model->fresh();
     }
 
     protected function model(): string

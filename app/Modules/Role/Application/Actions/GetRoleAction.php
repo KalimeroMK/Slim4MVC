@@ -7,10 +7,10 @@ namespace App\Modules\Role\Application\Actions;
 use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
-final class GetRoleAction
+final readonly class GetRoleAction
 {
     public function __construct(
-        private readonly RoleRepository $repository
+        private RoleRepository $roleRepository
     ) {}
 
     /**
@@ -20,7 +20,7 @@ final class GetRoleAction
      */
     public function execute(int $id): Role
     {
-        $role = $this->repository->findOrFail($id);
+        $role = $this->roleRepository->findOrFail($id);
         $role->load('permissions');
 
         return $role;

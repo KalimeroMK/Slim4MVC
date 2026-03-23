@@ -16,9 +16,7 @@ return function ($container, Capsule $capsule): void {
     $translator = new Translator($loader, 'en');
 
     // Register the translator
-    $container->set(TranslatorContract::class, function () use ($translator): TranslatorContract {
-        return $translator;
-    });
+    $container->set(TranslatorContract::class, fn (): TranslatorContract => $translator);
 
     $validationFactory = new Factory($translator);
 
@@ -26,7 +24,5 @@ return function ($container, Capsule $capsule): void {
     $validationFactory->setPresenceVerifier($presenceVerifier);
 
     // Register the validation factory
-    $container->set(Factory::class, function () use ($validationFactory): Factory {
-        return $validationFactory;
-    });
+    $container->set(Factory::class, fn (): Factory => $validationFactory);
 };

@@ -102,14 +102,14 @@ abstract class Mailable
         $subject = $this->subject ?: $this->getSubject();
         $data = array_merge($this->buildData(), $this->data);
 
-        $job = new SendEmailJob(
+        $sendEmailJob = new SendEmailJob(
             $this->to,
             $subject,
             $this->template(),
             $data
         );
 
-        if (!$queue instanceof \App\Modules\Core\Infrastructure\Queue\Queue) {
+        if (! $queue instanceof Queue) {
             try {
                 $container = \DI\Container::getInstance();
                 $queue = $container->get(Queue::class);
@@ -118,7 +118,7 @@ abstract class Mailable
             }
         }
 
-        $queue->push($job);
+        $queue->push($sendEmailJob);
     }
 
     /**

@@ -15,49 +15,46 @@ if (! function_exists('old')) {
 
         $field = collect($input)->filter(fn ($value, $field): bool => $key === $field);
 
-        if (isset($field[$key])) {
-            return $field[$key];
-        }
-
-        return null;
+        return $field[$key] ?? null;
     }
 }
+
 if (! function_exists('base_path')) {
-    function base_path($path = ''): string
+    function base_path(string $path = ''): string
     {
-        return __DIR__."/../{$path}";
+        return __DIR__.('/../'.$path);
     }
 }
 
 if (! function_exists('env')) {
-    function env($key, $default = false): mixed
+    function env(string $key, $default = false): mixed
     {
         $value = getenv($key);
 
-        throw_when(! $value && ! $default, "{$key} is not a defined .env variable and has not default value");
+        throw_when(! $value && ! $default, $key.' is not a defined .env variable and has not default value');
 
         return $value ?: $default;
     }
 }
 
 if (! function_exists('config_path')) {
-    function config_path($path = ''): string
+    function config_path(string $path = ''): string
     {
-        return base_path("config/{$path}");
+        return base_path('config/'.$path);
     }
 }
 
 if (! function_exists('app_path')) {
-    function app_path($path = ''): string
+    function app_path(string $path = ''): string
     {
-        return base_path("app/{$path}");
+        return base_path('app/'.$path);
     }
 }
 
 if (! function_exists('database_path')) {
-    function database_path($path = ''): string
+    function database_path(string $path = ''): string
     {
-        return base_path("database/{$path}");
+        return base_path('database/'.$path);
     }
 }
 
@@ -79,12 +76,12 @@ if (! function_exists('config')) {
         $folder = scandir(config_path());
         $config_files = array_slice($folder, 2, count($folder));
 
-        foreach ($config_files as $file) {
+        foreach ($config_files as $config_file) {
             throw_when(
-                Str::after($file, '.') !== 'php',
+                Str::after($config_file, '.') !== 'php',
                 'Config files must be .php files'
             );
-            data_set($config, Str::before($file, '.php'), require config_path($file));
+            data_set($config, Str::before($config_file, '.php'), require config_path($config_file));
         }
 
         return data_get($config, $path);
@@ -101,7 +98,7 @@ if (! function_exists('data_get')) {
             return $target;
         }
 
-        $key = is_array($key) ? $key : explode('.', $key);
+        $key = is_array($key) ? $key : explode('.', (string) $key);
 
         while (! is_null($segment = array_shift($key))) {
             if ($segment === '*') {

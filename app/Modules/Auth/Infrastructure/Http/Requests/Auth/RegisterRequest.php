@@ -13,7 +13,7 @@ class RegisterRequest extends FormRequest
      *
      * @return array<string, array<int, string>>
      */
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             'name' => ['required', 'string', 'max:255'],

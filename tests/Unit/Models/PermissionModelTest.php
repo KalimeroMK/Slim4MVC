@@ -9,7 +9,7 @@ use App\Modules\Role\Infrastructure\Models\Role;
 use Exception;
 use Tests\TestCase;
 
-class PermissionModelTest extends TestCase
+final class PermissionModelTest extends TestCase
 {
     public function test_permission_can_have_roles(): void
     {

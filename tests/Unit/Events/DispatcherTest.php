@@ -12,7 +12,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
-class DispatcherTest extends TestCase
+final class DispatcherTest extends TestCase
 {
     private Dispatcher $dispatcher;
 
@@ -53,9 +53,9 @@ class DispatcherTest extends TestCase
         $called = false;
         $receivedEvent = null;
 
-        $this->dispatcher->listen(UserRegistered::class, function (UserRegistered $event) use (&$called, &$receivedEvent) {
+        $this->dispatcher->listen(UserRegistered::class, function (UserRegistered $userRegistered) use (&$called, &$receivedEvent): void {
             $called = true;
-            $receivedEvent = $event;
+            $receivedEvent = $userRegistered;
         });
 
         $user = new User(['name' => 'Test', 'email' => 'test@example.com']);
@@ -81,18 +81,18 @@ class DispatcherTest extends TestCase
         $this->dispatcher->listen(UserRegistered::class, \App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class);
 
         $user = new User(['name' => 'Test', 'email' => 'test@example.com']);
-        $event = new UserRegistered($user);
+        $userRegistered = new UserRegistered($user);
 
-        $this->dispatcher->dispatch($event);
+        $this->dispatcher->dispatch($userRegistered);
     }
 
     public function test_dispatch_does_nothing_when_no_listeners(): void
     {
         $user = new User(['name' => 'Test', 'email' => 'test@example.com']);
-        $event = new UserRegistered($user);
+        $userRegistered = new UserRegistered($user);
 
         // Should not throw exception
-        $this->dispatcher->dispatch($event);
+        $this->dispatcher->dispatch($userRegistered);
 
         // Verify no listeners were called
         $listeners = $this->dispatcher->getListeners();
@@ -104,11 +104,11 @@ class DispatcherTest extends TestCase
         $userRegisteredCalled = false;
         $passwordResetCalled = false;
 
-        $this->dispatcher->listen(UserRegistered::class, function () use (&$userRegisteredCalled) {
+        $this->dispatcher->listen(UserRegistered::class, function () use (&$userRegisteredCalled): void {
             $userRegisteredCalled = true;
         });
 
-        $this->dispatcher->listen(PasswordResetRequested::class, function () use (&$passwordResetCalled) {
+        $this->dispatcher->listen(PasswordResetRequested::class, function () use (&$passwordResetCalled): void {
             $passwordResetCalled = true;
         });
 

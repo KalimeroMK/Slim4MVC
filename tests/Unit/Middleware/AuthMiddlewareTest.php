@@ -5,29 +5,29 @@ declare(strict_types=1);
 namespace Tests\Unit\Middleware;
 
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
-use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\Core\Infrastructure\Support\Auth;
+use App\Modules\User\Infrastructure\Models\User;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
 use Tests\TestCase;
 
-class AuthMiddlewareTest extends TestCase
+final class AuthMiddlewareTest extends TestCase
 {
-    private AuthMiddleware $middleware;
+    private AuthMiddleware $authMiddleware;
 
     private MockObject $auth;
 
-    private ServerRequestFactory $requestFactory;
+    private ServerRequestFactory $serverRequestFactory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->requestFactory = new ServerRequestFactory();
+        $this->serverRequestFactory = new ServerRequestFactory();
         $this->auth = $this->createMock(Auth::class);
-        $this->middleware = new AuthMiddleware($this->auth);
+        $this->authMiddleware = new AuthMiddleware($this->auth);
         $_ENV['JWT_SECRET'] = 'test-secret-key';
     }
 
@@ -42,10 +42,10 @@ class AuthMiddlewareTest extends TestCase
         $this->auth->method('check')->willReturn(true);
         $this->auth->method('user')->willReturn($user);
 
-        $request = $this->requestFactory->createServerRequest('GET', '/api/test');
-        $handler = $this->createHandler();
+        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $requestHandler = $this->createHandler();
 
-        $response = $this->middleware->process($request, $handler);
+        $response = $this->authMiddleware->process($request, $requestHandler);
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -54,10 +54,10 @@ class AuthMiddlewareTest extends TestCase
     {
         $this->auth->method('check')->willReturn(false);
 
-        $request = $this->requestFactory->createServerRequest('GET', '/api/test');
-        $handler = $this->createHandler();
+        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $requestHandler = $this->createHandler();
 
-        $response = $this->middleware->process($request, $handler);
+        $response = $this->authMiddleware->process($request, $requestHandler);
 
         $this->assertEquals(401, $response->getStatusCode());
         $this->assertStringContainsString('Unauthorized', (string) $response->getBody());
@@ -68,10 +68,10 @@ class AuthMiddlewareTest extends TestCase
     {
         $this->auth->method('check')->willReturn(false);
 
-        $request = $this->requestFactory->createServerRequest('GET', '/api/test');
-        $handler = $this->createHandler();
+        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $requestHandler = $this->createHandler();
 
-        $response = $this->middleware->process($request, $handler);
+        $response = $this->authMiddleware->process($request, $requestHandler);
         $body = json_decode((string) $response->getBody(), true);
 
         $this->assertArrayHasKey('status', $body);

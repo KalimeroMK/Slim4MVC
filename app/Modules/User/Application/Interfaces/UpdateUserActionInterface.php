@@ -14,5 +14,5 @@ interface UpdateUserActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(UpdateUserDTO $dto): ?array;
+    public function execute(UpdateUserDTO $updateUserDTO): ?array;
 }

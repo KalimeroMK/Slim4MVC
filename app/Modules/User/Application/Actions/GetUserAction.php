@@ -7,10 +7,10 @@ namespace App\Modules\User\Application\Actions;
 use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class GetUserAction
+final readonly class GetUserAction
 {
     public function __construct(
-        private readonly UserRepository $repository
+        private UserRepository $userRepository
     ) {}
 
     /**
@@ -20,7 +20,7 @@ final class GetUserAction
      */
     public function execute(int $id): User
     {
-        $user = $this->repository->findOrFail($id);
+        $user = $this->userRepository->findOrFail($id);
         $user->load('roles');
 
         return $user;

@@ -14,18 +14,7 @@ abstract class Controller
 {
     use AuthorizesRequests;
 
-    protected Request $request;
-
-    protected Response $response;
-
-    public function __construct(
-        protected ContainerInterface $container,
-        Request $request,
-        Response $response
-    ) {
-        $this->request = $request;
-        $this->response = $response;
-    }
+    public function __construct(protected ContainerInterface $container, protected Request $request, protected Response $response) {}
 
     /**
      * Get the container instance.

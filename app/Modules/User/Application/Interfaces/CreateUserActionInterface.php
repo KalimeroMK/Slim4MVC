@@ -14,5 +14,5 @@ interface CreateUserActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(CreateUserDTO $dto): ?array;
+    public function execute(CreateUserDTO $createUserDTO): ?array;
 }

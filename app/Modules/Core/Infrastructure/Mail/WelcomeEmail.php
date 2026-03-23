@@ -13,16 +13,13 @@ use App\Modules\User\Infrastructure\Models\User;
  */
 class WelcomeEmail extends Mailable
 {
-    protected User $user;
-
     public function __construct(
         Mailer $mailer,
         Blade $blade,
-        User $user
+        protected User $user
     ) {
         parent::__construct($mailer, $blade);
-        $this->user = $user;
-        $this->to($user->email);
+        $this->to($this->user->email);
     }
 
     protected function template(): string

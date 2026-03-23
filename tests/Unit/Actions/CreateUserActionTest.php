@@ -10,21 +10,21 @@ use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Tests\TestCase;
 
-class CreateUserActionTest extends TestCase
+final class CreateUserActionTest extends TestCase
 {
-    private CreateUserAction $action;
+    private CreateUserAction $createUserAction;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $repository = new UserRepository();
-        $this->action = new CreateUserAction($repository);
+        $userRepository = new UserRepository();
+        $this->createUserAction = new CreateUserAction($userRepository);
     }
 
     public function test_execute_creates_user_with_hashed_password(): void
     {
-        $dto = new CreateUserDTO('Test User', 'test@example.com', 'password123');
-        $result = $this->action->execute($dto);
+        $createUserDTO = new CreateUserDTO('Test User', 'test@example.com', 'password123');
+        $result = $this->createUserAction->execute($createUserDTO);
 
         $this->assertIsArray($result);
         $this->assertEquals('Test User', $result['name']);
@@ -34,18 +34,18 @@ class CreateUserActionTest extends TestCase
 
     public function test_execute_hashes_password_correctly(): void
     {
-        $dto = new CreateUserDTO('Test User', 'test@example.com', 'password123');
-        $this->action->execute($dto);
+        $createUserDTO = new CreateUserDTO('Test User', 'test@example.com', 'password123');
+        $this->createUserAction->execute($createUserDTO);
 
         $user = User::where('email', 'test@example.com')->first();
         $this->assertNotNull($user);
-        $this->assertTrue(password_verify('password123', $user->password));
+        $this->assertTrue(password_verify('password123', (string) $user->password));
     }
 
     public function test_execute_creates_user_in_database(): void
     {
-        $dto = new CreateUserDTO('Test User', 'test@example.com', 'password123');
-        $this->action->execute($dto);
+        $createUserDTO = new CreateUserDTO('Test User', 'test@example.com', 'password123');
+        $this->createUserAction->execute($createUserDTO);
 
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',

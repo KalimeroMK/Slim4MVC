@@ -6,10 +6,10 @@ namespace App\Modules\User\Application\Actions;
 
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class DeleteUserAction
+final readonly class DeleteUserAction
 {
     public function __construct(
-        private readonly UserRepository $repository
+        private UserRepository $userRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class DeleteUserAction
      */
     public function execute(int $id): void
     {
-        $this->repository->delete($id);
+        $this->userRepository->delete($id);
     }
 }

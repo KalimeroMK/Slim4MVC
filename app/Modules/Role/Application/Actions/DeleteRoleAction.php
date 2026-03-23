@@ -6,10 +6,10 @@ namespace App\Modules\Role\Application\Actions;
 
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
-final class DeleteRoleAction
+final readonly class DeleteRoleAction
 {
     public function __construct(
-        private readonly RoleRepository $repository
+        private RoleRepository $roleRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class DeleteRoleAction
      */
     public function execute(int $id): void
     {
-        $this->repository->delete($id);
+        $this->roleRepository->delete($id);
     }
 }

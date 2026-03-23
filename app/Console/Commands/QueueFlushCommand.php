@@ -27,12 +27,12 @@ class QueueFlushCommand extends Command
 
         if (! $force) {
             $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(
+            $confirmationQuestion = new ConfirmationQuestion(
                 'Are you sure you want to flush all failed jobs? (yes/no) ',
                 false
             );
 
-            if (! $helper->ask($input, $output, $question)) {
+            if (! $helper->ask($input, $output, $confirmationQuestion)) {
                 $output->writeln('<info>Operation cancelled.</info>');
 
                 return Command::SUCCESS;
@@ -42,9 +42,8 @@ class QueueFlushCommand extends Command
         $count = FailedJob::count();
         FailedJob::truncate();
 
-        $output->writeln("<info>✓ Flushed {$count} failed jobs</info>");
+        $output->writeln(sprintf('<info>✓ Flushed %s failed jobs</info>', $count));
 
         return Command::SUCCESS;
     }
 }
-

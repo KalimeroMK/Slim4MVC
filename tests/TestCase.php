@@ -26,6 +26,7 @@ abstract class TestCase extends BaseTestCase
         // Set up container
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->useAutowiring(true);
+
         $this->container = $containerBuilder->build();
 
         // Set up database
@@ -42,14 +43,12 @@ abstract class TestCase extends BaseTestCase
         $this->capsule->getConnection()->beginTransaction();
 
         // Set up session
-        $storage = new MockArraySessionStorage();
-        $session = new Session($storage);
+        $mockArraySessionStorage = new MockArraySessionStorage();
+        $session = new Session($mockArraySessionStorage);
         $session->start();
-        $this->container->set(Session::class, fn (): Session => $session);
 
-        // Set up logger (mock)
-        $logger = $this->createMock(LoggerInterface::class);
-        $this->container->set(LoggerInterface::class, $logger);
+        $this->container->set(Session::class, fn (): Session => $session);
+        $this->container->set(LoggerInterface::class, $this->createStub(LoggerInterface::class));
 
         // Set container for Logger helper
         AppLogger::setContainer($this->container);
@@ -64,6 +63,7 @@ abstract class TestCase extends BaseTestCase
         if ($this->capsule->getConnection()->transactionLevel() > 0) {
             $this->capsule->getConnection()->rollBack();
         }
+
         parent::tearDown();
     }
 
@@ -73,15 +73,15 @@ abstract class TestCase extends BaseTestCase
     protected function assertDatabaseHas(string $table, array $data): void
     {
         $connection = $this->capsule->getConnection();
-        $query = $connection->table($table);
+        $builder = $connection->table($table);
 
         foreach ($data as $key => $value) {
-            $query->where($key, $value);
+            $builder->where($key, $value);
         }
 
         $this->assertTrue(
-            $query->exists(),
-            "Failed asserting that table [{$table}] has record matching: ".json_encode($data)
+            $builder->exists(),
+            sprintf('Failed asserting that table [%s] has record matching: ', $table).json_encode($data)
         );
     }
 
@@ -91,15 +91,15 @@ abstract class TestCase extends BaseTestCase
     protected function assertDatabaseMissing(string $table, array $data): void
     {
         $connection = $this->capsule->getConnection();
-        $query = $connection->table($table);
+        $builder = $connection->table($table);
 
         foreach ($data as $key => $value) {
-            $query->where($key, $value);
+            $builder->where($key, $value);
         }
 
         $this->assertFalse(
-            $query->exists(),
-            "Failed asserting that table [{$table}] does not have record matching: ".json_encode($data)
+            $builder->exists(),
+            sprintf('Failed asserting that table [%s] does not have record matching: ', $table).json_encode($data)
         );
     }
 
@@ -169,9 +169,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createUser(array $attributes = []): \App\Modules\User\Infrastructure\Models\User
     {
-        $factory = new \App\Modules\User\Infrastructure\Database\Factories\UserFactory();
+        $userFactory = new \App\Modules\User\Infrastructure\Database\Factories\UserFactory();
 
-        return $factory->create($attributes);
+        return $userFactory->create($attributes);
     }
 
     /**
@@ -179,9 +179,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createRole(array $attributes = []): \App\Modules\Role\Infrastructure\Models\Role
     {
-        $factory = new \App\Modules\Role\Infrastructure\Database\Factories\RoleFactory();
+        $roleFactory = new \App\Modules\Role\Infrastructure\Database\Factories\RoleFactory();
 
-        return $factory->create($attributes);
+        return $roleFactory->create($attributes);
     }
 
     /**
@@ -189,9 +189,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function createPermission(array $attributes = []): \App\Modules\Permission\Infrastructure\Models\Permission
     {
-        $factory = new \App\Modules\Permission\Infrastructure\Database\Factories\PermissionFactory();
+        $permissionFactory = new \App\Modules\Permission\Infrastructure\Database\Factories\PermissionFactory();
 
-        return $factory->create($attributes);
+        return $permissionFactory->create($attributes);
     }
 
     /**

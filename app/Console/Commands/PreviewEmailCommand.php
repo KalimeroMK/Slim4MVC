@@ -46,16 +46,16 @@ class PreviewEmailCommand extends Command
 
         // Create test user
         $userFactory = new UserFactory();
-        $user = $userFactory->make([
+        $model = $userFactory->make([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
         // Create mailable based on type
         $mailable = match ($type) {
-            'welcome' => new WelcomeEmail($mailer, $blade, $user),
-            'password-reset' => new PasswordResetEmail($mailer, $blade, $user, 'test-reset-token-123'),
-            default => throw new InvalidArgumentException("Unknown email type: {$type}"),
+            'welcome' => new WelcomeEmail($mailer, $blade, $model),
+            'password-reset' => new PasswordResetEmail($mailer, $blade, $model, 'test-reset-token-123'),
+            default => throw new InvalidArgumentException('Unknown email type: '.$type),
         };
 
         // Generate preview
@@ -63,7 +63,7 @@ class PreviewEmailCommand extends Command
 
         if ($outputPath) {
             file_put_contents($outputPath, $html);
-            $output->writeln("<info>Email preview saved to: {$outputPath}</info>");
+            $output->writeln(sprintf('<info>Email preview saved to: %s</info>', $outputPath));
         } else {
             $output->writeln($html);
         }

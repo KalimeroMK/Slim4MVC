@@ -75,7 +75,7 @@ class QueueWorkCommand extends Command
                     $reflection = new ReflectionMethod($job, 'handle');
                     $params = $reflection->getParameters();
 
-                    if (count($params) > 0 && $params[0]->getType()?->getName() === 'Psr\Container\ContainerInterface') {
+                    if (count($params) > 0 && $params[0]->getType()?->getName() === ContainerInterface::class) {
                         $job->handle($this->container);
                     } else {
                         $job->handle();
@@ -83,10 +83,10 @@ class QueueWorkCommand extends Command
                 }
 
                 $processed++;
-                $output->writeln("<info>✓ Processed job #{$processed}</info>");
+                $output->writeln(sprintf('<info>✓ Processed job #%d</info>', $processed));
 
                 if ($maxJobs > 0 && $processed >= $maxJobs) {
-                    $output->writeln("<info>Processed {$processed} jobs. Stopping.</info>");
+                    $output->writeln(sprintf('<info>Processed %d jobs. Stopping.</info>', $processed));
 
                     break;
                 }
@@ -98,16 +98,16 @@ class QueueWorkCommand extends Command
                 if ($shouldRetry) {
                     // Retry the job
                     $this->queue->push($job);
-                    $output->writeln("<comment>⚠ Retrying job (attempt {$attempts}/{$maxTries}): {$e->getMessage()}</comment>");
+                    $output->writeln(sprintf('<comment>⚠ Retrying job (attempt %d/%d): %s</comment>', $attempts, $maxTries, $e->getMessage()));
                 } else {
                     // Store as failed job
                     FailedJob::store($job, $e, $attempts);
-                    $output->writeln("<error>✗ Failed job stored (attempt {$attempts}/{$maxTries}): {$e->getMessage()}</error>");
+                    $output->writeln(sprintf('<error>✗ Failed job stored (attempt %d/%d): %s</error>', $attempts, $maxTries, $e->getMessage()));
                 }
             }
         }
 
-        $output->writeln("<info>Queue worker stopped. Processed: {$processed}, Failed: {$failed}</info>");
+        $output->writeln(sprintf('<info>Queue worker stopped. Processed: %d, Failed: %d</info>', $processed, $failed));
 
         return Command::SUCCESS;
     }

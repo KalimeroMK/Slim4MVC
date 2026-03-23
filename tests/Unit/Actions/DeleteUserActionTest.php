@@ -10,15 +10,15 @@ use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 
-class DeleteUserActionTest extends TestCase
+final class DeleteUserActionTest extends TestCase
 {
-    private DeleteUserAction $action;
+    private DeleteUserAction $deleteUserAction;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $repository = new UserRepository();
-        $this->action = new DeleteUserAction($repository);
+        $userRepository = new UserRepository();
+        $this->deleteUserAction = new DeleteUserAction($userRepository);
     }
 
     public function test_execute_deletes_user_from_database(): void
@@ -30,7 +30,7 @@ class DeleteUserActionTest extends TestCase
         ]);
 
         $userId = $user->id;
-        $this->action->execute($userId);
+        $this->deleteUserAction->execute($userId);
 
         $this->assertDatabaseMissing('users', ['id' => $userId]);
         $this->assertNull(User::find($userId));
@@ -40,6 +40,6 @@ class DeleteUserActionTest extends TestCase
     {
         $this->expectException(ModelNotFoundException::class);
 
-        $this->action->execute(999);
+        $this->deleteUserAction->execute(999);
     }
 }

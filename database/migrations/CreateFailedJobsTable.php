@@ -28,4 +28,3 @@ class CreateFailedJobsTable
         Capsule::schema()->dropIfExists('failed_jobs');
     }
 }
-

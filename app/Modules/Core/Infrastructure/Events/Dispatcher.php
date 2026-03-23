@@ -37,7 +37,7 @@ class Dispatcher
      */
     public function dispatch(Event $event): void
     {
-        $eventClass = get_class($event);
+        $eventClass = $event::class;
 
         if (! isset($this->listeners[$eventClass])) {
             return;

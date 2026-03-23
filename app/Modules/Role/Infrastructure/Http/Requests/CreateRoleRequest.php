@@ -8,7 +8,7 @@ use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 
 class CreateRoleRequest extends FormRequest
 {
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             'name' => 'required|string|unique:roles,name|max:20',

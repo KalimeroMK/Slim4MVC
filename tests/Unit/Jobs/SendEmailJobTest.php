@@ -7,38 +7,30 @@ namespace Tests\Unit\Jobs;
 use App\Modules\Core\Infrastructure\Jobs\SendEmailJob;
 use App\Modules\Core\Infrastructure\Support\Mailer;
 use App\Modules\Core\Infrastructure\View\Blade;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-class SendEmailJobTest extends TestCase
+final class SendEmailJobTest extends TestCase
 {
-    private MockObject $mailer;
-
-    private MockObject $blade;
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->blade = $this->createMock(Blade::class);
-        $this->mailer = $this->createMock(Mailer::class);
     }
 
     public function test_job_has_correct_properties(): void
     {
-        $job = new SendEmailJob(
+        $sendEmailJob = new SendEmailJob(
             'test@example.com',
             'Test Subject',
             'email.test',
             ['key' => 'value']
         );
 
-        $this->assertInstanceOf(SendEmailJob::class, $job);
+        $this->assertInstanceOf(SendEmailJob::class, $sendEmailJob);
     }
 
     public function test_handle_calls_mailer_send(): void
     {
-        $job = new SendEmailJob(
+        $sendEmailJob = new SendEmailJob(
             'test@example.com',
             'Test Subject',
             'email.test',
@@ -51,14 +43,14 @@ class SendEmailJobTest extends TestCase
 
         // Create a real Mailer instance but we'll test the job structure
         // Since we can't easily mock Mailer constructor, we test that job can be created
-        $this->assertInstanceOf(SendEmailJob::class, $job);
+        $this->assertInstanceOf(SendEmailJob::class, $sendEmailJob);
     }
 
     public function test_job_implements_job_interface(): void
     {
-        $job = new SendEmailJob('test@example.com', 'Test', 'email.test', []);
+        $sendEmailJob = new SendEmailJob('test@example.com', 'Test', 'email.test', []);
 
-        $this->assertInstanceOf(\App\Modules\Core\Infrastructure\Jobs\Job::class, $job);
-        $this->assertTrue(method_exists($job, 'handle'));
+        $this->assertInstanceOf(\App\Modules\Core\Infrastructure\Jobs\Job::class, $sendEmailJob);
+        $this->assertTrue(method_exists($sendEmailJob, 'handle'));
     }
 }

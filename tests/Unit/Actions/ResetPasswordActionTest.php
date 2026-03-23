@@ -11,15 +11,15 @@ use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Tests\TestCase;
 
-class ResetPasswordActionTest extends TestCase
+final class ResetPasswordActionTest extends TestCase
 {
-    private ResetPasswordAction $action;
+    private ResetPasswordAction $resetPasswordAction;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $repository = new UserRepository();
-        $this->action = new ResetPasswordAction($repository);
+        $userRepository = new UserRepository();
+        $this->resetPasswordAction = new ResetPasswordAction($userRepository);
     }
 
     public function test_execute_with_valid_token_resets_password(): void
@@ -31,22 +31,22 @@ class ResetPasswordActionTest extends TestCase
             'password_reset_token' => 'valid-token-123',
         ]);
 
-        $dto = new ResetPasswordDTO('valid-token-123', 'newpassword123');
-        $this->action->execute($dto);
+        $resetPasswordDTO = new ResetPasswordDTO('valid-token-123', 'newpassword123');
+        $this->resetPasswordAction->execute($resetPasswordDTO);
 
         $user = User::find($user->id); // Reload from database
-        $this->assertTrue(password_verify('newpassword123', $user->password));
+        $this->assertTrue(password_verify('newpassword123', (string) $user->password));
         $this->assertNull($user->password_reset_token);
     }
 
     public function test_execute_with_invalid_token_throws_exception(): void
     {
-        $dto = new ResetPasswordDTO('invalid-token', 'newpassword123');
+        $resetPasswordDTO = new ResetPasswordDTO('invalid-token', 'newpassword123');
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Invalid or expired reset token');
 
-        $this->action->execute($dto);
+        $this->resetPasswordAction->execute($resetPasswordDTO);
     }
 
     public function test_execute_with_nonexistent_token_throws_exception(): void
@@ -58,11 +58,11 @@ class ResetPasswordActionTest extends TestCase
             'password_reset_token' => 'different-token',
         ]);
 
-        $dto = new ResetPasswordDTO('nonexistent-token', 'newpassword123');
+        $resetPasswordDTO = new ResetPasswordDTO('nonexistent-token', 'newpassword123');
 
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Invalid or expired reset token');
 
-        $this->action->execute($dto);
+        $this->resetPasswordAction->execute($resetPasswordDTO);
     }
 }

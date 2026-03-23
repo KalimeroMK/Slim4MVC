@@ -11,7 +11,7 @@ use App\Modules\Core\Infrastructure\View\Blade;
 use ReflectionClass;
 use Tests\TestCase;
 
-class MailableTest extends TestCase
+final class MailableTest extends TestCase
 {
     private Mailer $mailer;
 
@@ -30,9 +30,9 @@ class MailableTest extends TestCase
     public function test_welcome_email_preview(): void
     {
         $user = $this->createUser(['name' => 'Test User', 'email' => 'test@example.com']);
-        $email = new WelcomeEmail($this->mailer, $this->blade, $user);
+        $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
 
-        $html = $email->preview();
+        $html = $welcomeEmail->preview();
 
         $this->assertIsString($html);
         $this->assertStringContainsString('Test User', $html);
@@ -42,13 +42,12 @@ class MailableTest extends TestCase
     public function test_welcome_email_subject(): void
     {
         $user = $this->createUser();
-        $email = new WelcomeEmail($this->mailer, $this->blade, $user);
+        $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
 
-        $reflection = new ReflectionClass($email);
-        $method = $reflection->getMethod('getSubject');
-        $method->setAccessible(true);
+        $reflectionClass = new ReflectionClass($welcomeEmail);
+        $reflectionMethod = $reflectionClass->getMethod('getSubject');
 
-        $subject = $method->invoke($email);
+        $subject = $reflectionMethod->invoke($welcomeEmail);
 
         $this->assertEquals('Welcome to our platform!', $subject);
     }
@@ -56,13 +55,12 @@ class MailableTest extends TestCase
     public function test_welcome_email_template(): void
     {
         $user = $this->createUser();
-        $email = new WelcomeEmail($this->mailer, $this->blade, $user);
+        $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
 
-        $reflection = new ReflectionClass($email);
-        $method = $reflection->getMethod('template');
-        $method->setAccessible(true);
+        $reflectionClass = new ReflectionClass($welcomeEmail);
+        $reflectionMethod = $reflectionClass->getMethod('template');
 
-        $template = $method->invoke($email);
+        $template = $reflectionMethod->invoke($welcomeEmail);
 
         $this->assertEquals('email.welcome', $template);
     }
@@ -70,9 +68,9 @@ class MailableTest extends TestCase
     public function test_password_reset_email_preview(): void
     {
         $user = $this->createUser(['name' => 'Test User', 'email' => 'test@example.com']);
-        $email = new PasswordResetEmail($this->mailer, $this->blade, $user, 'test-token-123');
+        $passwordResetEmail = new PasswordResetEmail($this->mailer, $this->blade, $user, 'test-token-123');
 
-        $html = $email->preview();
+        $html = $passwordResetEmail->preview();
 
         $this->assertIsString($html);
         $this->assertStringContainsString('test-token-123', $html);
@@ -82,13 +80,12 @@ class MailableTest extends TestCase
     public function test_password_reset_email_subject(): void
     {
         $user = $this->createUser();
-        $email = new PasswordResetEmail($this->mailer, $this->blade, $user, 'token');
+        $passwordResetEmail = new PasswordResetEmail($this->mailer, $this->blade, $user, 'token');
 
-        $reflection = new ReflectionClass($email);
-        $method = $reflection->getMethod('getSubject');
-        $method->setAccessible(true);
+        $reflectionClass = new ReflectionClass($passwordResetEmail);
+        $reflectionMethod = $reflectionClass->getMethod('getSubject');
 
-        $subject = $method->invoke($email);
+        $subject = $reflectionMethod->invoke($passwordResetEmail);
 
         $this->assertEquals('Reset Your Password', $subject);
     }
@@ -96,13 +93,12 @@ class MailableTest extends TestCase
     public function test_password_reset_email_template(): void
     {
         $user = $this->createUser();
-        $email = new PasswordResetEmail($this->mailer, $this->blade, $user, 'token');
+        $passwordResetEmail = new PasswordResetEmail($this->mailer, $this->blade, $user, 'token');
 
-        $reflection = new ReflectionClass($email);
-        $method = $reflection->getMethod('template');
-        $method->setAccessible(true);
+        $reflectionClass = new ReflectionClass($passwordResetEmail);
+        $reflectionMethod = $reflectionClass->getMethod('template');
 
-        $template = $method->invoke($email);
+        $template = $reflectionMethod->invoke($passwordResetEmail);
 
         $this->assertEquals('email.reset-password', $template);
     }
@@ -110,8 +106,8 @@ class MailableTest extends TestCase
     public function test_mailable_with_custom_subject(): void
     {
         $user = $this->createUser();
-        $email = new WelcomeEmail($this->mailer, $this->blade, $user);
-        $email->subject('Custom Subject');
+        $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
+        $welcomeEmail->subject('Custom Subject');
 
         // Test that custom subject is used
         $this->assertTrue(true); // Subject is tested through send/queue methods
@@ -120,10 +116,10 @@ class MailableTest extends TestCase
     public function test_mailable_with_additional_data(): void
     {
         $user = $this->createUser();
-        $email = new WelcomeEmail($this->mailer, $this->blade, $user);
-        $email->with(['custom' => 'data']);
+        $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
+        $welcomeEmail->with(['custom' => 'data']);
 
-        $html = $email->preview();
+        $html = $welcomeEmail->preview();
 
         // Additional data should be available in template
         $this->assertIsString($html);

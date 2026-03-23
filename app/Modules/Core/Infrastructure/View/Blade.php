@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\View;
 
-use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use eftec\bladeone\BladeOne;
+use Exception;
 use RuntimeException;
 
 /**
@@ -16,21 +16,11 @@ class Blade
 {
     protected BladeOne $engine;
 
-    protected string $viewsPath;
-
-    protected string $cachePath;
-
-    protected array $sharedData = [];
-
     public function __construct(
-        string $viewsPath,
-        string $cachePath,
-        array $sharedData = []
+        protected string $viewsPath,
+        protected string $cachePath,
+        protected array $sharedData = []
     ) {
-        $this->viewsPath = $viewsPath;
-        $this->cachePath = $cachePath;
-        $this->sharedData = $sharedData;
-        
         $this->setupEngine();
         $this->shareDefaults();
     }
@@ -42,8 +32,8 @@ class Blade
     {
         try {
             return $this->engine->run($template, array_merge($this->sharedData, $data));
-        } catch (\Exception $e) {
-            throw new RuntimeException("Failed to render view '{$template}': " . $e->getMessage(), 0, $e);
+        } catch (Exception $exception) {
+            throw new RuntimeException(sprintf("Failed to render view '%s': ", $template).$exception->getMessage(), 0, $exception);
         }
     }
 
@@ -61,8 +51,8 @@ class Blade
      */
     public function exists(string $template): bool
     {
-        $path = $this->viewsPath . '/' . str_replace('.', '/', $template) . '.blade.php';
-        
+        $path = $this->viewsPath.'/'.str_replace('.', '/', $template).'.blade.php';
+
         return file_exists($path);
     }
 
@@ -91,16 +81,12 @@ class Blade
         $this->share('errors', $_SESSION['errors'] ?? []);
         $this->share('old', $_SESSION['old'] ?? []);
         $this->share('_token', $_SESSION['csrf_token'] ?? '');
-        
+
         // Register CSRF directive
-        $this->directive('csrf', function () {
-            return '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>';
-        });
-        
+        $this->directive('csrf', fn () => '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>');
+
         // Register method directive
-        $this->directive('method', function ($method) {
-            return '<?php echo \'<input type="hidden" name="_method" value="\' . ' . $method . ' . \'">\'; ?>';
-        });
+        $this->directive('method', fn ($method) => '<?php echo \'<input type="hidden" name="_method" value="\' . '.$method.' . \'">\'; ?>');
     }
 
     /**
@@ -108,12 +94,12 @@ class Blade
      */
     protected function setupEngine(): void
     {
-        $mode = ($_ENV['APP_ENV'] ?? 'local') === 'production' 
-            ? BladeOne::MODE_FAST 
+        $mode = ($_ENV['APP_ENV'] ?? 'local') === 'production'
+            ? BladeOne::MODE_FAST
             : BladeOne::MODE_AUTO;
-        
+
         $this->engine = new BladeOne($this->viewsPath, $this->cachePath, $mode);
-        
+
         $this->registerDirectives();
     }
 
@@ -123,58 +109,36 @@ class Blade
     protected function registerDirectives(): void
     {
         // @csrf - CSRF token field
-        $this->engine->directive('csrf', function () {
-            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::csrfField(); ?>';
-        });
+        $this->engine->directive('csrf', fn () => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfField(); ?>');
 
         // @csrfToken - CSRF token value only
-        $this->engine->directive('csrfToken', function () {
-            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::csrfToken(); ?>';
-        });
+        $this->engine->directive('csrfToken', fn () => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfToken(); ?>');
 
         // @method('PUT') - HTTP method spoofing
-        $this->engine->directive('method', function ($method) {
-            return '<?php echo \App\Modules\Core\Infrastructure\Support\AuthHelper::methodField(' . $method . '); ?>';
-        });
+        $this->engine->directive('method', fn ($method) => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::methodField('.$method.'); ?>');
 
         // @auth - Check if user is authenticated
-        $this->engine->directive('auth', function () {
-            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::check()): ?>';
-        });
+        $this->engine->directive('auth', fn () => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::check()): ?>');
 
         // @endauth
-        $this->engine->directive('endauth', function () {
-            return '<?php endif; ?>';
-        });
+        $this->engine->directive('endauth', fn () => '<?php endif; ?>');
 
         // @guest - Check if user is not authenticated
-        $this->engine->directive('guest', function () {
-            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::guest()): ?>';
-        });
+        $this->engine->directive('guest', fn () => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::guest()): ?>');
 
         // @endguest
-        $this->engine->directive('endguest', function () {
-            return '<?php endif; ?>';
-        });
+        $this->engine->directive('endguest', fn () => '<?php endif; ?>');
 
         // @can('permission') - Check if user has permission
-        $this->engine->directive('can', function ($permission) {
-            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::can(' . $permission . ')): ?>';
-        });
+        $this->engine->directive('can', fn ($permission) => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::can('.$permission.')): ?>');
 
         // @endcan
-        $this->engine->directive('endcan', function () {
-            return '<?php endif; ?>';
-        });
+        $this->engine->directive('endcan', fn () => '<?php endif; ?>');
 
         // @role('admin') - Check if user has role
-        $this->engine->directive('role', function ($role) {
-            return '<?php if (\App\Modules\Core\Infrastructure\Support\AuthHelper::hasRole(' . $role . ')): ?>';
-        });
+        $this->engine->directive('role', fn ($role) => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::hasRole('.$role.')): ?>');
 
         // @endrole
-        $this->engine->directive('endrole', function () {
-            return '<?php endif; ?>';
-        });
+        $this->engine->directive('endrole', fn () => '<?php endif; ?>');
     }
 }

@@ -12,5 +12,5 @@ interface RegisterActionInterface
     /**
      * Execute registration action.
      */
-    public function execute(RegisterDTO $dto): User;
+    public function execute(RegisterDTO $registerDTO): User;
 }

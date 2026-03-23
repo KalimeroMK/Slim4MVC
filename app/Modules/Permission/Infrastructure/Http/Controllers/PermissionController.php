@@ -28,11 +28,11 @@ class PermissionController extends Controller
 
     public function __construct(
         ContainerInterface $container,
-        private readonly CreatePermissionAction $createAction,
-        private readonly UpdatePermissionAction $updateAction,
-        private readonly DeletePermissionAction $deleteAction,
+        private readonly CreatePermissionAction $createPermissionAction,
+        private readonly UpdatePermissionAction $updatePermissionAction,
+        private readonly DeletePermissionAction $deletePermissionAction,
         private readonly GetPermissionAction $getAction,
-        private readonly ListPermissionAction $listAction,
+        private readonly ListPermissionAction $listPermissionAction,
         private readonly GetPermissionAction $rolesAction
     ) {
         parent::__construct($container);
@@ -46,7 +46,7 @@ class PermissionController extends Controller
     public function index(Request $request, Response $response): Response
     {
         $params = $this->getPaginationParams();
-        $result = $this->listAction->execute($params['page'], $params['perPage']);
+        $result = $this->listPermissionAction->execute($params['page'], $params['perPage']);
 
         $items = PermissionResource::collection($result['items']);
 
@@ -60,10 +60,10 @@ class PermissionController extends Controller
         );
     }
 
-    public function store(CreatePermissionRequest $request, Response $response): Response
+    public function store(CreatePermissionRequest $createPermissionRequest, Response $response): Response
     {
-        $permission = $this->createAction->execute(
-            CreatePermissionDTO::fromRequest($request->validated())
+        $permission = $this->createPermissionAction->execute(
+            CreatePermissionDTO::fromRequest($createPermissionRequest->validated())
         );
 
         // Load relationships for resource
@@ -79,10 +79,10 @@ class PermissionController extends Controller
         return ApiResponse::success(PermissionResource::make($permission));
     }
 
-    public function update(UpdatePermissionRequest $request, Response $response, array $args): Response
+    public function update(UpdatePermissionRequest $updatePermissionRequest, Response $response, array $args): Response
     {
-        $permission = $this->updateAction->execute(
-            UpdatePermissionDTO::fromRequest($request->validated())
+        $permission = $this->updatePermissionAction->execute(
+            UpdatePermissionDTO::fromRequest($updatePermissionRequest->validated())
         );
 
         // Load relationships for resource
@@ -93,7 +93,7 @@ class PermissionController extends Controller
 
     public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
+        $this->deletePermissionAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Permission deleted successfully');
     }

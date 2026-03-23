@@ -11,11 +11,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Tests\TestCase;
 
-class FormRequestTest extends TestCase
+final class FormRequestTest extends TestCase
 {
     private Factory $validatorFactory;
 
-    private ServerRequestFactory $requestFactory;
+    private ServerRequestFactory $serverRequestFactory;
 
     protected function setUp(): void
     {
@@ -27,15 +27,15 @@ class FormRequestTest extends TestCase
                 'en'
             )
         );
-        $this->requestFactory = new ServerRequestFactory();
+        $this->serverRequestFactory = new ServerRequestFactory();
     }
 
     public function test_validated_returns_validated_data_when_validation_passes(): void
     {
-        $request = $this->createRequest(['email' => 'test@example.com', 'password' => 'password123']);
-        $formRequest = new TestFormRequest($request, $this->validatorFactory);
+        $serverRequest = $this->createRequest(['email' => 'test@example.com', 'password' => 'password123']);
+        $testFormRequest = new TestFormRequest($serverRequest, $this->validatorFactory);
 
-        $validated = $formRequest->validated();
+        $validated = $testFormRequest->validated();
 
         $this->assertEquals('test@example.com', $validated['email']);
         $this->assertEquals('password123', $validated['password']);
@@ -43,24 +43,24 @@ class FormRequestTest extends TestCase
 
     public function test_validated_throws_exception_when_validation_fails(): void
     {
-        $request = $this->createRequest(['email' => 'invalid-email', 'password' => '']);
-        $formRequest = new TestFormRequest($request, $this->validatorFactory);
+        $serverRequest = $this->createRequest(['email' => 'invalid-email', 'password' => '']);
+        $testFormRequest = new TestFormRequest($serverRequest, $this->validatorFactory);
 
         $this->expectException(ValidationException::class);
 
-        $formRequest->validated();
+        $testFormRequest->validated();
     }
 
     public function test_validate_throws_exception_with_422_status(): void
     {
-        $request = $this->createRequest(['email' => 'invalid']);
-        $formRequest = new TestFormRequest($request, $this->validatorFactory);
+        $serverRequest = $this->createRequest(['email' => 'invalid']);
+        $testFormRequest = new TestFormRequest($serverRequest, $this->validatorFactory);
 
         try {
-            $formRequest->validate();
+            $testFormRequest->validate();
             $this->fail('Expected ValidationException was not thrown');
-        } catch (ValidationException $e) {
-            $response = $e->getResponse();
+        } catch (ValidationException $validationException) {
+            $response = $validationException->getResponse();
             $this->assertEquals(422, $response->getStatusCode());
             $this->assertStringContainsString('errors', (string) $response->getBody());
         }
@@ -68,7 +68,7 @@ class FormRequestTest extends TestCase
 
     private function createRequest(array $body): ServerRequestInterface
     {
-        $request = $this->requestFactory->createServerRequest('POST', '/test');
+        $request = $this->serverRequestFactory->createServerRequest('POST', '/test');
 
         return $request->withParsedBody($body);
     }

@@ -23,7 +23,7 @@ class MakeModelCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $modelName = ucfirst($input->getArgument('name'));
+        $modelName = ucfirst((string) $input->getArgument('name'));
         $createMigration = $input->getOption('migration');
 
         // Base project directory
@@ -50,6 +50,7 @@ class MakeModelCommand extends Command
         if (! is_dir($modelDir)) {
             mkdir($modelDir, 0777, true);
         }
+
         $projectRoot = dirname(__DIR__, 3);
 
         // Load stub and replace placeholder
@@ -58,7 +59,7 @@ class MakeModelCommand extends Command
             $modelTemplate = file_get_contents($stubPath);
             $modelTemplate = str_replace('{{className}}', $modelName, $modelTemplate);
         } else {
-            $output->writeln("<error>Stub file not found: $stubPath</error>");
+            $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
 
             return;
         }
@@ -90,7 +91,7 @@ class MakeModelCommand extends Command
                 $migrationTemplate
             );
         } else {
-            $output->writeln("<error>Stub file not found: $stubPath</error>");
+            $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
 
             return;
         }

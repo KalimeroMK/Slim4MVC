@@ -6,10 +6,10 @@ namespace App\Modules\Permission\Application\Actions;
 
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
-final class ListPermissionAction
+final readonly class ListPermissionAction
 {
     public function __construct(
-        private readonly PermissionRepository $repository
+        private PermissionRepository $permissionRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class ListPermissionAction
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {
-        return $this->repository->paginateWithRoles($page, $perPage);
+        return $this->permissionRepository->paginateWithRoles($page, $perPage);
     }
 }

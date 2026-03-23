@@ -6,10 +6,10 @@ namespace App\Modules\Role\Application\Actions;
 
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
-final class ListRoleAction
+final readonly class ListRoleAction
 {
     public function __construct(
-        private readonly RoleRepository $repository
+        private RoleRepository $roleRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class ListRoleAction
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {
-        return $this->repository->paginate($page, $perPage);
+        return $this->roleRepository->paginate($page, $perPage);
     }
 }

@@ -28,50 +28,50 @@ class CreateControllerCommand extends Command
         $map = [
             // Controllers
             [
-                'stub' => "$stubRoot/controller.stub",
-                'destination' => "$projectRoot/app/Http/Controllers/{$name}Controller.php",
+                'stub' => $stubRoot.'/controller.stub',
+                'destination' => sprintf('%s/app/Http/Controllers/%sController.php', $projectRoot, $name),
             ],
 
             // Actions
             [
-                'stub' => "$stubRoot/Actions/CreateAction",
-                'destination' => "$projectRoot/app/Actions/$name/Create{$name}Action.php",
+                'stub' => $stubRoot.'/Actions/CreateAction',
+                'destination' => sprintf('%s/app/Actions/%s/Create%sAction.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/Actions/DeleteAction",
-                'destination' => "$projectRoot/app/Actions/$name/Delete{$name}Action.php",
+                'stub' => $stubRoot.'/Actions/DeleteAction',
+                'destination' => sprintf('%s/app/Actions/%s/Delete%sAction.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/Actions/GetAction",
-                'destination' => "$projectRoot/app/Actions/$name/Get{$name}Action.php",
+                'stub' => $stubRoot.'/Actions/GetAction',
+                'destination' => sprintf('%s/app/Actions/%s/Get%sAction.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/Actions/ListActon",
-                'destination' => "$projectRoot/app/Actions/$name/List{$name}Action.php",
+                'stub' => $stubRoot.'/Actions/ListActon',
+                'destination' => sprintf('%s/app/Actions/%s/List%sAction.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/Actions/UpdateAction",
-                'destination' => "$projectRoot/app/Actions/$name/Update{$name}Action.php",
+                'stub' => $stubRoot.'/Actions/UpdateAction',
+                'destination' => sprintf('%s/app/Actions/%s/Update%sAction.php', $projectRoot, $name, $name),
             ],
 
             // DTOs
             [
-                'stub' => "$stubRoot/DTO/CreateDTO",
-                'destination' => "$projectRoot/app/DTO/$name/Create{$name}DTO.php",
+                'stub' => $stubRoot.'/DTO/CreateDTO',
+                'destination' => sprintf('%s/app/DTO/%s/Create%sDTO.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/DTO/UpdateDTO",
-                'destination' => "$projectRoot/app/DTO/$name/Update{$name}DTO.php",
+                'stub' => $stubRoot.'/DTO/UpdateDTO',
+                'destination' => sprintf('%s/app/DTO/%s/Update%sDTO.php', $projectRoot, $name, $name),
             ],
 
             // Requests
             [
-                'stub' => "$stubRoot/Request/CreateRequest",
-                'destination' => "$projectRoot/app/Http/Requests/$name/Create{$name}Request.php",
+                'stub' => $stubRoot.'/Request/CreateRequest',
+                'destination' => sprintf('%s/app/Http/Requests/%s/Create%sRequest.php', $projectRoot, $name, $name),
             ],
             [
-                'stub' => "$stubRoot/Request/UpdateRequest",
-                'destination' => "$projectRoot/app/Http/Requests/$name/Update{$name}Request.php",
+                'stub' => $stubRoot.'/Request/UpdateRequest',
+                'destination' => sprintf('%s/app/Http/Requests/%s/Update%sRequest.php', $projectRoot, $name, $name),
             ],
         ];
 
@@ -80,13 +80,13 @@ class CreateControllerCommand extends Command
             $destination = $item['destination'];
 
             if (! file_exists($stubPath)) {
-                $output->writeln("<error>Missing stub: $stubPath</error>");
+                $output->writeln(sprintf('<error>Missing stub: %s</error>', $stubPath));
 
                 continue;
             }
 
             if (file_exists($destination)) {
-                $output->writeln("<comment>Skipped (already exists): $destination</comment>");
+                $output->writeln(sprintf('<comment>Skipped (already exists): %s</comment>', $destination));
 
                 continue;
             }
@@ -99,7 +99,7 @@ class CreateControllerCommand extends Command
             $content = str_replace('{{controllerName}}', $name, file_get_contents($stubPath));
             file_put_contents($destination, $content);
 
-            $output->writeln("<info>Created: $destination</info>");
+            $output->writeln(sprintf('<info>Created: %s</info>', $destination));
         }
 
         return Command::SUCCESS;

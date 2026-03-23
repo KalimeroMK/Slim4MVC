@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Modules\Core\Infrastructure\Queue\FailedJob;
-use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Queue\RedisQueue;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +25,7 @@ class QueueStatsCommand extends Command
     protected function configure(): void
     {
         $this->setDescription('Display queue statistics')
-            ->addOption('driver', null, InputOption::VALUE_OPTIONAL, 'Queue driver (file|redis)', null);
+            ->addOption('driver', null, InputOption::VALUE_OPTIONAL, 'Queue driver (file|redis)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -39,22 +38,21 @@ class QueueStatsCommand extends Command
         $output->writeln('');
 
         $size = $queue->size();
-        $output->writeln("Pending jobs: <comment>{$size}</comment>");
+        $output->writeln(sprintf('Pending jobs: <comment>%d</comment>', $size));
 
         // Get failed jobs count
         $failedCount = FailedJob::count();
-        $output->writeln("Failed jobs: <comment>{$failedCount}</comment>");
+        $output->writeln(sprintf('Failed jobs: <comment>%s</comment>', $failedCount));
 
         // Get driver info
         $driverName = $driver ?? $_ENV['QUEUE_DRIVER'] ?? 'file';
-        $output->writeln("Driver: <comment>{$driverName}</comment>");
+        $output->writeln(sprintf('Driver: <comment>%s</comment>', $driverName));
 
         if ($queue instanceof RedisQueue) {
             $stats = $queue->stats();
-            $output->writeln("Queue name: <comment>{$stats['queue_name']}</comment>");
+            $output->writeln(sprintf('Queue name: <comment>%s</comment>', $stats['queue_name']));
         }
 
         return Command::SUCCESS;
     }
 }
-

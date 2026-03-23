@@ -32,29 +32,29 @@ class MakeRequestCommand extends Command
         $type = $input->getOption('type');
 
         $projectRoot = dirname(__DIR__, 2);
-        $stubPath = $projectRoot.'/stubs/Request/'.ucfirst($type).'Request';
+        $stubPath = $projectRoot.'/stubs/Request/'.ucfirst((string) $type).'Request';
 
         // Check if stub exists, if not try alternative path
         if (! file_exists($stubPath)) {
-            $stubPath = __DIR__.'/../../../stubs/Request/'.ucfirst($type).'Request';
+            $stubPath = __DIR__.'/../../../stubs/Request/'.ucfirst((string) $type).'Request';
         }
 
         if (! file_exists($stubPath)) {
-            $output->writeln("<error>Stub file not found: $stubPath</error>");
+            $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
 
             return Command::FAILURE;
         }
 
         // Parse name (e.g., "User/CreateUserRequest" or "CreateUserRequest")
-        $parts = explode('/', $name);
+        $parts = explode('/', (string) $name);
         if (count($parts) === 2) {
             $namespace = $parts[0];
             $className = $parts[1];
-        } elseif (preg_match('/^Create(.+)Request$/', $name, $matches)) {
+        } elseif (preg_match('/^Create(.+)Request$/', (string) $name, $matches)) {
             // Try to extract namespace from class name
             $namespace = $matches[1];
             $className = $name;
-        } elseif (preg_match('/^Update(.+)Request$/', $name, $matches)) {
+        } elseif (preg_match('/^Update(.+)Request$/', (string) $name, $matches)) {
             $namespace = $matches[1];
             $className = $name;
         } else {
@@ -63,15 +63,15 @@ class MakeRequestCommand extends Command
         }
 
         // Fix path - projectRoot already points to root, not app directory
-        $destination = "$projectRoot/app/Http/Requests/$namespace/$className.php";
+        $destination = sprintf('%s/app/Http/Requests/%s/%s.php', $projectRoot, $namespace, $className);
 
         // If projectRoot already contains app, adjust
         if (str_ends_with($projectRoot, '/app')) {
-            $destination = dirname($projectRoot)."/app/Http/Requests/$namespace/$className.php";
+            $destination = dirname($projectRoot).sprintf('/app/Http/Requests/%s/%s.php', $namespace, $className);
         }
 
         if (file_exists($destination)) {
-            $output->writeln("<error>Request already exists: $destination</error>");
+            $output->writeln(sprintf('<error>Request already exists: %s</error>', $destination));
 
             return Command::FAILURE;
         }
@@ -98,7 +98,7 @@ class MakeRequestCommand extends Command
         }
 
         file_put_contents($destination, $content);
-        $output->writeln("<info>Request created successfully: $destination</info>");
+        $output->writeln(sprintf('<info>Request created successfully: %s</info>', $destination));
 
         return Command::SUCCESS;
     }
@@ -115,20 +115,20 @@ class MakeRequestCommand extends Command
             require $dbPath;
         }
 
-        $modelClass = "App\\Models\\$modelName";
+        $modelClass = 'App\Models\\'.$modelName;
 
         if (! class_exists($modelClass)) {
-            $output->writeln("<comment>Warning: Model class $modelClass not found. Skipping auto-generation.</comment>");
+            $output->writeln(sprintf('<comment>Warning: Model class %s not found. Skipping auto-generation.</comment>', $modelClass));
 
             return null;
         }
 
         try {
-            $reflection = new ReflectionClass($modelClass);
-            $model = $reflection->newInstanceWithoutConstructor();
+            $reflectionClass = new ReflectionClass($modelClass);
+            $model = $reflectionClass->newInstanceWithoutConstructor();
 
             if (! ($model instanceof Model)) {
-                $output->writeln("<comment>Warning: $modelClass is not an Eloquent Model. Skipping auto-generation.</comment>");
+                $output->writeln(sprintf('<comment>Warning: %s is not an Eloquent Model. Skipping auto-generation.</comment>', $modelClass));
 
                 return null;
             }
@@ -151,11 +151,11 @@ class MakeRequestCommand extends Command
                 // Determine type based on cast or field name
                 $cast = $casts[$field] ?? null;
                 if ($cast) {
-                    if (str_contains($cast, 'int')) {
+                    if (str_contains((string) $cast, 'int')) {
                         $fieldRules[] = 'integer';
-                    } elseif (str_contains($cast, 'bool')) {
+                    } elseif (str_contains((string) $cast, 'bool')) {
                         $fieldRules[] = 'boolean';
-                    } elseif (str_contains($cast, 'date') || str_contains($cast, 'datetime')) {
+                    } elseif (str_contains((string) $cast, 'date') || str_contains((string) $cast, 'datetime')) {
                         $fieldRules[] = 'date';
                     } else {
                         $fieldRules[] = 'string';
@@ -164,7 +164,7 @@ class MakeRequestCommand extends Command
                     // Guess type from field name
                     $fieldRules[] = 'email';
                     if (! $isUpdate) {
-                        $fieldRules[] = 'unique:'.mb_strtolower($modelName)."s,$field";
+                        $fieldRules[] = 'unique:'.mb_strtolower($modelName).('s,'.$field);
                     }
                 } elseif (str_contains($field, 'password')) {
                     $fieldRules[] = 'string';
@@ -192,8 +192,8 @@ class MakeRequestCommand extends Command
             }
 
             return $rules;
-        } catch (Exception $e) {
-            $output->writeln("<comment>Warning: Could not generate rules from model: {$e->getMessage()}</comment>");
+        } catch (Exception $exception) {
+            $output->writeln(sprintf('<comment>Warning: Could not generate rules from model: %s</comment>', $exception->getMessage()));
 
             return null;
         }
@@ -206,8 +206,9 @@ class MakeRequestCommand extends Command
     {
         $rulesString = "        return [\n";
         foreach ($rules as $field => $rule) {
-            $rulesString .= "            '$field' => '$rule',\n";
+            $rulesString .= "            '{$field}' => '{$rule}',\n";
         }
+
         $rulesString .= '        ];';
 
         // Replace the rules section

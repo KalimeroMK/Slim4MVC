@@ -18,7 +18,6 @@ use App\Modules\Auth\Application\Interfaces\Auth\RegisterActionInterface;
 use App\Modules\Auth\Application\Interfaces\Auth\ResetPasswordActionInterface;
 use App\Modules\Auth\Application\Interfaces\Auth\WebLoginActionInterface;
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
-use App\Modules\Core\Infrastructure\Queue\FileQueue;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Support\JwtService;
@@ -57,9 +56,7 @@ return [
     Dispatcher::class => autowire(Dispatcher::class),
     // Queue system
     QueueManager::class => autowire(QueueManager::class),
-    Queue::class => factory(function (QueueManager $queueManager): Queue {
-        return $queueManager->queue();
-    }),
+    Queue::class => factory(fn (QueueManager $queueManager): Queue => $queueManager->queue()),
     // JWT Service
     JwtService::class => factory(function (): JwtService {
         $secret = $_ENV['JWT_SECRET'] ?? '';

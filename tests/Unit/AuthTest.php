@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\Core\Infrastructure\Support\Auth;
+use App\Modules\User\Infrastructure\Models\User;
 use Tests\TestCase;
 
-class AuthTest extends TestCase
+final class AuthTest extends TestCase
 {
     private Auth $auth;
 
@@ -20,7 +20,7 @@ class AuthTest extends TestCase
 
     public function test_attempt_with_valid_credentials_returns_true(): void
     {
-        $user = User::create([
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => password_hash('password123', PASSWORD_BCRYPT),
@@ -40,7 +40,7 @@ class AuthTest extends TestCase
 
     public function test_attempt_with_invalid_password_returns_false(): void
     {
-        $user = User::create([
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => password_hash('password123', PASSWORD_BCRYPT),
@@ -60,7 +60,7 @@ class AuthTest extends TestCase
 
     public function test_logout_removes_user_from_session(): void
     {
-        $user = User::create([
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => password_hash('password123', PASSWORD_BCRYPT),

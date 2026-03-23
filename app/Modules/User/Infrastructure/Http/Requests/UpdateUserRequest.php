@@ -8,7 +8,7 @@ use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 
 class UpdateUserRequest extends FormRequest
 {
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             'name' => 'nullable|string|max:255',

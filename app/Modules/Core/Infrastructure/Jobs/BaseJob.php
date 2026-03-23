@@ -7,12 +7,13 @@ namespace App\Modules\Core\Infrastructure\Jobs;
 abstract class BaseJob implements Job
 {
     protected int $attempts = 0;
+
     protected int $maxAttempts = 3;
 
     /**
      * Get the number of times the job has been attempted.
      */
-    public function attempts(): int
+    final public function attempts(): int
     {
         return $this->attempts;
     }
@@ -20,7 +21,7 @@ abstract class BaseJob implements Job
     /**
      * Increment the number of attempts.
      */
-    public function incrementAttempts(): void
+    final public function incrementAttempts(): void
     {
         $this->attempts++;
     }
@@ -28,7 +29,7 @@ abstract class BaseJob implements Job
     /**
      * Get the maximum number of times the job may be attempted.
      */
-    public function maxAttempts(): int
+    final public function maxAttempts(): int
     {
         return $this->maxAttempts;
     }
@@ -36,7 +37,7 @@ abstract class BaseJob implements Job
     /**
      * Set the maximum number of times the job may be attempted.
      */
-    public function setMaxAttempts(int $maxAttempts): void
+    final public function setMaxAttempts(int $maxAttempts): void
     {
         $this->maxAttempts = $maxAttempts;
     }
@@ -44,9 +45,8 @@ abstract class BaseJob implements Job
     /**
      * Determine if the job should be retried on failure.
      */
-    public function shouldRetry(): bool
+    final public function shouldRetry(): bool
     {
         return $this->attempts < $this->maxAttempts;
     }
 }
-

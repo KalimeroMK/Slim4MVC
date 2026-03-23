@@ -13,13 +13,9 @@ class ListRoutesCommand extends Command
 {
     protected static $defaultName = 'list-routes';
 
-    private App $app;
-
-    public function __construct(App $app)
+    public function __construct(private readonly App $app)
     {
         parent::__construct();
-
-        $this->app = $app;
     }
 
     protected function configure()
@@ -39,7 +35,7 @@ class ListRoutesCommand extends Command
         foreach ($routes as $route) {
             $methods = implode(', ', $route->getMethods());
             $path = $route->getPattern();
-            $output->writeln("Method: $methods | Path: $path");
+            $output->writeln(sprintf('Method: %s | Path: %s', $methods, $path));
         }
 
         return Command::SUCCESS;

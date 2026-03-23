@@ -14,5 +14,5 @@ interface CreateRoleActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(CreateRoleDTO $dto): ?array;
+    public function execute(CreateRoleDTO $createRoleDTO): ?array;
 }

@@ -6,10 +6,10 @@ namespace App\Modules\User\Application\Actions;
 
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
-final class ListUserAction
+final readonly class ListUserAction
 {
     public function __construct(
-        private readonly UserRepository $repository
+        private UserRepository $userRepository
     ) {}
 
     /**
@@ -19,6 +19,6 @@ final class ListUserAction
      */
     public function execute(int $page = 1, int $perPage = 15): array
     {
-        return $this->repository->paginate($page, $perPage);
+        return $this->userRepository->paginate($page, $perPage);
     }
 }

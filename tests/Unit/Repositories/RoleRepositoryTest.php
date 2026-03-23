@@ -8,14 +8,14 @@ use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 use Tests\TestCase;
 
-class RoleRepositoryTest extends TestCase
+final class RoleRepositoryTest extends TestCase
 {
-    private RoleRepository $repository;
+    private RoleRepository $roleRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new RoleRepository();
+        $this->roleRepository = new RoleRepository();
     }
 
     public function test_all_returns_all_roles(): void
@@ -23,7 +23,7 @@ class RoleRepositoryTest extends TestCase
         Role::create(['name' => 'Role 1']);
         Role::create(['name' => 'Role 2']);
 
-        $roles = $this->repository->all();
+        $roles = $this->roleRepository->all();
 
         $this->assertCount(2, $roles);
     }
@@ -32,7 +32,7 @@ class RoleRepositoryTest extends TestCase
     {
         $role = Role::create(['name' => 'Test Role']);
 
-        $found = $this->repository->find($role->id);
+        $found = $this->roleRepository->find($role->id);
 
         $this->assertNotNull($found);
         $this->assertEquals($role->id, $found->id);
@@ -41,7 +41,7 @@ class RoleRepositoryTest extends TestCase
 
     public function test_create_creates_new_role(): void
     {
-        $role = $this->repository->create(['name' => 'New Role']);
+        $role = $this->roleRepository->create(['name' => 'New Role']);
 
         $this->assertInstanceOf(Role::class, $role);
         $this->assertEquals('New Role', $role->name);
@@ -52,7 +52,7 @@ class RoleRepositoryTest extends TestCase
     {
         $role = Role::create(['name' => 'Old Name']);
 
-        $updated = $this->repository->update($role->id, ['name' => 'New Name']);
+        $updated = $this->roleRepository->update($role->id, ['name' => 'New Name']);
 
         $this->assertEquals('New Name', $updated->name);
         $this->assertDatabaseHas('roles', ['id' => $role->id, 'name' => 'New Name']);
@@ -62,7 +62,7 @@ class RoleRepositoryTest extends TestCase
     {
         $role = Role::create(['name' => 'To Delete']);
 
-        $result = $this->repository->delete($role->id);
+        $result = $this->roleRepository->delete($role->id);
 
         $this->assertTrue($result);
         $this->assertDatabaseMissing('roles', ['id' => $role->id]);
@@ -72,7 +72,7 @@ class RoleRepositoryTest extends TestCase
     {
         $role = Role::create(['name' => 'Find Me']);
 
-        $found = $this->repository->findByName('Find Me');
+        $found = $this->roleRepository->findByName('Find Me');
 
         $this->assertNotNull($found);
         $this->assertEquals($role->id, $found->id);
@@ -80,7 +80,7 @@ class RoleRepositoryTest extends TestCase
 
     public function test_find_by_name_returns_null_when_not_found(): void
     {
-        $found = $this->repository->findByName('Nonexistent');
+        $found = $this->roleRepository->findByName('Nonexistent');
 
         $this->assertNull($found);
     }

@@ -14,8 +14,8 @@ class RequestResolver
         private readonly Factory $validatorFactory
     ) {}
 
-    public function resolve(string $requestClass, ServerRequestInterface $request): FormRequest
+    public function resolve(string $requestClass, ServerRequestInterface $serverRequest): FormRequest
     {
-        return new $requestClass($request, $this->validatorFactory);
+        return new $requestClass($serverRequest, $this->validatorFactory);
     }
 }

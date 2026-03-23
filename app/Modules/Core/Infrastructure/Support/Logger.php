@@ -54,7 +54,7 @@ class Logger
 
         try {
             return self::$container->get(LoggerInterface::class);
-        } catch (DependencyException|NotFoundException $e) {
+        } catch (DependencyException|NotFoundException) {
             return null;
         }
     }

@@ -79,7 +79,7 @@ class AuthHelper
     /**
      * Set user data (used after login).
      *
-     * @param array<string, mixed> $user
+     * @param  array<string, mixed>  $user
      */
     public static function setUser(array $user): void
     {
@@ -108,7 +108,7 @@ class AuthHelper
     {
         $token = $_SESSION['csrf_token'] ?? '';
 
-        return '<input type="hidden" name="_token" value="'.htmlspecialchars($token, ENT_QUOTES, 'UTF-8').'">';
+        return '<input type="hidden" name="_token" value="'.htmlspecialchars((string) $token, ENT_QUOTES, 'UTF-8').'">';
     }
 
     /**
@@ -124,7 +124,7 @@ class AuthHelper
      */
     public static function methodField(string $method): string
     {
-        $method = strtoupper($method);
+        $method = mb_strtoupper($method);
 
         return '<input type="hidden" name="_method" value="'.htmlspecialchars($method, ENT_QUOTES, 'UTF-8').'">';
     }

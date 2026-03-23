@@ -9,10 +9,10 @@ use App\Modules\Role\Application\Interfaces\CreateRoleActionInterface;
 use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
-final class CreateRoleAction implements CreateRoleActionInterface
+final readonly class CreateRoleAction implements CreateRoleActionInterface
 {
     public function __construct(
-        private readonly RoleRepository $repository
+        private RoleRepository $roleRepository
     ) {}
 
     /**
@@ -20,14 +20,14 @@ final class CreateRoleAction implements CreateRoleActionInterface
      *
      * @return array<string, mixed>|null
      */
-    public function execute(CreateRoleDTO $dto): ?array
+    public function execute(CreateRoleDTO $createRoleDTO): ?array
     {
-        $role = $this->repository->create([
-            'name' => $dto->name,
+        $role = $this->roleRepository->create([
+            'name' => $createRoleDTO->name,
         ]);
 
-        if (! empty($dto->permissions)) {
-            $role->givePermissionTo($dto->permissions);
+        if (! empty($createRoleDTO->permissions)) {
+            $role->givePermissionTo($createRoleDTO->permissions);
         }
 
         return $role->load('permissions')->toArray();

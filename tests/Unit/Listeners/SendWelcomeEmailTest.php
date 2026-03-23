@@ -7,15 +7,15 @@ namespace Tests\Unit\Listeners;
 use App\Modules\Core\Infrastructure\Events\UserRegistered;
 use App\Modules\Core\Infrastructure\Jobs\SendEmailJob;
 use App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail;
-use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\Core\Infrastructure\Queue\Queue;
+use App\Modules\User\Infrastructure\Models\User;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use Tests\TestCase;
 
-class SendWelcomeEmailTest extends TestCase
+final class SendWelcomeEmailTest extends TestCase
 {
-    private SendWelcomeEmail $listener;
+    private SendWelcomeEmail $sendWelcomeEmail;
 
     private MockObject $queue;
 
@@ -24,7 +24,7 @@ class SendWelcomeEmailTest extends TestCase
         parent::setUp();
 
         $this->queue = $this->createMock(Queue::class);
-        $this->listener = new SendWelcomeEmail($this->queue);
+        $this->sendWelcomeEmail = new SendWelcomeEmail($this->queue);
     }
 
     public function test_handle_queues_email_job(): void
@@ -35,25 +35,25 @@ class SendWelcomeEmailTest extends TestCase
             'password' => password_hash('password', PASSWORD_BCRYPT),
         ]);
 
-        $event = new UserRegistered($user);
+        $userRegistered = new UserRegistered($user);
 
         $this->queue->expects($this->once())
             ->method('push')
-            ->with($this->callback(function (SendEmailJob $job) use ($user) {
+            ->with($this->callback(function (SendEmailJob $sendEmailJob) use ($user): true {
                 // Verify job properties using reflection
-                $reflection = new ReflectionClass($job);
-                $toProperty = $reflection->getProperty('to');
-                $toProperty->setAccessible(true);
-                $subjectProperty = $reflection->getProperty('subject');
-                $subjectProperty->setAccessible(true);
-                $templateProperty = $reflection->getProperty('template');
-                $templateProperty->setAccessible(true);
+                $reflectionClass = new ReflectionClass($sendEmailJob);
+                $reflectionProperty = $reflectionClass->getProperty('to');
 
-                return $toProperty->getValue($job) === $user->email
-                    && $subjectProperty->getValue($job) === 'Welcome to our platform!'
-                    && $templateProperty->getValue($job) === 'email.welcome';
+                $subjectProperty = $reflectionClass->getProperty('subject');
+
+                $templateProperty = $reflectionClass->getProperty('template');
+                $this->assertSame($user->email, $reflectionProperty->getValue($sendEmailJob));
+                $this->assertSame('Welcome to our platform!', $subjectProperty->getValue($sendEmailJob));
+                $this->assertSame('email.welcome', $templateProperty->getValue($sendEmailJob));
+
+                return true;
             }));
 
-        $this->listener->handle($event);
+        $this->sendWelcomeEmail->handle($userRegistered);
     }
 }

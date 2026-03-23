@@ -10,31 +10,32 @@ use Predis\Client;
 
 class RedisQueue implements Queue
 {
-    private Client $redis;
-    private string $queueName;
+    private readonly Client $client;
 
-    public function __construct(?Client $redis = null, string $queueName = 'default')
+    private readonly string $queueName;
+
+    public function __construct(?Client $client = null, string $queueName = 'default')
     {
-        $this->redis = $redis ?? $this->createRedisClient();
-        $this->queueName = "queue:{$queueName}";
+        $this->client = $client ?? $this->createRedisClient();
+        $this->queueName = 'queue:'.$queueName;
     }
 
     public function push(Job $job): void
     {
         $jobData = [
-            'class' => get_class($job),
+            'class' => $job::class,
             'data' => serialize($job),
             'created_at' => time(),
             'attempts' => 0,
         ];
 
-        $this->redis->lpush($this->queueName, json_encode($jobData));
+        $this->client->lpush($this->queueName, json_encode($jobData));
     }
 
     public function pop(): ?Job
     {
         // Use rpop for non-blocking pop (returns null if queue is empty)
-        $result = $this->redis->rpop($this->queueName);
+        $result = $this->client->rpop($this->queueName);
 
         if ($result === null) {
             return null;
@@ -48,19 +49,19 @@ class RedisQueue implements Queue
 
         try {
             return unserialize($jobData['data']);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
     }
 
     public function size(): int
     {
-        return (int) $this->redis->llen($this->queueName);
+        return (int) $this->client->llen($this->queueName);
     }
 
     public function clear(): void
     {
-        $this->redis->del($this->queueName);
+        $this->client->del($this->queueName);
     }
 
     /**
@@ -99,4 +100,3 @@ class RedisQueue implements Queue
         return new Client($parameters);
     }
 }
-

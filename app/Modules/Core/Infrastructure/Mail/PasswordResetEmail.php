@@ -13,20 +13,14 @@ use App\Modules\User\Infrastructure\Models\User;
  */
 class PasswordResetEmail extends Mailable
 {
-    protected User $user;
-
-    protected string $token;
-
     public function __construct(
         Mailer $mailer,
         Blade $blade,
-        User $user,
-        string $token
+        protected User $user,
+        protected string $token
     ) {
         parent::__construct($mailer, $blade);
-        $this->user = $user;
-        $this->token = $token;
-        $this->to($user->email);
+        $this->to($this->user->email);
     }
 
     protected function template(): string

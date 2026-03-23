@@ -7,10 +7,10 @@ namespace App\Modules\Permission\Application\Actions;
 use App\Modules\Permission\Infrastructure\Models\Permission;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
-final class GetPermissionAction
+final readonly class GetPermissionAction
 {
     public function __construct(
-        private readonly PermissionRepository $repository
+        private PermissionRepository $permissionRepository
     ) {}
 
     /**
@@ -20,7 +20,7 @@ final class GetPermissionAction
      */
     public function execute(int $id): Permission
     {
-        $permission = $this->repository->findOrFail($id);
+        $permission = $this->permissionRepository->findOrFail($id);
         $permission->load('roles');
 
         return $permission;

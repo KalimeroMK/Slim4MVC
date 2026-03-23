@@ -31,7 +31,7 @@ class JwtEncoder
         }
 
         if ($algorithm !== 'HS256') {
-            throw new RuntimeException("Unsupported algorithm: {$algorithm}. Only HS256 is supported.");
+            throw new RuntimeException(sprintf('Unsupported algorithm: %s. Only HS256 is supported.', $algorithm));
         }
 
         // Add standard claims if not present
@@ -49,10 +49,10 @@ class JwtEncoder
         $payloadEncoded = $this->base64UrlEncode(json_encode($payload, JSON_THROW_ON_ERROR));
 
         // Create signature
-        $signature = hash_hmac('sha256', "{$headerEncoded}.{$payloadEncoded}", $secret, true);
+        $signature = hash_hmac('sha256', sprintf('%s.%s', $headerEncoded, $payloadEncoded), $secret, true);
         $signatureEncoded = $this->base64UrlEncode($signature);
 
-        return "{$headerEncoded}.{$payloadEncoded}.{$signatureEncoded}";
+        return sprintf('%s.%s.%s', $headerEncoded, $payloadEncoded, $signatureEncoded);
     }
 
     /**

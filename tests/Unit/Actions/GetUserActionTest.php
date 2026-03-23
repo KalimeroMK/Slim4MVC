@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Actions;
 
-use App\Modules\User\Application\Actions\GetUserAction;
 use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Application\Actions\GetUserAction;
 use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Tests\TestCase;
 
-class GetUserActionTest extends TestCase
+final class GetUserActionTest extends TestCase
 {
-    private GetUserAction $action;
+    private GetUserAction $getUserAction;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $repository = new UserRepository();
-        $this->action = new GetUserAction($repository);
+        $userRepository = new UserRepository();
+        $this->getUserAction = new GetUserAction($userRepository);
     }
 
     public function test_execute_returns_user_with_roles(): void
@@ -33,7 +33,7 @@ class GetUserActionTest extends TestCase
         $role = Role::create(['name' => 'admin']);
         $user->roles()->attach($role->id);
 
-        $result = $this->action->execute($user->id);
+        $result = $this->getUserAction->execute($user->id);
 
         $this->assertInstanceOf(User::class, $result);
         $this->assertEquals($user->id, $result->id);
@@ -45,6 +45,6 @@ class GetUserActionTest extends TestCase
     {
         $this->expectException(ModelNotFoundException::class);
 
-        $this->action->execute(999);
+        $this->getUserAction->execute(999);
     }
 }

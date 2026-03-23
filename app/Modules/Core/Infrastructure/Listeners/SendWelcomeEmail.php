@@ -14,14 +14,14 @@ class SendWelcomeEmail
         private readonly Queue $queue
     ) {}
 
-    public function handle(UserRegistered $event): void
+    public function handle(UserRegistered $userRegistered): void
     {
         // Queue the email job instead of sending synchronously
         $this->queue->push(new SendEmailJob(
-            $event->user->email,
+            $userRegistered->user->email,
             'Welcome to our platform!',
             'email.welcome',
-            ['user' => $event->user]
+            ['user' => $userRegistered->user]
         ));
     }
 }

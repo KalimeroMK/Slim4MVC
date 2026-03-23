@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Modules\Auth\Application\DTOs\Auth;
 
-final class PasswordRecoveryDTO
+final readonly class PasswordRecoveryDTO
 {
     public function __construct(
-        public readonly string $email
+        public string $email
     ) {}
 
     /**

@@ -38,7 +38,7 @@ class Auth
 
         try {
             $this->jwtService = $container->get(JwtService::class);
-        } catch (DependencyException|NotFoundException $e) {
+        } catch (DependencyException|NotFoundException) {
             // JwtService will be created on demand if not in container
             $this->jwtService = new JwtService();
         }
@@ -48,7 +48,7 @@ class Auth
     {
         $user = User::where('email', $email)->first();
 
-        if (! $user || ! password_verify($password, $user->password)) {
+        if (! $user || ! password_verify($password, (string) $user->password)) {
             return false;
         }
 
@@ -78,7 +78,7 @@ class Auth
 
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
 
-        if (! str_starts_with($authHeader, 'Bearer ')) {
+        if (! str_starts_with((string) $authHeader, 'Bearer ')) {
             return null;
         }
 
@@ -89,11 +89,11 @@ class Auth
             $this->user = User::find($decoded->id);
 
             return $this->user;
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             // Log authentication failures for security monitoring
             if ($this->logger instanceof LoggerInterface) {
                 $this->logger->warning('JWT authentication failed', [
-                    'error' => $e->getMessage(),
+                    'error' => $exception->getMessage(),
                     'token_preview' => mb_substr($token, 0, 20).'...',
                 ]);
             }

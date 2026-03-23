@@ -8,14 +8,14 @@ use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Tests\TestCase;
 
-class UserRepositoryTest extends TestCase
+final class UserRepositoryTest extends TestCase
 {
-    private UserRepository $repository;
+    private UserRepository $userRepository;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new UserRepository();
+        $this->userRepository = new UserRepository();
     }
 
     public function test_all_returns_all_users(): void
@@ -23,7 +23,7 @@ class UserRepositoryTest extends TestCase
         User::create(['name' => 'User 1', 'email' => 'user1@test.com', 'password' => 'password']);
         User::create(['name' => 'User 2', 'email' => 'user2@test.com', 'password' => 'password']);
 
-        $users = $this->repository->all();
+        $users = $this->userRepository->all();
 
         $this->assertCount(2, $users);
     }
@@ -32,7 +32,7 @@ class UserRepositoryTest extends TestCase
     {
         $user = User::create(['name' => 'Test User', 'email' => 'test@test.com', 'password' => 'password']);
 
-        $found = $this->repository->find($user->id);
+        $found = $this->userRepository->find($user->id);
 
         $this->assertNotNull($found);
         $this->assertEquals($user->id, $found->id);
@@ -41,7 +41,7 @@ class UserRepositoryTest extends TestCase
 
     public function test_find_returns_null_when_not_found(): void
     {
-        $found = $this->repository->find(999);
+        $found = $this->userRepository->find(999);
 
         $this->assertNull($found);
     }
@@ -50,7 +50,7 @@ class UserRepositoryTest extends TestCase
     {
         $user = User::create(['name' => 'Test User', 'email' => 'test@test.com', 'password' => 'password']);
 
-        $found = $this->repository->findOrFail($user->id);
+        $found = $this->userRepository->findOrFail($user->id);
 
         $this->assertEquals($user->id, $found->id);
     }
@@ -59,12 +59,12 @@ class UserRepositoryTest extends TestCase
     {
         $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
 
-        $this->repository->findOrFail(999);
+        $this->userRepository->findOrFail(999);
     }
 
     public function test_create_creates_new_user(): void
     {
-        $user = $this->repository->create([
+        $user = $this->userRepository->create([
             'name' => 'New User',
             'email' => 'new@test.com',
             'password' => password_hash('password', PASSWORD_BCRYPT),
@@ -80,7 +80,7 @@ class UserRepositoryTest extends TestCase
     {
         $user = User::create(['name' => 'Old Name', 'email' => 'old@test.com', 'password' => 'password']);
 
-        $updated = $this->repository->update($user->id, ['name' => 'New Name']);
+        $updated = $this->userRepository->update($user->id, ['name' => 'New Name']);
 
         $this->assertEquals('New Name', $updated->name);
         $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'New Name']);
@@ -90,7 +90,7 @@ class UserRepositoryTest extends TestCase
     {
         $user = User::create(['name' => 'To Delete', 'email' => 'delete@test.com', 'password' => 'password']);
 
-        $result = $this->repository->delete($user->id);
+        $result = $this->userRepository->delete($user->id);
 
         $this->assertTrue($result);
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
@@ -101,7 +101,7 @@ class UserRepositoryTest extends TestCase
         User::create(['name' => 'User 1', 'email' => 'user1@test.com', 'password' => 'password']);
         User::create(['name' => 'User 2', 'email' => 'user2@test.com', 'password' => 'password']);
 
-        $result = $this->repository->paginate(1, 1);
+        $result = $this->userRepository->paginate(1, 1);
 
         $this->assertArrayHasKey('items', $result);
         $this->assertArrayHasKey('total', $result);
@@ -117,7 +117,7 @@ class UserRepositoryTest extends TestCase
     {
         $user = User::create(['name' => 'Test', 'email' => 'find@test.com', 'password' => 'password']);
 
-        $found = $this->repository->findByEmail('find@test.com');
+        $found = $this->userRepository->findByEmail('find@test.com');
 
         $this->assertNotNull($found);
         $this->assertEquals($user->id, $found->id);
@@ -125,7 +125,7 @@ class UserRepositoryTest extends TestCase
 
     public function test_find_by_email_returns_null_when_not_found(): void
     {
-        $found = $this->repository->findByEmail('nonexistent@test.com');
+        $found = $this->userRepository->findByEmail('nonexistent@test.com');
 
         $this->assertNull($found);
     }
@@ -139,7 +139,7 @@ class UserRepositoryTest extends TestCase
             'password_reset_token' => 'test-token-123',
         ]);
 
-        $found = $this->repository->findByPasswordResetToken('test-token-123');
+        $found = $this->userRepository->findByPasswordResetToken('test-token-123');
 
         $this->assertNotNull($found);
         $this->assertEquals($user->id, $found->id);
@@ -147,11 +147,11 @@ class UserRepositoryTest extends TestCase
 
     public function test_paginate_with_roles_includes_roles(): void
     {
-        $user = User::create(['name' => 'User', 'email' => 'user@test.com', 'password' => 'password']);
+        User::create(['name' => 'User', 'email' => 'user@test.com', 'password' => 'password']);
 
-        $result = $this->repository->paginateWithRoles(1, 15);
+        $result = $this->userRepository->paginateWithRoles(1, 15);
 
         $this->assertArrayHasKey('items', $result);
-        $this->assertTrue($result['total'] >= 1);
+        $this->assertGreaterThanOrEqual(1, $result['total']);
     }
 }

@@ -7,6 +7,7 @@ namespace App\Modules\Core\Infrastructure\Queue;
 use App\Modules\Core\Infrastructure\Jobs\Job;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Override;
 
 /**
  * @property int $id
@@ -20,9 +21,9 @@ use Illuminate\Database\Eloquent\Model;
  */
 class FailedJob extends Model
 {
-    protected $table = 'failed_jobs';
-
     public $timestamps = false;
+
+    protected $table = 'failed_jobs';
 
     protected $fillable = [
         'job_class',
@@ -45,9 +46,9 @@ class FailedJob extends Model
     public static function store(Job $job, Exception $exception, int $attempts = 1): self
     {
         return self::create([
-            'job_class' => get_class($job),
+            'job_class' => $job::class,
             'job_data' => serialize($job),
-            'exception' => get_class($exception),
+            'exception' => $exception::class,
             'exception_message' => $exception->getMessage(),
             'exception_trace' => $exception->getTraceAsString(),
             'failed_at' => time(),
@@ -62,7 +63,7 @@ class FailedJob extends Model
     {
         try {
             return unserialize($this->job_data);
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -74,7 +75,7 @@ class FailedJob extends Model
     {
         $job = $this->getJob();
 
-        if ($job === null) {
+        if (! $job instanceof Job) {
             return false;
         }
 
@@ -87,9 +88,9 @@ class FailedJob extends Model
     /**
      * Delete the failed job.
      */
+    #[Override]
     public function delete(): ?bool
     {
         return parent::delete();
     }
 }
-

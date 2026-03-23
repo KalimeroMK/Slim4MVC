@@ -9,20 +9,20 @@ use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterfac
 use App\Modules\Permission\Infrastructure\Models\Permission;
 use App\Modules\Permission\Infrastructure\Repositories\PermissionRepository;
 
-final class CreatePermissionAction implements CreatePermissionActionInterface
+final readonly class CreatePermissionAction implements CreatePermissionActionInterface
 {
     public function __construct(
-        private readonly PermissionRepository $repository
+        private PermissionRepository $permissionRepository
     ) {}
 
     /**
      * Execute permission creation.
      */
-    public function execute(CreatePermissionDTO $dto): Permission
+    public function execute(CreatePermissionDTO $createPermissionDTO): Permission
     {
         /** @var Permission $permission */
-        $permission = $this->repository->create([
-            'name' => $dto->name,
+        $permission = $this->permissionRepository->create([
+            'name' => $createPermissionDTO->name,
         ]);
 
         return $permission;

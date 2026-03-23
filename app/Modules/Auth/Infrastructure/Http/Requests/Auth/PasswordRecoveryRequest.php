@@ -13,7 +13,7 @@ class PasswordRecoveryRequest extends FormRequest
      *
      * @return array<string, array<int, string>>
      */
-    public function rules(): array
+    protected function rules(): array
     {
         return [
             'email' => ['required', 'email'],

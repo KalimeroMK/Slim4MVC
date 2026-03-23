@@ -43,7 +43,7 @@ abstract class ApiTestCase extends TestCase
             ->withMethod($method)
             ->withUri($this->app->getContainer()->get('uri')->create($uri));
 
-        if (! empty($data)) {
+        if ($data !== []) {
             $request = $request->withParsedBody($data);
         }
 

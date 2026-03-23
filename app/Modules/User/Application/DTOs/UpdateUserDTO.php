@@ -6,18 +6,7 @@ namespace App\Modules\User\Application\DTOs;
 
 class UpdateUserDTO
 {
-    public int $id;
-
-    public ?string $name;
-
-    public ?string $email;
-
-    public function __construct(int $id, ?string $name = null, ?string $email = null)
-    {
-        $this->id = $id;
-        $this->name = $name;
-        $this->email = $email;
-    }
+    public function __construct(public int $id, public ?string $name = null, public ?string $email = null) {}
 
     public static function fromRequest(array $validated): self
     {

@@ -10,19 +10,18 @@ use App\Modules\Core\Infrastructure\Exceptions\InvalidCredentialsException;
 use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
-use RuntimeException;
 use Tests\TestCase;
 
-class LoginActionTest extends TestCase
+final class LoginActionTest extends TestCase
 {
-    private LoginAction $action;
+    private LoginAction $loginAction;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $repository = new UserRepository();
+        $userRepository = new UserRepository();
         $jwtService = new JwtService('test-secret-key-for-testing-only');
-        $this->action = new LoginAction($repository, $jwtService);
+        $this->loginAction = new LoginAction($userRepository, $jwtService);
         $_ENV['JWT_SECRET'] = 'test-secret-key-for-testing-only';
     }
 
@@ -34,8 +33,8 @@ class LoginActionTest extends TestCase
             'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
 
-        $dto = new LoginDTO('test@example.com', 'password123');
-        $result = $this->action->execute($dto);
+        $loginDTO = new LoginDTO('test@example.com', 'password123');
+        $result = $this->loginAction->execute($loginDTO);
 
         $this->assertArrayHasKey('user', $result);
         $this->assertArrayHasKey('token', $result);
@@ -46,12 +45,12 @@ class LoginActionTest extends TestCase
 
     public function test_execute_with_invalid_email_throws_exception(): void
     {
-        $dto = new LoginDTO('nonexistent@example.com', 'password123');
+        $loginDTO = new LoginDTO('nonexistent@example.com', 'password123');
 
         $this->expectException(InvalidCredentialsException::class);
         $this->expectExceptionMessage('Invalid credentials');
 
-        $this->action->execute($dto);
+        $this->loginAction->execute($loginDTO);
     }
 
     public function test_execute_with_invalid_password_throws_exception(): void
@@ -62,12 +61,11 @@ class LoginActionTest extends TestCase
             'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
 
-        $dto = new LoginDTO('test@example.com', 'wrongpassword');
+        $loginDTO = new LoginDTO('test@example.com', 'wrongpassword');
 
         $this->expectException(InvalidCredentialsException::class);
         $this->expectExceptionMessage('Invalid credentials');
 
-        $this->action->execute($dto);
+        $this->loginAction->execute($loginDTO);
     }
-
 }

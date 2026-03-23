@@ -9,7 +9,7 @@ use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\User\Infrastructure\Models\User;
 use Tests\TestCase;
 
-class RoleModelTest extends TestCase
+final class RoleModelTest extends TestCase
 {
     public function test_role_can_have_users(): void
     {

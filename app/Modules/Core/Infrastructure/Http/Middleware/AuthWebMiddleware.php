@@ -13,12 +13,7 @@ use Slim\Psr7\Response as SlimResponse;
 
 class AuthWebMiddleware implements MiddlewareInterface
 {
-    private Auth $auth;
-
-    public function __construct(Auth $auth)
-    {
-        $this->auth = $auth;
-    }
+    public function __construct(private readonly Auth $auth) {}
 
     public function process(Request $request, Handler $handler): Response
     {

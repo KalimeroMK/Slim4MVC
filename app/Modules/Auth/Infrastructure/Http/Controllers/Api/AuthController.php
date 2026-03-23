@@ -32,10 +32,10 @@ class AuthController extends Controller
         parent::__construct($container);
     }
 
-    public function register(RegisterRequest $request, Response $response): Response
+    public function register(RegisterRequest $registerRequest, Response $response): Response
     {
         $user = $this->registerAction->execute(
-            RegisterDTO::fromRequest($request->validated())
+            RegisterDTO::fromRequest($registerRequest->validated())
         );
 
         $response->getBody()->write(json_encode([
@@ -46,10 +46,10 @@ class AuthController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function login(LoginRequest $request, Response $response): Response
+    public function login(LoginRequest $loginRequest, Response $response): Response
     {
         $result = $this->loginAction->execute(
-            LoginDTO::fromRequest($request->validated())
+            LoginDTO::fromRequest($loginRequest->validated())
         );
 
         $response->getBody()->write(json_encode($result));
@@ -57,10 +57,10 @@ class AuthController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function passwordRecovery(PasswordRecoveryRequest $request, Response $response): Response
+    public function passwordRecovery(PasswordRecoveryRequest $passwordRecoveryRequest, Response $response): Response
     {
         $this->passwordRecoveryAction->execute(
-            PasswordRecoveryDTO::fromRequest($request->validated())
+            PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
         $response->getBody()->write(json_encode([
@@ -71,10 +71,10 @@ class AuthController extends Controller
         return $response->withHeader('Content-Type', 'application/json');
     }
 
-    public function updatePassword(ResetPasswordRequest $request, Response $response): Response
+    public function updatePassword(ResetPasswordRequest $resetPasswordRequest, Response $response): Response
     {
         $this->resetPasswordAction->execute(
-            ResetPasswordDTO::fromRequest($request->validated())
+            ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
         $response->getBody()->write(json_encode([

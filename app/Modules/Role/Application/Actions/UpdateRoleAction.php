@@ -11,10 +11,10 @@ use App\Modules\Role\Application\Interfaces\UpdateRoleActionInterface;
 use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\Role\Infrastructure\Repositories\RoleRepository;
 
-final class UpdateRoleAction implements UpdateRoleActionInterface
+final readonly class UpdateRoleAction implements UpdateRoleActionInterface
 {
     public function __construct(
-        private readonly RoleRepository $repository
+        private RoleRepository $roleRepository
     ) {}
 
     /**
@@ -22,18 +22,18 @@ final class UpdateRoleAction implements UpdateRoleActionInterface
      *
      * @return array<string, mixed>|null
      */
-    public function execute(UpdateRoleDTO $dto): ?array
+    public function execute(UpdateRoleDTO $updateRoleDTO): ?array
     {
         $attributes = [];
-        if ($dto->name !== null) {
-            $attributes['name'] = $dto->name;
+        if ($updateRoleDTO->name !== null) {
+            $attributes['name'] = $updateRoleDTO->name;
         }
 
-        $role = $this->repository->update($dto->id, $attributes);
+        $role = $this->roleRepository->update($updateRoleDTO->id, $attributes);
 
-        if ($dto->permissions !== []) {
+        if ($updateRoleDTO->permissions !== []) {
             /** @var Role $role */
-            $role->syncPermissions($dto->permissions);
+            $role->syncPermissions($updateRoleDTO->permissions);
         }
 
         return $role->fresh()->load('permissions')->toArray();

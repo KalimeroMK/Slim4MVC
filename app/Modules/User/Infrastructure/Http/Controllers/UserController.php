@@ -28,11 +28,11 @@ class UserController extends Controller
 
     public function __construct(
         ContainerInterface $container,
-        private readonly CreateUserAction $createAction,
-        private readonly UpdateUserAction $updateAction,
-        private readonly DeleteUserAction $deleteAction,
-        private readonly GetUserAction $getAction,
-        private readonly ListUsersAction $listAction
+        private readonly CreateUserAction $createUserAction,
+        private readonly UpdateUserAction $updateUserAction,
+        private readonly DeleteUserAction $deleteUserAction,
+        private readonly GetUserAction $getUserAction,
+        private readonly ListUsersAction $listUsersAction
     ) {
         parent::__construct($container);
     }
@@ -45,7 +45,7 @@ class UserController extends Controller
     public function index(Request $request, Response $response): Response
     {
         $params = $this->getPaginationParams();
-        $result = $this->listAction->execute($params['page'], $params['perPage']);
+        $result = $this->listUsersAction->execute($params['page'], $params['perPage']);
 
         $items = UserResource::collection($result['items']);
 
@@ -71,10 +71,10 @@ class UserController extends Controller
      *   "password": "secret"
      * }
      */
-    public function store(CreateUserRequest $request, Response $response): Response
+    public function store(CreateUserRequest $createUserRequest, Response $response): Response
     {
-        $userData = $this->createAction->execute(
-            CreateUserDTO::fromRequest($request->validated())
+        $userData = $this->createUserAction->execute(
+            CreateUserDTO::fromRequest($createUserRequest->validated())
         );
 
         // Reload user with relationships for resource
@@ -92,7 +92,7 @@ class UserController extends Controller
      */
     public function show(Request $request, Response $response, array $args): Response
     {
-        $user = $this->getAction->execute($args['id']);
+        $user = $this->getUserAction->execute($args['id']);
 
         return ApiResponse::success(UserResource::make($user));
     }
@@ -110,15 +110,15 @@ class UserController extends Controller
      *
      * @param  array  $args  Array with route parameters (expects 'id')
      */
-    public function update(UpdateUserRequest $request, Response $response, array $args): Response
+    public function update(UpdateUserRequest $updateUserRequest, Response $response, array $args): Response
     {
-        $this->updateAction->execute(
+        $this->updateUserAction->execute(
             new UpdateUserDTO(
                 $args['id'],
-                $request->validated()['name'] ?? null,
-                $request->validated()['email'] ?? null,
-                $request->validated()['password'] ?? null,
-                $request->validated()['roles'] ?? []
+                $updateUserRequest->validated()['name'] ?? null,
+                $updateUserRequest->validated()['email'] ?? null,
+                $updateUserRequest->validated()['password'] ?? null,
+                $updateUserRequest->validated()['roles'] ?? []
             )
         );
 
@@ -137,7 +137,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteAction->execute($args['id']);
+        $this->deleteUserAction->execute($args['id']);
 
         return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'User deleted successfully');
     }

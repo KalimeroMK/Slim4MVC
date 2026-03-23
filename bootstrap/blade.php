@@ -30,24 +30,19 @@ return function (Container $container): void {
         $container->set('view', function (ContainerInterface $container): object {
             $blade = $container->get(Blade::class);
 
-            return new class($blade)
+            return new readonly class($blade)
             {
-                private Blade $blade;
-
-                public function __construct(Blade $blade)
-                {
-                    $this->blade = $blade;
-                }
+                public function __construct(private Blade $blade) {}
 
                 public function render(string $template, array $data = []): string
                 {
                     try {
                         return $this->blade->make($template, $data);
-                    } catch (Exception $e) {
+                    } catch (Exception $exception) {
                         throw new RuntimeException(
-                            "Failed to render view '{$template}': ".$e->getMessage(),
+                            sprintf("Failed to render view '%s': ", $template).$exception->getMessage(),
                             0,
-                            $e
+                            $exception
                         );
                     }
                 }
@@ -59,11 +54,11 @@ return function (Container $container): void {
             };
         });
 
-    } catch (Exception $e) {
+    } catch (Exception $exception) {
         throw new RuntimeException(
-            'Failed to initialize Blade templating: '.$e->getMessage(),
+            'Failed to initialize Blade templating: '.$exception->getMessage(),
             0,
-            $e
+            $exception
         );
     }
 };

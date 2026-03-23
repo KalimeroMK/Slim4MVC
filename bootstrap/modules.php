@@ -19,10 +19,10 @@ return function (App $app, ContainerInterface $container): void {
         return;
     }
 
-    foreach ($modules as $providerClass) {
-        if (is_string($providerClass) && class_exists($providerClass)) {
+    foreach ($modules as $module) {
+        if (is_string($module) && class_exists($module)) {
             try {
-                $provider = new $providerClass();
+                $provider = new $module();
 
                 // Register services
                 if (method_exists($provider, 'register')) {
@@ -35,7 +35,7 @@ return function (App $app, ContainerInterface $container): void {
                 }
             } catch (Throwable $e) {
                 // Log error but don't break the application
-                error_log("Failed to load module $providerClass: ".$e->getMessage());
+                error_log(sprintf('Failed to load module %s: ', $module).$e->getMessage());
             }
         }
     }

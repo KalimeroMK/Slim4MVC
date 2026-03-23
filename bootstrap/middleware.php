@@ -48,21 +48,15 @@ return function ($app, DI\Container $container): void {
     $app->addErrorMiddleware($displayErrorDetails, true, true);
 
     // Register request resolver
-    $container->set(RequestResolver::class, function () use ($container): RequestResolver {
-        return new RequestResolver(
-            $container,
-            $container->get(Factory::class)
-        );
-    });
+    $container->set(RequestResolver::class, fn (): RequestResolver => new RequestResolver(
+        $container,
+        $container->get(Factory::class)
+    ));
 
     // Register other middlewares
-    $container->set(AuthMiddleware::class, function () use ($container): AuthMiddleware {
-        return new AuthMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class));
-    });
+    $container->set(AuthMiddleware::class, fn (): AuthMiddleware => new AuthMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class)));
 
-    $container->set(AuthWebMiddleware::class, function () use ($container): AuthWebMiddleware {
-        return new AuthWebMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class));
-    });
+    $container->set(AuthWebMiddleware::class, fn (): AuthWebMiddleware => new AuthWebMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class)));
 
     // Add exception handler middleware (should be early to catch all exceptions)
     $app->add(new ExceptionHandlerMiddleware());

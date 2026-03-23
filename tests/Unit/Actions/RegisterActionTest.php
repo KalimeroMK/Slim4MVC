@@ -13,9 +13,9 @@ use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\TestCase;
 
-class RegisterActionTest extends TestCase
+final class RegisterActionTest extends TestCase
 {
-    private RegisterAction $action;
+    private RegisterAction $registerAction;
 
     private MockObject $dispatcher;
 
@@ -24,8 +24,8 @@ class RegisterActionTest extends TestCase
         parent::setUp();
 
         $this->dispatcher = $this->createMock(Dispatcher::class);
-        $repository = new UserRepository();
-        $this->action = new RegisterAction($this->dispatcher, $repository);
+        $userRepository = new UserRepository();
+        $this->registerAction = new RegisterAction($this->dispatcher, $userRepository);
     }
 
     public function test_execute_creates_user_with_hashed_password(): void
@@ -34,34 +34,36 @@ class RegisterActionTest extends TestCase
             ->method('dispatch')
             ->with($this->isInstanceOf(UserRegistered::class));
 
-        $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
-        $user = $this->action->execute($dto);
+        $registerDTO = new RegisterDTO('Test User', 'test@example.com', 'password123');
+        $user = $this->registerAction->execute($registerDTO);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertEquals('Test User', $user->name);
         $this->assertEquals('test@example.com', $user->email);
-        $this->assertTrue(password_verify('password123', $user->password));
+        $this->assertTrue(password_verify('password123', (string) $user->password));
     }
 
     public function test_execute_dispatches_user_registered_event(): void
     {
         $this->dispatcher->expects($this->once())
             ->method('dispatch')
-            ->with($this->callback(function (UserRegistered $event) {
-                return $event->user instanceof User
-                    && $event->user->email === 'test@example.com';
+            ->with($this->callback(function (UserRegistered $userRegistered): true {
+                $this->assertInstanceOf(User::class, $userRegistered->user);
+                $this->assertSame('test@example.com', $userRegistered->user->email);
+
+                return true;
             }));
 
-        $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
-        $this->action->execute($dto);
+        $registerDTO = new RegisterDTO('Test User', 'test@example.com', 'password123');
+        $this->registerAction->execute($registerDTO);
     }
 
     public function test_execute_creates_user_in_database(): void
     {
         $this->dispatcher->method('dispatch');
 
-        $dto = new RegisterDTO('Test User', 'test@example.com', 'password123');
-        $user = $this->action->execute($dto);
+        $registerDTO = new RegisterDTO('Test User', 'test@example.com', 'password123');
+        $user = $this->registerAction->execute($registerDTO);
 
         $this->assertNotNull($user->id);
         $this->assertDatabaseHas('users', [

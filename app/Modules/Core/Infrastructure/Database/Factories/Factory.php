@@ -48,6 +48,7 @@ abstract class Factory
         if (! isset($newFactory->stateCallbacks)) {
             $newFactory->stateCallbacks = [];
         }
+
         $newFactory->stateCallbacks[] = $callback;
 
         return $newFactory;
@@ -66,8 +67,8 @@ abstract class Factory
 
         // Apply state callbacks
         if (isset($this->stateCallbacks) && is_array($this->stateCallbacks)) {
-            foreach ($this->stateCallbacks as $callback) {
-                $stateAttributes = $callback($definition);
+            foreach ($this->stateCallbacks as $stateCallback) {
+                $stateAttributes = $stateCallback($definition);
                 $definition = array_merge($definition, $stateAttributes);
             }
         }

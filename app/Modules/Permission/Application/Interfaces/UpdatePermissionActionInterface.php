@@ -14,5 +14,5 @@ interface UpdatePermissionActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(UpdatePermissionDTO $dto): ?array;
+    public function execute(UpdatePermissionDTO $updatePermissionDTO): ?array;
 }

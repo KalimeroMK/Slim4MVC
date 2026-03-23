@@ -60,15 +60,15 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
      */
     private function resolveParameters(
         callable $callable,
-        ServerRequestInterface $request,
+        ServerRequestInterface $serverRequest,
         ResponseInterface $response,
         array $routeArguments
     ): array {
-        $reflection = $this->getReflection($callable);
+        $reflectionFunctionAbstract = $this->getReflection($callable);
         $parameters = [];
 
-        foreach ($reflection->getParameters() as $param) {
-            $parameters[] = $this->resolveParameter($param, $request, $response, $routeArguments);
+        foreach ($reflectionFunctionAbstract->getParameters() as $reflectionParameter) {
+            $parameters[] = $this->resolveParameter($reflectionParameter, $serverRequest, $response, $routeArguments);
         }
 
         return $parameters;
@@ -93,7 +93,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
     private function getCacheKey(callable $callable): string
     {
         if (is_array($callable)) {
-            $class = is_object($callable[0]) ? get_class($callable[0]) : $callable[0];
+            $class = is_object($callable[0]) ? $callable[0]::class : $callable[0];
 
             return $class.'::'.$callable[1];
         }
@@ -122,13 +122,13 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
      * Resolve a single parameter using optimized type checking order.
      */
     private function resolveParameter(
-        ReflectionParameter $parameter,
-        ServerRequestInterface $request,
+        ReflectionParameter $reflectionParameter,
+        ServerRequestInterface $serverRequest,
         ResponseInterface $response,
         array $routeArguments
     ): mixed {
-        $type = $parameter->getType();
-        $name = $parameter->getName();
+        $type = $reflectionParameter->getType();
+        $name = $reflectionParameter->getName();
 
         // Fast path: no type hint - check route arguments
         if ($type === null) {
@@ -144,7 +144,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
 
         // Fast path: PSR-7 interfaces (very common)
         if ($typeName === ServerRequestInterface::class) {
-            return $request;
+            return $serverRequest;
         }
 
         if ($typeName === ResponseInterface::class) {
@@ -153,7 +153,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
 
         // Form requests (common, but check after PSR-7)
         if ($this->isFormRequest($typeName)) {
-            return $this->resolveFormRequest($typeName, $request);
+            return $this->resolveFormRequest($typeName, $serverRequest);
         }
 
         // Container resolution (fallback)
@@ -162,8 +162,8 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
         }
 
         // If parameter has default value, return it
-        if ($parameter->isDefaultValueAvailable()) {
-            return $parameter->getDefaultValue();
+        if ($reflectionParameter->isDefaultValueAvailable()) {
+            return $reflectionParameter->getDefaultValue();
         }
 
         // Last resort: return null (will likely cause error, but better than crashing)
@@ -173,9 +173,9 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
     /**
      * Get type name from ReflectionType.
      */
-    private function getTypeName(ReflectionType $type): string
+    private function getTypeName(ReflectionType $reflectionType): string
     {
-        return $type->getName();
+        return $reflectionType->getName();
     }
 
     /**
@@ -195,8 +195,8 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
     /**
      * Resolve FormRequest instance (integrated from RequestResolver for better performance).
      */
-    private function resolveFormRequest(string $requestClass, ServerRequestInterface $request): FormRequest
+    private function resolveFormRequest(string $requestClass, ServerRequestInterface $serverRequest): FormRequest
     {
-        return new $requestClass($request, $this->validatorFactory);
+        return new $requestClass($serverRequest, $this->validatorFactory);
     }
 }

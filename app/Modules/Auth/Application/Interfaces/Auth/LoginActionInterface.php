@@ -13,5 +13,5 @@ interface LoginActionInterface
      *
      * @return array<string, mixed>
      */
-    public function execute(LoginDTO $dto): array;
+    public function execute(LoginDTO $loginDTO): array;
 }

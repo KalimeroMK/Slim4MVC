@@ -31,15 +31,15 @@ class UserRepository extends EloquentRepository
      */
     public function paginateWithRoles(int $page = 1, int $perPage = 15): array
     {
-        $paginator = User::with('roles')
+        $lengthAwarePaginator = User::with('roles')
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return [
-            'items' => $paginator->items(),
-            'total' => $paginator->total(),
-            'page' => $paginator->currentPage(),
-            'perPage' => $paginator->perPage(),
+            'items' => $lengthAwarePaginator->items(),
+            'total' => $lengthAwarePaginator->total(),
+            'page' => $lengthAwarePaginator->currentPage(),
+            'perPage' => $lengthAwarePaginator->perPage(),
         ];
     }
 

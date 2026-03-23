@@ -11,5 +11,5 @@ interface WebLoginActionInterface
     /**
      * Execute web login action (session-based).
      */
-    public function execute(LoginDTO $dto): void;
+    public function execute(LoginDTO $loginDTO): void;
 }

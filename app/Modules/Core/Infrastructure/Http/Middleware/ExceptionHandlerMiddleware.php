@@ -40,7 +40,7 @@ class ExceptionHandlerMiddleware implements MiddlewareInterface
             return ApiResponse::badRequest($e->getMessage());
         } catch (ValidationException $e) {
             return ApiResponse::validationError($e->getErrors(), $e->getMessage());
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException) {
             return ApiResponse::notFound('Resource not found');
         } catch (RuntimeException $e) {
             // Log the exception for debugging

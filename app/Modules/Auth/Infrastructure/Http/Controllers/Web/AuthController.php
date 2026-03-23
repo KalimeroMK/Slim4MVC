@@ -55,24 +55,24 @@ class AuthController extends Controller
         return view('auth.reset-password', $response, $token);
     }
 
-    public function register(RegisterRequest $request, Response $response): Response
+    public function register(RegisterRequest $registerRequest, Response $response): Response
     {
         $this->registerAction->execute(
-            RegisterDTO::fromRequest($request->validated())
+            RegisterDTO::fromRequest($registerRequest->validated())
         );
 
         return $this->redirect('/login');
     }
 
-    public function login(LoginRequest $request, Response $response): Response
+    public function login(LoginRequest $loginRequest, Response $response): Response
     {
         try {
             $this->webLoginAction->execute(
-                LoginDTO::fromRequest($request->validated())
+                LoginDTO::fromRequest($loginRequest->validated())
             );
 
             return $this->redirect('/dashboard');
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException) {
             return $this->redirect('/login?error=invalid_credentials');
         }
     }
@@ -84,19 +84,19 @@ class AuthController extends Controller
         return $this->redirect('/');
     }
 
-    public function sendPasswordResetLink(PasswordRecoveryRequest $request, Response $response): Response
+    public function sendPasswordResetLink(PasswordRecoveryRequest $passwordRecoveryRequest, Response $response): Response
     {
         $this->passwordRecoveryAction->execute(
-            PasswordRecoveryDTO::fromRequest($request->validated())
+            PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
         return $this->redirect('/login?message=password_reset_sent');
     }
 
-    public function updatePassword(ResetPasswordRequest $request, Response $response): Response
+    public function updatePassword(ResetPasswordRequest $resetPasswordRequest, Response $response): Response
     {
         $this->resetPasswordAction->execute(
-            ResetPasswordDTO::fromRequest($request->validated())
+            ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
         return $this->redirect('/login?message=password_reset_success');

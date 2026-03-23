@@ -14,5 +14,5 @@ interface UpdateRoleActionInterface
      *
      * @throws RuntimeException On invalid credentials
      */
-    public function execute(UpdateRoleDTO $dto): ?array;
+    public function execute(UpdateRoleDTO $updateRoleDTO): ?array;
 }

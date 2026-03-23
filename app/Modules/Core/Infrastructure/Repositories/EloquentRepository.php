@@ -101,15 +101,15 @@ abstract class EloquentRepository implements Repository
      */
     final public function paginate(int $page = 1, int $perPage = 15): array
     {
-        $paginator = $this->model()::query()
+        $lengthAwarePaginator = $this->model()::query()
             ->orderBy('id', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return [
-            'items' => $paginator->items(),
-            'total' => $paginator->total(),
-            'page' => $paginator->currentPage(),
-            'perPage' => $paginator->perPage(),
+            'items' => $lengthAwarePaginator->items(),
+            'total' => $lengthAwarePaginator->total(),
+            'page' => $lengthAwarePaginator->currentPage(),
+            'perPage' => $lengthAwarePaginator->perPage(),
         ];
     }
 
