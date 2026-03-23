@@ -1,0 +1,36 @@
+parameters:
+    level: 8
+    paths:
+        - app
+        - bootstrap
+        - routes
+    excludePaths:
+        - vendor
+        - storage
+        - stubs
+        - tests
+    scanFiles:
+        - vendor/autoload.php
+    ignoreErrors:
+        # Ignore missing type specifications for iterables (common in legacy code)
+        - '#missingType\.iterableValue#'
+        - '#missingType\.generics#'
+        # Ignore missing return types in some cases
+        - '#missingType\.return#'
+        - '#missingType\.parameter#'
+        # Ignore undefined properties on Eloquent models (they use magic __get)
+        - '#Access to an undefined property App\\Modules\\[a-zA-Z]+\\Infrastructure\\Models\\[a-zA-Z]+::\$[a-z_]+#'
+        # Ignore static method not found on Eloquent models (they use __callStatic)
+        - '#Call to an undefined static method App\\Modules\\[a-zA-Z]+\\Infrastructure\\Models\\[a-zA-Z]+::[a-zA-Z]+#'
+        # Ignore undefined methods on Eloquent relations
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\[a-zA-Z]+::[a-zA-Z]+#'
+        # Ignore helper functions
+        - '#Function view not found#'
+        - '#Function route not found#'
+        - '#Function url not found#'
+        - '#Function asset not found#'
+        - '#Function request not found#'
+        # Ignore PHP 8.0+ reflection issues
+        - '#Call to an undefined method ReflectionType::getName#'
+        # Ignore some common patterns
+        - '#does not specify its type: TModel#'

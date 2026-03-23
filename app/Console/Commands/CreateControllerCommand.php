@@ -96,7 +96,12 @@ class CreateControllerCommand extends Command
                 mkdir($dir, 0755, true);
             }
 
-            $content = str_replace('{{controllerName}}', $name, file_get_contents($stubPath));
+            $stubContent = file_get_contents($stubPath);
+            if ($stubContent === false) {
+                $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+                continue;
+            }
+            $content = str_replace('{{controllerName}}', $name, $stubContent);
             file_put_contents($destination, $content);
 
             $output->writeln(sprintf('<info>Created: %s</info>', $destination));

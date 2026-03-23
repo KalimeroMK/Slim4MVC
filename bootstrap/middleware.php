@@ -49,7 +49,6 @@ return function ($app, DI\Container $container): void {
 
     // Register request resolver
     $container->set(RequestResolver::class, fn (): RequestResolver => new RequestResolver(
-        $container,
         $container->get(Factory::class)
     ));
 

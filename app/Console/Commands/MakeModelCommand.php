@@ -56,8 +56,12 @@ class MakeModelCommand extends Command
         // Load stub and replace placeholder
         $stubPath = $projectRoot.'/stubs/model.stub';
         if (file_exists($stubPath)) {
-            $modelTemplate = file_get_contents($stubPath);
-            $modelTemplate = str_replace('{{className}}', $modelName, $modelTemplate);
+            $stubContent = file_get_contents($stubPath);
+            if ($stubContent === false) {
+                $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+                return;
+            }
+            $modelTemplate = str_replace('{{className}}', $modelName, $stubContent);
         } else {
             $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
 
@@ -84,11 +88,15 @@ class MakeModelCommand extends Command
         // Load stub and replace placeholders
         $stubPath = $projectRoot.'/stubs/migration.stub';
         if (file_exists($stubPath)) {
-            $migrationTemplate = file_get_contents($stubPath);
+            $stubContent = file_get_contents($stubPath);
+            if ($stubContent === false) {
+                $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $stubPath));
+                return;
+            }
             $migrationTemplate = str_replace(
                 ['{{className}}', '{{tableName}}'],
                 [$className, $tableName],
-                $migrationTemplate
+                $stubContent
             );
         } else {
             $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));

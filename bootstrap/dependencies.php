@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 // config/dependencies.php
-use App\Actions\Permission\CreatePermissionAction;
-use App\Actions\Permission\UpdatePermissionAction;
-use App\Interface\Permission\CreatePermissionActionInterface;
-use App\Interface\Permission\UpdatePermissionActionInterface;
+use App\Modules\Permission\Application\Actions\CreatePermissionAction;
+use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
+use App\Modules\Permission\Application\Interfaces\CreatePermissionActionInterface;
+use App\Modules\Permission\Application\Interfaces\UpdatePermissionActionInterface;
 use App\Modules\Auth\Application\Actions\Auth\LoginAction;
 use App\Modules\Auth\Application\Actions\Auth\PasswordRecoveryAction;
 use App\Modules\Auth\Application\Actions\Auth\RegisterAction;
@@ -61,4 +61,4 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
+    }),    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class),];
