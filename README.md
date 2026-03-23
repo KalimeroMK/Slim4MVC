@@ -60,17 +60,23 @@ A modern, production-ready starter kit for building web applications with Slim F
    docker-compose up -d
    ```
 
-5. **Run migrations:**
+5. **Clear cache (if you encounter namespace errors):**
+   ```bash
+   php clear-cache.php
+   docker compose restart
+   ```
+
+6. **Run migrations:**
    ```bash
    php run_migrations.php
    ```
 
-6. **Seed database (optional):**
+7. **Seed database (optional):**
    ```bash
    php slim seed:database
    ```
 
-7. **Setup storage permissions:**
+8. **Setup storage permissions:**
    ```bash
    # Using PHP script (recommended)
    php setup-storage.php

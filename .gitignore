@@ -10,3 +10,4 @@
 .phpunit.cache/
 .env.example.backup
 .rector.cache/
+**/.DS_Store
