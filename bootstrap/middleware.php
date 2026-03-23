@@ -43,7 +43,7 @@ return function ($app, DI\Container $container): void {
     $app->addRoutingMiddleware();
 
     // Add CSRF middleware (generates token for web routes, validates non-GET requests)
-    $app->add(new CsrfMiddleware($container->get(Session::class)));
+    $app->add(new CsrfMiddleware());
 
     // Ensure body parsing works for form data
     $app->add(function ($request, $handler) {

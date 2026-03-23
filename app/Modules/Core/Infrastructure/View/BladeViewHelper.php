@@ -14,11 +14,11 @@ if (! function_exists('view')) {
      */
     function view(string $template, Response $response, array $with = []): Response
     {
-        // Try to get Blade from container if available
-        if (function_exists('app') && app()->has(Blade::class)) {
-            $blade = app()->get(Blade::class);
+        $app = app();
+        
+        if ($app !== null && $app->has(Blade::class)) {
+            $blade = $app->get(Blade::class);
         } else {
-            // Fallback to creating new instance
             $cache = __DIR__.'/../../../../../storage/cache/view';
             $views = __DIR__.'/../../../../../resources/views';
             $blade = new Blade($views, $cache);

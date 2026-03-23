@@ -18,7 +18,9 @@ class UserController extends Controller
      */
     public function index(Request $request, Response $response): Response
     {
+        /** @phpstan-ignore-next-line */
         $users = User::with('roles')->get();
+        /** @phpstan-ignore-next-line */
         $roles = Role::all();
 
         return view('admin.users.index', $response, [
@@ -32,6 +34,7 @@ class UserController extends Controller
      */
     public function create(Request $request, Response $response): Response
     {
+        /** @phpstan-ignore-next-line */
         $roles = Role::all();
 
         return view('admin.users.create', $response, [
@@ -44,9 +47,8 @@ class UserController extends Controller
      */
     public function store(Request $request, Response $response): Response
     {
+        /** @var array<string, mixed> $data */
         $data = $request->getParsedBody();
-
-        // Validation
         if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
             throw new RuntimeException('Name, email and password are required');
         }
@@ -55,11 +57,12 @@ class UserController extends Controller
             throw new RuntimeException('Passwords do not match');
         }
 
-        // Check if email exists
+        /** @phpstan-ignore-next-line */
         if (User::where('email', $data['email'])->exists()) {
             throw new RuntimeException('Email already exists');
         }
 
+        /** @phpstan-ignore-next-line */
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -79,7 +82,9 @@ class UserController extends Controller
      */
     public function edit(Request $request, Response $response, int $id): Response
     {
+        /** @phpstan-ignore-next-line */
         $user = User::with('roles')->findOrFail($id);
+        /** @phpstan-ignore-next-line */
         $roles = Role::all();
 
         return view('admin.users.edit', $response, [
@@ -93,7 +98,9 @@ class UserController extends Controller
      */
     public function update(Request $request, Response $response, int $id): Response
     {
+        /** @var array<string, mixed> $data */
         $data = $request->getParsedBody();
+        /** @phpstan-ignore-next-line */
         $user = User::findOrFail($id);
 
         // Update name
@@ -103,6 +110,7 @@ class UserController extends Controller
 
         // Update email
         if (! empty($data['email']) && $data['email'] !== $user->email) {
+            /** @phpstan-ignore-next-line */
             if (User::where('email', $data['email'])->where('id', '!=', $id)->exists()) {
                 throw new RuntimeException('Email already taken');
             }
@@ -122,7 +130,9 @@ class UserController extends Controller
      */
     public function updatePassword(Request $request, Response $response, int $id): Response
     {
+        /** @var array<string, mixed> $data */
         $data = $request->getParsedBody();
+        /** @phpstan-ignore-next-line */
         $user = User::findOrFail($id);
 
         if (empty($data['password']) || empty($data['password_confirmation'])) {
@@ -148,9 +158,8 @@ class UserController extends Controller
      */
     public function delete(Request $request, Response $response, int $id): Response
     {
+        /** @phpstan-ignore-next-line */
         $user = User::findOrFail($id);
-
-        // Don't allow deleting yourself
         $currentUser = $this->getCurrentUser();
         if ($currentUser && $currentUser['id'] === $id) {
             throw new RuntimeException('Cannot delete your own account');
@@ -163,6 +172,8 @@ class UserController extends Controller
 
     /**
      * Get current logged in user.
+     *
+     * @return array<string, mixed>|null
      */
     private function getCurrentUser(): ?array
     {

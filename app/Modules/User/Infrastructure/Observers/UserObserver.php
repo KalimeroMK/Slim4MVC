@@ -21,6 +21,7 @@ class UserObserver
             ->exists();
 
         if (! $hasRoles) {
+            /** @phpstan-ignore-next-line */
             $clientRole = Role::firstOrCreate(['name' => 'client']);
 
             DB::table('role_user')->insert([

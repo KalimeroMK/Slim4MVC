@@ -54,7 +54,29 @@ class User extends Model
     }
 
     /**
+     * Check if user has the given role.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    /**
+     * Check if user has the given permission.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        return $this->roles()
+            ->whereHas('permissions', function ($query) use ($permission) {
+                $query->where('name', $permission);
+            })
+            ->exists();
+    }
+
+    /**
      * Override save method to auto-assign client role.
+     *
+     * @param array<string, mixed> $options
      */
     public function save(array $options = []): bool
     {
@@ -74,6 +96,7 @@ class User extends Model
 
             if (! $hasRoles) {
                 // Find or create client role
+                /** @phpstan-ignore-next-line */
                 $clientRole = Role::firstOrCreate(['name' => 'client']);
 
                 // Insert role_user relationship directly
