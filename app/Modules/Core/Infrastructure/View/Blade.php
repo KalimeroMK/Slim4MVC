@@ -1,107 +1,116 @@
 <?php
 
-// app/View/Blade.php
-
 declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\View;
 
-use Exception;
-use Illuminate\Config\Repository;
-use Illuminate\Events\Dispatcher;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\View\Compilers\BladeCompiler;
-use Illuminate\View\Engines\CompilerEngine;
-use Illuminate\View\Engines\EngineResolver;
-use Illuminate\View\Factory;
-use Illuminate\View\FileViewFinder;
+use eftec\bladeone\BladeOne;
 use RuntimeException;
 
+/**
+ * Lightweight Blade engine using BladeOne.
+ * Optimized for Slim 4 micro-framework.
+ */
 class Blade
 {
-    protected Factory $factory;
+    protected BladeOne $engine;
 
-    protected BladeCompiler $compiler;
+    protected string $viewsPath;
 
-    protected Filesystem $files;
+    protected string $cachePath;
+
+    protected array $sharedData = [];
 
     public function __construct(
-        protected string $viewsPath,
-        protected string $cachePath,
-        protected array $sharedData = []
+        string $viewsPath,
+        string $cachePath,
+        array $sharedData = []
     ) {
-        $this->files = new Filesystem();
-        $this->setupBlade();
+        $this->viewsPath = $viewsPath;
+        $this->cachePath = $cachePath;
+        $this->sharedData = $sharedData;
+        
+        $this->setupEngine();
         $this->shareDefaults();
     }
 
+    /**
+     * Render a view template.
+     */
     public function make(string $template, array $data = []): string
     {
         try {
-            return $this->factory->make($template, array_merge($this->sharedData, $data))->render();
-        } catch (Exception $e) {
-            throw new RuntimeException("Failed to render view '{$template}': ".$e->getMessage(), 0, $e);
+            return $this->engine->run($template, array_merge($this->sharedData, $data));
+        } catch (\Exception $e) {
+            throw new RuntimeException("Failed to render view '{$template}': " . $e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * Share data across all views.
+     */
     public function share(string $key, $value = null): void
     {
         $this->sharedData[$key] = $value;
-        $this->factory->share($key, $value);
+        $this->engine->share($key, $value);
     }
 
+    /**
+     * Check if view exists.
+     */
     public function exists(string $template): bool
     {
-        return $this->factory->exists($template);
+        $path = $this->viewsPath . '/' . str_replace('.', '/', $template) . '.blade.php';
+        
+        return file_exists($path);
     }
 
-    public function getCompiler(): BladeCompiler
+    /**
+     * Get the BladeOne engine instance.
+     */
+    public function getEngine(): BladeOne
     {
-        return $this->compiler;
+        return $this->engine;
     }
 
-    public function getFactory(): Factory
+    /**
+     * Add custom directive.
+     */
+    public function directive(string $name, callable $handler): void
     {
-        return $this->factory;
+        $this->engine->directive($name, $handler);
     }
 
-    public function addExtension(string $extension, string $engine = 'blade'): void
-    {
-        $this->factory->addExtension($extension, $engine);
-    }
-
+    /**
+     * Set default shared data.
+     */
     protected function shareDefaults(): void
     {
         $this->share('_session', $_SESSION ?? []);
         $this->share('errors', $_SESSION['errors'] ?? []);
         $this->share('old', $_SESSION['old'] ?? []);
-
         $this->share('_token', $_SESSION['csrf_token'] ?? '');
-
-        foreach ($this->sharedData as $key => $value) {
-            $this->factory->share($key, $value);
-        }
+        
+        // Register CSRF directive
+        $this->directive('csrf', function () {
+            return '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>';
+        });
+        
+        // Register method directive
+        $this->directive('method', function ($method) {
+            return '<?php echo \'<input type="hidden" name="_method" value="\' . ' . $method . ' . \'">\'; ?>';
+        });
     }
 
-    private function setupBlade(): void
+    /**
+     * Initialize BladeOne engine.
+     */
+    protected function setupEngine(): void
     {
-        $config = new Repository([
-            'view.paths' => [$this->viewsPath],
-            'view.compiled' => $this->cachePath,
-        ]);
-
-        $this->compiler = new class($this->files, $config->get('view.compiled')) extends BladeCompiler
-        {
-            protected function compileCsrf(): string
-            {
-                return '<?php echo \'<input type="hidden" name="_token" value="\'.htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES).\'">\'; ?>';
-            }
-        };
-
-        $resolver = new EngineResolver();
-        $resolver->register('blade', fn (): CompilerEngine => new CompilerEngine($this->compiler));
-
-        $finder = new FileViewFinder($this->files, $config->get('view.paths'));
-        $this->factory = new Factory($resolver, $finder, new Dispatcher());
+        $mode = ($_ENV['APP_ENV'] ?? 'local') === 'production' 
+            ? BladeOne::MODE_FAST 
+            : BladeOne::MODE_AUTO;
+        
+        $this->engine = new BladeOne($this->viewsPath, $this->cachePath, $mode);
     }
 }
