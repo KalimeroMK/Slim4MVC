@@ -19,7 +19,8 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Exception Handling** - Custom exception classes with centralized exception handling middleware
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (268+ tests, 573+ assertions)
+- **API Query Builder** - Filter, sort, search with operators and pagination
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (286+ tests, 599+ assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -125,6 +126,7 @@ The project uses a **modular architecture** where each feature is organized as a
 │   │   │       ├── Repositories/ # Base repositories
 │   │   │       ├── Support/  # Helper classes (Auth, Logger, Mailer, Cookie)
 │   │   │       ├── Cache/    # Cache system (File, Redis, Null drivers)
+│   │   │       ├── Query/    # API Query Builder (filter, sort, search)
 │   │   │       └── View/     # Blade integration
 │   │   ├── Auth/             # Authentication module
 │   │   │   ├── Application/
@@ -1315,6 +1317,184 @@ $data = $helper->get('secret'); // 'sensitive data'
 3. **Use secure flag** in production (HTTPS only)
 4. **SameSite=Lax** or **Strict** for CSRF protection
 5. **Reasonable TTL** - don't make cookies live forever
+
+## 🔍 API Query Builder
+
+Powerful query parameter parsing for REST API filtering, sorting, and searching.
+
+### Features
+
+- **Filtering** - Filter by any field with operators (`eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `like`, `in`, etc.)
+- **Sorting** - Multi-column sort with direction (`asc`/`desc`)
+- **Searching** - Full-text search across multiple fields
+- **Field Selection** - Select only needed fields (sparse fieldsets)
+- **Relationships** - Eager load related data (`include`)
+- **Ranges** - Filter by numeric ranges (price, dates, etc.)
+- **Pagination** - Automatic pagination with configurable limits
+
+### Usage
+
+#### Basic Filtering
+
+```php
+// URL: GET /api/users?filter[role]=admin&filter[active]=true
+$users = User::filter($request)->paginate();
+```
+
+#### Sorting
+
+```php
+// URL: GET /api/users?sort=-created_at,name
+// Sort by created_at DESC, then name ASC
+$users = User::filter($request)->paginate();
+```
+
+#### Searching
+
+```php
+// In User model
+protected array $searchable = ['name', 'email'];
+
+// URL: GET /api/users?search=john
+// Searches in name and email fields
+$users = User::filter($request)->paginate();
+```
+
+#### Field Selection
+
+```php
+// URL: GET /api/users?fields=id,name,email
+// Returns only id, name, and email
+$users = User::filter($request)->paginate();
+```
+
+#### Eager Loading
+
+```php
+// URL: GET /api/users?include=posts,comments
+$users = User::filter($request)->paginate();
+```
+
+#### Ranges
+
+```php
+// URL: GET /api/products?range[price]=10,100
+$products = Product::filter($request)->paginate();
+```
+
+#### Advanced Filters with Operators
+
+```php
+// URL: GET /api/users?filter[age]=gt:18&filter[name]=like:john
+// Operators: eq, ne, gt, gte, lt, lte, like, starts, ends, in, nin, null
+```
+
+### Using in Controllers
+
+```php
+use App\Modules\Core\Infrastructure\Query\Filterable;
+
+class UserController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        // Using the Filterable trait
+        $result = User::filterPaginate($request);
+        
+        return ApiResponse::success($result['items'], HttpStatusCode::OK, null, $result['pagination']);
+    }
+}
+```
+
+### Model Configuration
+
+```php
+use App\Modules\Core\Infrastructure\Query\Filterable;
+
+class User extends Model
+{
+    use Filterable;
+    
+    // Fields allowed for filtering
+    protected array $filterable = ['name', 'email', 'role', 'active'];
+    
+    // Fields allowed for sorting
+    protected array $sortable = ['id', 'name', 'created_at', 'updated_at'];
+    
+    // Fields allowed for searching
+    protected array $searchable = ['name', 'email'];
+    
+    // Default sort order
+    protected array $defaultSort = ['created_at' => 'desc'];
+}
+```
+
+### Using QueryBuilder Directly
+
+```php
+use App\Modules\Core\Infrastructure\Query\QueryBuilder;
+
+// Simple usage
+$users = (new QueryBuilder($request))->paginate(User::class);
+
+// With configuration
+$builder = new QueryBuilder($request, [
+    'filterable' => ['name', 'email'],
+    'sortable' => ['id', 'name'],
+    'searchable' => ['name', 'email'],
+]);
+
+$users = $builder->paginate(User::class);
+```
+
+### Helper Functions
+
+```php
+// Parse query parameters
+$parser = query_parser($request);
+$filters = $parser->filters();
+$sorts = $parser->sorts();
+$search = $parser->search();
+
+// Apply filters to query
+$query = query_filter(User::class, $request);
+$users = $query->paginate();
+
+// Get paginated results directly
+$result = query_paginate(User::class, $request);
+// Returns: ['items' => [...], 'pagination' => [...]]
+```
+
+### URL Parameter Reference
+
+| Parameter | Example | Description |
+|-----------|---------|-------------|
+| `filter[field]` | `filter[status]=active` | Filter by field value |
+| `filter[field]=op:value` | `filter[age]=gt:18` | Filter with operator |
+| `sort` | `sort=-created_at,name` | Sort by fields |
+| `search` | `search=john` | Full-text search |
+| `fields` | `fields=id,name,email` | Select specific fields |
+| `include` | `include=posts,comments` | Eager load relations |
+| `range[field]` | `range[price]=10,100` | Filter by range |
+| `page` | `page=2` | Page number |
+| `per_page` | `per_page=25` | Items per page (max 100) |
+
+### Filter Operators
+
+| Operator | Example | Description |
+|----------|---------|-------------|
+| `eq` | `filter[id]=eq:1` | Equal (default) |
+| `ne` | `filter[status]=ne:draft` | Not equal |
+| `gt` | `filter[age]=gt:18` | Greater than |
+| `gte` | `filter[price]=gte:10` | Greater than or equal |
+| `lt` | `filter[age]=lt:65` | Less than |
+| `lte` | `filter[price]=lte:100` | Less than or equal |
+| `like` | `filter[name]=like:john` | Contains substring |
+| `starts` | `filter[name]=starts:John` | Starts with |
+| `ends` | `filter[name]=ends:Doe` | Ends with |
+| `in` | `filter[id]=in:1,2,3` | In array |
+| `nin` | `filter[status]=nin:deleted` | Not in array |
+| `null` | `filter[deleted_at]=null:true` | Is null / not null |
 
 ## 📦 Dependencies
 
