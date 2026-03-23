@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace {{namespace}}\Policies;
 
-use App\Models\User;
-use App\Policies\Policy;
+use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\Core\Infrastructure\Policies\Policy;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 
 class {{modelName}}Policy extends Policy

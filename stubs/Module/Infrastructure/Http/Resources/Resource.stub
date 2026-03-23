@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace {{namespace}}\Infrastructure\Http\Resources;
 
-use App\Http\Resources\Resource;
+use App\Modules\Core\Infrastructure\Http\Resources\Resource;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 
 class {{modelName}}Resource extends Resource

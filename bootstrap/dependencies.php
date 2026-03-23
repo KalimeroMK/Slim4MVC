@@ -35,7 +35,6 @@ use App\Modules\User\Infrastructure\Repositories\UserRepository;
 
 use function DI\autowire;
 use function DI\factory;
-
 return [
     RegisterActionInterface::class => autowire(RegisterAction::class),
     LoginActionInterface::class => autowire(LoginAction::class),
@@ -62,4 +61,5 @@ return [
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
-    }),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
+    }),
+];

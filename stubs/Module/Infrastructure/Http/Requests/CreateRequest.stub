@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace {{namespace}}\Infrastructure\Http\Requests;
 
-use App\Http\Requests\FormRequest;
+use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 
 final class Create{{modelName}}Request extends FormRequest
 {

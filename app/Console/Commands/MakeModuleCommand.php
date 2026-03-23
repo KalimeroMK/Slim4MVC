@@ -168,7 +168,7 @@ class MakeModuleCommand extends Command
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Controllers/Controller.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Controllers/%sController.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
+                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Requests/CreateRequest.stub',
@@ -183,7 +183,7 @@ class MakeModuleCommand extends Command
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Resources/Resource.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Resources/%sResource.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
+                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Providers/ServiceProvider.stub',
