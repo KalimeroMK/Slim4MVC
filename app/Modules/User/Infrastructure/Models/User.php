@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Infrastructure\Models;
 
+use App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations;
 use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\User\Infrastructure\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Model;
@@ -25,9 +26,25 @@ use Illuminate\Support\Carbon;
  *
  * @method static static|null find(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder<self> where(string $column, mixed $operator = null, mixed $value = null)
+ *
+ * Auto Eager Loading Examples:
+ *   - protected array $autoWith = ['roles'];        // Auto-load roles
+ *   - protected array $excludeAutoWith = ['logs']; // Exclude logs
+ *   - User::queryWithoutAutoWith()->find(1);       // Skip auto-loading
+ *   - preload($users, ['roles', 'permissions']);   // Manual preload
  */
 class User extends Model
 {
+    use AutoEloquentRelations;
+
+    /**
+     * Relations to auto eager load.
+     * Set to empty array or remove property to disable for this model.
+     *
+     * @var list<string>
+     */
+    protected array $autoWith = ['roles'];
+
     protected $fillable = [
         'name',
         'email',

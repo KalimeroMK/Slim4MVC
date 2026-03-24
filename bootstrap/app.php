@@ -45,6 +45,9 @@ $validation($container, $capsule);
 // Configure Event system
 (require __DIR__.'/../bootstrap/events.php')($container);
 
+// Configure Eloquent features (auto eager loading, etc.)
+require __DIR__.'/../bootstrap/eloquent.php';
+
 // Set the container in Slim
 AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);

@@ -57,7 +57,8 @@
       "app/Modules/Core/Infrastructure/Support/helper.php",
       "app/Modules/Core/Infrastructure/Cache/helpers.php",
       "app/Modules/Core/Infrastructure/Support/cookie_helpers.php",
-      "app/Modules/Core/Infrastructure/Query/helpers.php"
+      "app/Modules/Core/Infrastructure/Query/helpers.php",
+      "app/Modules/Core/Infrastructure/Database/Eloquent/helpers.php"
     ]
   },
   "config": {
