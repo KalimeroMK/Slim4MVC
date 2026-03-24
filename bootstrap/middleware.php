@@ -15,7 +15,8 @@ use Monolog\Level;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Tuupola\Middleware\CorsMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\CorsMiddleware;
+use Psr\Http\Message\ResponseFactoryInterface;
 
 return function ($app, DI\Container $container): void {
 
@@ -28,15 +29,18 @@ return function ($app, DI\Container $container): void {
     // Set container for Logger helper class
     App\Modules\Core\Infrastructure\Support\Logger::setContainer($container);
 
-    // Add CORS middleware for API routes
-    $cors = new CorsMiddleware([
-        'origin' => explode(',', $_ENV['CORS_ORIGINS'] ?? '*'),
-        'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-        'headers.allow' => ['Content-Type', 'Authorization', 'X-Requested-With'],
-        'headers.expose' => ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
-        'credentials' => true,
-        'cache' => 86400,
-    ]);
+    // Add CORS middleware for API routes (using PSR-17 ResponseFactory)
+    $cors = new CorsMiddleware(
+        $container->get(ResponseFactoryInterface::class),
+        [
+            'origin' => explode(',', $_ENV['CORS_ORIGINS'] ?? '*'),
+            'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+            'headers.allow' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+            'headers.expose' => ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
+            'credentials' => true,
+            'cache' => 86400,
+        ]
+    );
 
     // Add middleware
     $app->addBodyParsingMiddleware();
