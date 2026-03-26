@@ -592,38 +592,71 @@ All standard Blade directives work as expected:
 
 The project includes a comprehensive test suite covering:
 
-- **Actions** - LoginAction, RegisterAction, ResetPasswordAction, CreateUserAction, GetUserAction, DeleteUserAction
-- **Authentication** - Auth class, AuthHelper, JWT Service, Session handling
-- **Controllers** - AuthController (API & Web)
-- **DTOs** - All Data Transfer Objects
-- **Enums** - ApiResponseStatus, HttpStatusCode
-- **Events** - Dispatcher, Listeners (SendWelcomeEmail, SendPasswordResetEmail)
-- **Factories** - UserFactory, RoleFactory, PermissionFactory
-- **Jobs** - SendEmailJob, Queue system (FileQueue, RedisQueue)
-- **Mail** - Mailable, WelcomeEmail, PasswordResetEmail
-- **Middleware** - AuthMiddleware, RateLimitMiddleware, CsrfMiddleware, and more
-- **Models** - User, Role, Permission relationships
-- **Policies** - Policy base class
-- **Providers** - All Service Providers
-- **Repositories** - UserRepository, RoleRepository, PermissionRepository
-- **Resources** - API Resource classes
-- **Validation** - Form request validation
-- **Console** - All CLI commands (MakeModule, MakeRequest, Queue commands, etc.)
-- **View** - BladeOne integration with custom directives
-- **Module system** - Creation and dependency registration
+### Test Suites
 
-**Test coverage:**
-- ✅ 215+ tests
-- ✅ 461+ assertions
-- ✅ All tests passing
-- ✅ PHP 8.4 optimized with Rector
+| Suite | Tests | Description |
+|-------|-------|-------------|
+| **Unit** | 404+ | Isolated component tests |
+| **Integration** | 63+ | Database and service integration |
+| **Feature** | 21+ | End-to-end API tests |
+| **Edge Cases** | 18+ | Boundary and unusual scenarios |
 
-Run tests:
+### New in v2.0 (173 additional tests)
+
+#### Environment Validation Tests (48 tests)
+- Production environment validation
+- Local/development environment validation
+- Weak secret detection
+- Missing configuration detection
+- Edge cases (unicode, special chars, boundary values)
+
+#### JWT Service Tests (51 tests)
+- Token generation and validation
+- Refresh token rotation
+- Fingerprint-based security
+- Token theft detection
+- Multiple algorithms (HS256, HS384, HS512)
+- Edge cases (expired tokens, tampered tokens)
+
+#### Auto-Discovery Tests (35 tests)
+- Module scanning
+- Cache warming and clearing
+- Production vs development behavior
+- Statistics generation
+
+#### Generic CRUD Tests (39 tests)
+- Create, Read, Update, Delete operations
+- Pagination
+- Action factory
+- Integration with real database
+
+### Running Tests
+
 ```bash
+# Run all tests
 composer test
-# or
-./vendor/bin/phpunit --testdox
+
+# Run specific test suites
+./vendor/bin/phpunit --testsuite Unit
+./vendor/bin/phpunit --testsuite Integration
+./vendor/bin/phpunit --testsuite Feature
+./vendor/bin/phpunit --testsuite EdgeCases
+
+# Run with coverage
+./vendor/bin/phpunit --coverage-html coverage
+
+# Run specific test file
+./vendor/bin/phpunit tests/Unit/EnvironmentValidatorTest.php
 ```
+
+### Test Coverage
+
+- ✅ 475+ tests
+- ✅ 900+ assertions
+- ✅ All new features tested
+- ✅ Edge cases covered
+- ✅ Integration with real database
+- ✅ PHP 8.4 optimized with Rector
 
 ### Code Quality Tools
 
@@ -1057,6 +1090,52 @@ return [
 $discovery = new OptimizedDiscovery();
 return $discovery->buildDefinitions();
 ```
+
+### JWT Service with Refresh Tokens
+
+Enhanced JWT implementation with security best practices.
+
+```php
+use App\Modules\Core\Infrastructure\Support\AdvancedJwtService;
+
+$jwtService = new AdvancedJwtService(
+    secret: $_ENV['JWT_SECRET'],
+    algorithm: 'HS256',
+    issuer: 'my-app',
+    audience: 'my-api'
+);
+
+// Generate access token
+$token = $jwtService->generateAccessToken(
+    userId: 123,
+    claims: ['role' => 'admin'],
+    ttl: 3600 // 1 hour
+);
+
+// Generate token pair (access + refresh)
+$tokenPair = $jwtService->generateRefreshToken(userId: 123);
+// Returns: access_token, refresh_token, expires_in
+
+// Rotate refresh token (security best practice)
+$newPair = $jwtService->rotateRefreshToken($tokenPair->getRefreshToken());
+
+// Validate token
+if ($jwtService->verify($token)) {
+    $payload = $jwtService->decode($token);
+    $userId = $payload->sub;
+}
+
+// Get token info
+$info = $jwtService->getTokenInfo($token);
+// Returns: algorithm, type, issuer, expires_at, is_expired, etc.
+```
+
+**Features:**
+- Access tokens (short-lived)
+- Refresh tokens (long-lived with rotation)
+- Fingerprint-based theft detection
+- Issuer and audience validation
+- Token blacklisting support
 
 ### Generic CRUD Controller
 
