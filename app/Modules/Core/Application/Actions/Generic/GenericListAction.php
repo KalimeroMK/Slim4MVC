@@ -6,6 +6,7 @@ namespace App\Modules\Core\Application\Actions\Generic;
 
 use App\Modules\Core\Infrastructure\Repositories\Repository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Generic List Action that works with any repository.
@@ -33,7 +34,10 @@ final class GenericListAction
     {
         $perPage = $perPage ?? $this->defaultPerPage;
 
-        return $this->repository->paginate($page, $perPage);
+        /** @var array{items: Collection<int, TModel>, total: int, page: int, perPage: int, totalPages: int} $result */
+        $result = $this->repository->paginate($page, $perPage);
+
+        return $result;
     }
 
     /**
@@ -81,10 +85,12 @@ final class GenericListAction
         $result = $this->execute($page, $perPage);
         
         // Load relations on the items
+        /** @var Collection<int, TModel>|list<TModel> $items */
         $items = $result['items'];
         if (is_array($items)) {
             $items = new Collection($items);
         }
+        /** @phpstan-ignore-next-line */
         $items->load($relations);
         $result['items'] = $items;
         

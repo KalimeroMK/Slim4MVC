@@ -287,7 +287,12 @@ final class AdvancedJwtService
      */
     private function generateUniqueId(int $length = 16): string
     {
-        return bin2hex(random_bytes((int) ($length / 2)));
+        $bytes = (int) ceil($length / 2);
+        if ($bytes < 1) {
+            $bytes = 1;
+        }
+
+        return bin2hex(random_bytes($bytes));
     }
 
     /**

@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Modules\Core\Application\Actions\Generic;
 
 use App\Modules\Core\Infrastructure\Repositories\Repository;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Factory for creating CRUD actions for any repository.
  *
- * @template TModel of \Illuminate\Database\Eloquent\Model
+ * @template TModel of Model
  */
 final class CrudActionFactory
 {
@@ -23,40 +24,71 @@ final class CrudActionFactory
     /**
      * Create a new factory instance for a repository class.
      *
-     * @template T of \Illuminate\Database\Eloquent\Model
+     * @template T of Model
      * @param class-string<Repository<T>> $repositoryClass
      * @return self<T>
      */
     public static function for(string $repositoryClass): self
     {
+        /** @var Repository<T> $repository */
         $repository = new $repositoryClass();
 
         return new self($repository);
     }
 
+    /**
+     * @return GenericCreateAction<TModel>
+     */
     public function create(): GenericCreateAction
     {
-        return new GenericCreateAction($this->repository);
+        /** @var GenericCreateAction<TModel> $action */
+        $action = new GenericCreateAction($this->repository);
+
+        return $action;
     }
 
+    /**
+     * @return GenericUpdateAction<TModel>
+     */
     public function update(): GenericUpdateAction
     {
-        return new GenericUpdateAction($this->repository);
+        /** @var GenericUpdateAction<TModel> $action */
+        $action = new GenericUpdateAction($this->repository);
+
+        return $action;
     }
 
+    /**
+     * @return GenericDeleteAction<TModel>
+     */
     public function delete(): GenericDeleteAction
     {
-        return new GenericDeleteAction($this->repository);
+        /** @var GenericDeleteAction<TModel> $action */
+        $action = new GenericDeleteAction($this->repository);
+
+        return $action;
     }
 
+    /**
+     * @return GenericGetAction<TModel>
+     */
     public function get(): GenericGetAction
     {
-        return new GenericGetAction($this->repository);
+        /** @var GenericGetAction<TModel> $action */
+        $action = new GenericGetAction($this->repository);
+
+        return $action;
     }
 
+    /**
+     * @return GenericListAction<TModel>
+     */
     public function list(): GenericListAction
     {
-        return new GenericListAction($this->repository);
+        /** @var GenericListAction<TModel> $action */
+        $action = new GenericListAction($this->repository);
+
+        return $action;
     }
 
     /**
@@ -73,11 +105,11 @@ final class CrudActionFactory
      * Create all CRUD actions at once.
      *
      * @return array{
-     *   create: GenericCreateAction,
-     *   update: GenericUpdateAction,
-     *   delete: GenericDeleteAction,
-     *   get: GenericGetAction,
-     *   list: GenericListAction,
+     *   create: GenericCreateAction<TModel>,
+     *   update: GenericUpdateAction<TModel>,
+     *   delete: GenericDeleteAction<TModel>,
+     *   get: GenericGetAction<TModel>,
+     *   list: GenericListAction<TModel>,
      *   repository: Repository<TModel>
      * }
      */

@@ -6,6 +6,7 @@ namespace App\Modules\Core\Application\Actions\Generic;
 
 use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
 use App\Modules\Core\Infrastructure\Repositories\Repository;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Generic Delete Action that works with any repository.
@@ -30,12 +31,12 @@ final class GenericDeleteAction
      */
     public function execute(int|string $id): void
     {
-        $model = $this->repository->find($id);
+        $model = $this->repository->find((int) $id);
 
         if ($model === null) {
             throw new NotFoundException('Resource not found');
         }
 
-        $this->repository->delete($id);
+        $this->repository->delete((int) $id);
     }
 }

@@ -36,6 +36,9 @@ final class GenericCreateAction
             throw new BadRequestException('Cannot create entity with empty data');
         }
 
-        return $this->repository->create($data);
+        /** @var TModel $result */
+        $result = $this->repository->create($data);
+
+        return $result;
     }
 }

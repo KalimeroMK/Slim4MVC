@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Application\Actions\Generic;
 
-use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
 use App\Modules\Core\Infrastructure\Repositories\Repository;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,15 +27,19 @@ final class GenericUpdateAction
      * @param int|string $id
      * @param array<string, mixed> $data
      * @return TModel
-     *
-     * @throws NotFoundException
      */
     public function execute(int|string $id, array $data): Model
     {
         if (empty($data)) {
-            return $this->repository->findOrFail((int) $id);
+            /** @var TModel $result */
+            $result = $this->repository->findOrFail((int) $id);
+
+            return $result;
         }
 
-        return $this->repository->update((int) $id, $data);
+        /** @var TModel $result */
+        $result = $this->repository->update((int) $id, $data);
+
+        return $result;
     }
 }

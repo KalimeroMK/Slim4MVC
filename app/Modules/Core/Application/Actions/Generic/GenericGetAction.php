@@ -32,7 +32,8 @@ final class GenericGetAction
      */
     public function execute(int|string $id): Model
     {
-        $model = $this->repository->find($id);
+        /** @var TModel|null $model */
+        $model = $this->repository->find((int) $id);
 
         if ($model === null) {
             throw new NotFoundException('Resource not found');
@@ -58,9 +59,8 @@ final class GenericGetAction
         $model = $this->execute($id);
         
         // Load relations if the model supports it
-        if (method_exists($model, 'load')) {
-            $model->load($relations);
-        }
+        /** @phpstan-ignore-next-line */
+        $model->load($relations);
 
         return $model;
     }
