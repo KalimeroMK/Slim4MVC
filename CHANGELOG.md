@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2024-03-26
+
+### Fixed
+
+#### Docker Environment Loading
+- **Fix: Load .env file in bootstrap/app.php for Docker**
+  - Додадена Dotenv иницијализација пред EnvironmentValidator за да се осигура дека environment променливите се вчитуваат од .env фајлот во Docker контејнер
+  - Ова го поправа проблемот каде валидацијата на конфигурацијата не успева и покрај тоа што .env фајлот постои со точни вредности
+  - Промена во: `bootstrap/app.php`
+
+#### Test Suite Fixes
+- **Fix all tests - 509 tests passing**
+  - User модел: автоматско доделување на 'user' улога наместо 'client'
+  - DatabaseSeeder: користење на firstOrCreate за идемпотентност
+  - GenericListAction: ракување со array items во executeWith методот
+  - AdvancedJwtService: поправка на token type проверка пред Redis проверка, фаќање на JsonException
+  - DiscoveryCommand: ракување со string definitions
+  - Тестови: адаптација на новата логика за доделување улоги, поправка на должини на JWT secrets
+  - bootstrap.php: извршување на миграции за интеграциски тестови
+  - Промени во: `app/Models/User.php`, `database/seeders/DatabaseSeeder.php`, `app/Core/CRUD/Actions/GenericListAction.php`, `app/Core/JWT/AdvancedJwtService.php`, `app/Console/Commands/DiscoveryCommand.php`, тест фајлови
+
+- **Fix tests and PHPStan errors**
+  - Поправени AdvancedJwtService тестови за Redis-less rotation
+  - Поправен clearCache да враќа false кога не постои кеш
+  - Поправен dependencies.php за отстранување на невалиден CreateItemAction
+  - Поправени ConfigurationException и EnvironmentValidator type hints
+  - Поправено JsonException ракување во AdvancedJwtService
+
+#### PHPStan Error Fixes
+- **Fix PHPStan errors in new code - 60 errors remaining in legacy code**
+  - Поправени generics во Generic*Action класи
+  - Поправени Model import issues
+  - Поправен random_bytes int параметар
+  - Поправена синтаксна грешка во dependencies.php
+  - Отстранети неискористени throws анотации
+
+- **Fix PHPStan errors across codebase - 23 errors remaining (all generics in GenericCrudController)**
+  - Поправени CacheManager, NullCache, RedisCache, FileCache type issues
+  - Поправен CookieHelper неискористен параметар и setcookie type
+  - Поправен cookie_helpers return type
+  - Поправени CorsMiddleware и QueryBuilder iterable types
+  - Поправени OptimizedDiscovery DI definition types
+  - Поправени AutoEloquentRelations static/new issues
+  - Поправени Query helpers generics
+
+### Changed
+
+#### Code Organization
+- **Move Web controllers to their respective modules**
+  - Web контролерите се преместени од Core/Admin во соодветните модули:
+    - `PermissionController` -> `Permission/Infrastructure/Http/Controllers/Web/`
+    - `RoleController` -> `Role/Infrastructure/Http/Controllers/Web/`
+    - `UserController` -> `User/Infrastructure/Http/Controllers/Web/`
+  - Ажуриран `routes/web.php` со нови namespaces
+  - Ова ја подобрува модуларната архитектура со држење на Web и API контролери заедно во нивните соодветни модули
+
+#### Error Response Structure
+- **Improve ConfigurationException JSON response structure**
+  - Додадени `JSON_PRETTY_PRINT` и `JSON_UNESCAPED_SLASHES` во `bootstrap/app.php`
+  - Структурирани грешки како објекти со 'field' и 'message' клучеви
+  - Додадени `status_code`, `timestamp`, и `total_errors` во одговорот
+  - Автоматско екстрахирање на field име од пораката за грешка
+
+### Test Results
+- **Вкупно 509 тестови, сите поминуваат** ✅
+- PHPStan: 23 преостанати грешки (сите се generics во GenericCrudController)
+
 ## [2.0.0] - 2024-03-26
 
 ### Added
