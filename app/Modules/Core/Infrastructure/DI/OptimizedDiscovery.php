@@ -89,7 +89,7 @@ final class OptimizedDiscovery
             return unlink(self::CACHE_FILE);
         }
 
-        return true;
+        return false;
     }
 
     /**

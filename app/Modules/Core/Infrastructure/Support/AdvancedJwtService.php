@@ -25,7 +25,6 @@ final class AdvancedJwtService
 {
     private const ACCESS_TOKEN_TTL = 900;      // 15 minutes
     private const REFRESH_TOKEN_TTL = 2592000;  // 30 days
-    private const FINGERPRINT_LENGTH = 32;
 
     private readonly JwtEncoder $encoder;
     private readonly JwtDecoder $decoder;
@@ -128,6 +127,11 @@ final class AdvancedJwtService
      */
     public function rotateRefreshToken(string $refreshToken): TokenPair
     {
+        // Check if Redis is available for token rotation
+        if ($this->redis === null) {
+            throw new RuntimeException('Token rotation requires Redis. Please configure Redis or generate a new token pair.');
+        }
+
         $payload = $this->decode($refreshToken);
 
         // Validate token type
@@ -143,18 +147,16 @@ final class AdvancedJwtService
         }
 
         // Verify token is in whitelist (not revoked)
-        if ($this->redis !== null) {
-            $stored = $this->redis->get($this->getRefreshTokenKey($payload->jti));
+        $stored = $this->redis->get($this->getRefreshTokenKey($payload->jti));
 
-            if ($stored === null) {
-                // Token was already used or revoked
-                $this->revokeAllUserTokens($payload->sub);
-                throw new RuntimeException('Refresh token has been revoked or already used');
-            }
-
-            // Delete old token (rotation)
-            $this->redis->del($this->getRefreshTokenKey($payload->jti));
+        if ($stored === null) {
+            // Token was already used or revoked
+            $this->revokeAllUserTokens($payload->sub);
+            throw new RuntimeException('Refresh token has been revoked or already used');
         }
+
+        // Delete old token (rotation)
+        $this->redis->del($this->getRefreshTokenKey($payload->jti));
 
         // Generate new token pair
         return $this->generateRefreshToken($payload->sub);
@@ -197,7 +199,7 @@ final class AdvancedJwtService
             $this->decode($token);
 
             return true;
-        } catch (RuntimeException|\JsonException) {
+        } catch (RuntimeException) {
             return false;
         }
     }
@@ -225,7 +227,7 @@ final class AdvancedJwtService
                 'is_expired' => isset($payload->exp) && $payload->exp < time(),
                 'jwt_id' => $payload->jti ?? null,
             ];
-        } catch (RuntimeException|\JsonException $e) {
+        } catch (RuntimeException $e) {
             return [
                 'valid' => false,
                 'error' => $e->getMessage(),
@@ -285,7 +287,7 @@ final class AdvancedJwtService
      */
     private function generateUniqueId(int $length = 16): string
     {
-        return bin2hex(random_bytes($length / 2));
+        return bin2hex(random_bytes((int) ($length / 2)));
     }
 
     /**

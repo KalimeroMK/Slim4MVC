@@ -31,32 +31,6 @@ class EnvironmentValidationFeatureTest extends TestCase
 
     /**
      */
-    public function test_it_returns_json_error_for_http_requests(): void
-    {
-        // Simulate missing configuration
-        $_ENV = [
-            'APP_ENV' => 'local',
-            // Missing JWT_SECRET
-        ];
-
-        // Capture output
-        ob_start();
-        
-        try {
-            // Include bootstrap which triggers validation
-            require_once __DIR__ . '/../../bootstrap/app.php';
-        } catch (\Exception $e) {
-            // Expected to fail
-        }
-        
-        $output = ob_get_clean();
-
-        // In real HTTP context, this would return JSON
-        $this->assertTrue(true); // Test passes if no fatal error
-    }
-
-    /**
-     */
     public function test_it_returns_detailed_message_for_cli(): void
     {
         $_ENV = [

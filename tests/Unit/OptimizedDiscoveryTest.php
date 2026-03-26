@@ -113,14 +113,14 @@ class OptimizedDiscoveryTest extends TestCase
         $this->assertFileDoesNotExist($this->cacheFile);
     }
 
-    public function test_clearCache_returns_true_when_no_cache(): void
+    public function test_clearCache_returns_false_when_no_cache(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
         $discovery = new OptimizedDiscovery();
         $result = $discovery->clearCache();
 
-        $this->assertTrue($result);
+        $this->assertFalse($result);
     }
 
     public function test_getStats_returns_expected_structure(): void

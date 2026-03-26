@@ -11,6 +11,7 @@ use RuntimeException;
  */
 class ConfigurationException extends RuntimeException
 {
+    /** @var array<int, string> */
     private array $errors;
 
     /**
@@ -61,6 +62,8 @@ class ConfigurationException extends RuntimeException
 
     /**
      * Get summary for HTTP responses.
+     *
+     * @return array<string, mixed>
      */
     public function getSummary(): array
     {

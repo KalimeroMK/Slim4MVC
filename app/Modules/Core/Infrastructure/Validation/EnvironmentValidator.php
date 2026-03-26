@@ -17,6 +17,8 @@ final class EnvironmentValidator
 
     /**
      * Validation rules configuration.
+     *
+     * @var array<string, array<string, mixed>>
      */
     private static array $config = [
         'critical' => [
