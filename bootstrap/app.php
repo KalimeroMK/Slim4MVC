@@ -10,6 +10,13 @@ use App\Modules\Core\Infrastructure\Http\RequestHandlers\FormRequestStrategy;
 use App\Modules\Core\Infrastructure\Validation\ConfigurationException;
 use App\Modules\Core\Infrastructure\Validation\EnvironmentValidator;
 use DI\ContainerBuilder;
+use Dotenv\Dotenv;
+
+// Load environment variables from .env file
+if (file_exists(__DIR__.'/../.env')) {
+    $dotenv = Dotenv::createUnsafeImmutable(__DIR__.'/..');
+    $dotenv->safeLoad();
+}
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Validation\Factory;
 use Slim\Factory\AppFactory;
