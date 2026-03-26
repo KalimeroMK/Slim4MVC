@@ -235,7 +235,15 @@ HELP
             $bindingsTable->setHeaders(['Interface', 'Implementation']);
 
             foreach ($stats['sample_bindings'] as $interface => $definition) {
-                $implementation = $definition->getName();
+                if (is_string($definition)) {
+                    $implementation = $definition;
+                } elseif (is_object($definition)) {
+                    $implementation = $definition instanceof \ReflectionClass
+                        ? $definition->getName()
+                        : get_class($definition);
+                } else {
+                    $implementation = gettype($definition);
+                }
                 $shortInterface = $this->shortenClassName($interface);
                 $shortImplementation = $this->shortenClassName($implementation);
 

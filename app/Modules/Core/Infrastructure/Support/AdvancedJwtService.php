@@ -127,16 +127,16 @@ final class AdvancedJwtService
      */
     public function rotateRefreshToken(string $refreshToken): TokenPair
     {
+        $payload = $this->decode($refreshToken);
+
+        // Validate token type first
+        if (($payload->type ?? '') !== 'refresh') {
+            throw new RuntimeException('Invalid token type: expected refresh token');
+        }
+
         // Check if Redis is available for token rotation
         if ($this->redis === null) {
             throw new RuntimeException('Token rotation requires Redis. Please configure Redis or generate a new token pair.');
-        }
-
-        $payload = $this->decode($refreshToken);
-
-        // Validate token type
-        if (($payload->type ?? '') !== 'refresh') {
-            throw new RuntimeException('Invalid token type: expected refresh token');
         }
 
         // Check fingerprint for potential token theft
@@ -227,7 +227,7 @@ final class AdvancedJwtService
                 'is_expired' => isset($payload->exp) && $payload->exp < time(),
                 'jwt_id' => $payload->jti ?? null,
             ];
-        } catch (RuntimeException $e) {
+        } catch (RuntimeException | \JsonException $e) {
             return [
                 'valid' => false,
                 'error' => $e->getMessage(),

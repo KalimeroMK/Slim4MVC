@@ -91,7 +91,28 @@ class User extends Model
     }
 
     /**
-     * Override save method to auto-assign client role.
+     * Get all unique permissions through roles.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Permission\Infrastructure\Models\Permission>
+     */
+    public function permissions(): \Illuminate\Database\Eloquent\Collection
+    {
+        $permissionIds = [];
+        
+        foreach ($this->roles as $role) {
+            foreach ($role->permissions as $permission) {
+                $permissionIds[$permission->id] = $permission;
+            }
+        }
+        
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Permission\Infrastructure\Models\Permission> $collection */
+        $collection = \Illuminate\Database\Eloquent\Collection::make(array_values($permissionIds));
+        
+        return $collection;
+    }
+
+    /**
+     * Override save method to auto-assign user role if no roles assigned.
      *
      * @param array<string, mixed> $options
      */
@@ -112,14 +133,14 @@ class User extends Model
                 ->exists();
 
             if (! $hasRoles) {
-                // Find or create client role
+                // Find or create user role
                 /** @phpstan-ignore-next-line */
-                $clientRole = Role::firstOrCreate(['name' => 'client']);
+                $userRole = Role::firstOrCreate(['name' => 'user']);
 
                 // Insert role_user relationship directly
                 $connection->table('role_user')->insert([
                     'user_id' => $this->id,
-                    'role_id' => $clientRole->id,
+                    'role_id' => $userRole->id,
                 ]);
             }
         }

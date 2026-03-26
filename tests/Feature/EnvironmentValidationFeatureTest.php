@@ -156,7 +156,7 @@ class EnvironmentValidationFeatureTest extends TestCase
     {
         $_ENV = [
             'APP_ENV' => 'local',
-            'JWT_SECRET' => 'onlylettersherethatislongenough',
+            'JWT_SECRET' => 'onlylettersherethatislongenoughx',  // Only letters (32 chars) to trigger warning
             'DB_HOST' => 'localhost',
             'DB_DATABASE' => 'test',
             'DB_USERNAME' => 'user',

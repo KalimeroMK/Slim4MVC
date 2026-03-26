@@ -23,7 +23,8 @@ final class UserModelTest extends TestCase
         $user->roles()->attach($role->id);
 
         $this->assertTrue($user->hasRole('admin'));
-        $this->assertFalse($user->hasRole('user'));
+        // User gets 'user' role automatically
+        $this->assertTrue($user->hasRole('user'));
     }
 
     public function test_user_can_have_multiple_roles(): void

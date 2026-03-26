@@ -184,7 +184,7 @@ class EnvironmentValidatorIntegrationTest extends TestCase
             'DB_HOST' => 'localhost',
             'DB_DATABASE' => 'test_db',
             'DB_USERNAME' => 'root',
-            'DB_PASSWORD' => '',
+            'DB_PASSWORD' => 'password',
         ];
 
         EnvironmentValidator::validate();

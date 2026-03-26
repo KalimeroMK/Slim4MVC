@@ -80,8 +80,13 @@ final class GenericListAction
     {
         $result = $this->execute($page, $perPage);
         
-        // Load relations on the collection
-        $result['items']->load($relations);
+        // Load relations on the items
+        $items = $result['items'];
+        if (is_array($items)) {
+            $items = new Collection($items);
+        }
+        $items->load($relations);
+        $result['items'] = $items;
         
         return $result;
     }
