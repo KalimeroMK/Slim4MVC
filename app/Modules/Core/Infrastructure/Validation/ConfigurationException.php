@@ -70,7 +70,29 @@ class ConfigurationException extends RuntimeException
         return [
             'error' => 'Configuration Error',
             'message' => 'Service configuration is invalid',
-            'errors' => $this->errors,
+            'status_code' => 500,
+            'timestamp' => date('c'),
+            'errors' => array_map(
+                fn ($error) => [
+                    'field' => $this->extractFieldName($error),
+                    'message' => $error,
+                ],
+                $this->errors
+            ),
+            'total_errors' => count($this->errors),
         ];
+    }
+
+    /**
+     * Extract field name from error message.
+     */
+    private function extractFieldName(string $error): string
+    {
+        // Match patterns like "JWT_SECRET is required..." or "DB_HOST is required..."
+        if (preg_match('/^([A-Z_]+)/', $error, $matches)) {
+            return $matches[1];
+        }
+
+        return 'general';
     }
 }

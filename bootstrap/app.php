@@ -33,7 +33,7 @@ try {
     // HTTP output - JSON error response
     http_response_code(500);
     header('Content-Type: application/json');
-    echo json_encode($e->getSummary());
+    echo json_encode($e->getSummary(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     exit(1);
 }
 
