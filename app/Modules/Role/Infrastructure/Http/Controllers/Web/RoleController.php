@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Modules\Core\Infrastructure\Http\Controllers\Admin;
+namespace App\Modules\Role\Infrastructure\Http\Controllers\Web;
 
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
 use App\Modules\Permission\Infrastructure\Models\Permission;

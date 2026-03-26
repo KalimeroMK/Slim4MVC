@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use App\Modules\Core\Infrastructure\Http\Controllers\Admin\DashboardController;
-use App\Modules\Core\Infrastructure\Http\Controllers\Admin\PermissionController;
-use App\Modules\Core\Infrastructure\Http\Controllers\Admin\RoleController;
-use App\Modules\Core\Infrastructure\Http\Controllers\Admin\UserController;
 use App\Modules\Core\Infrastructure\Http\Controllers\Web\HomeController;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
 use App\Modules\Core\Infrastructure\Support\Route;
+use App\Modules\Permission\Infrastructure\Http\Controllers\Web\PermissionController;
+use App\Modules\Role\Infrastructure\Http\Controllers\Web\RoleController;
+use App\Modules\User\Infrastructure\Http\Controllers\Web\UserController;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
