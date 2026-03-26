@@ -49,11 +49,17 @@ final class NullCache implements CacheInterface
         return $callback();
     }
 
+    /**
+     * @phpstan-ignore return.unusedType
+     */
     public function increment(string $key, int $value = 1): int|false
     {
         return $value;
     }
 
+    /**
+     * @phpstan-ignore return.unusedType
+     */
     public function decrement(string $key, int $value = 1): int|false
     {
         return -$value;

@@ -22,6 +22,9 @@ final readonly class QueryBuilder
      */
     private array $config;
 
+    /**
+     * @param array<string, mixed>|null $config
+     */
     public function __construct(
         Request $request,
         ?array $config = null

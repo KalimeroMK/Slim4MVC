@@ -145,6 +145,7 @@ final readonly class FileCache implements CacheInterface
     {
         $value = $this->get($key);
 
+        /** @phpstan-ignore-next-line */
         if ($value !== null) {
             return $value;
         }

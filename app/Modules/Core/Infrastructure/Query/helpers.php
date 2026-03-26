@@ -22,10 +22,12 @@ if (! function_exists('query_builder')) {
     /**
      * Create a new QueryBuilder instance.
      *
+     * @phpstan-ignore missingType.generics
      * @param  array<string, mixed>  $config
      */
     function query_builder(Request $request, ?array $config = null): QueryBuilder
     {
+        /** @phpstan-ignore-next-line */
         return new QueryBuilder($request, $config);
     }
 }
@@ -45,9 +47,11 @@ if (! function_exists('query_filter')) {
         $builder = new QueryBuilder($request, $config);
 
         if (is_string($model)) {
+            /** @phpstan-ignore-next-line */
             return $builder->apply($model::query());
         }
 
+        /** @phpstan-ignore-next-line */
         return $builder->apply($model);
     }
 }

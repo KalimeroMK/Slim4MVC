@@ -16,7 +16,7 @@ final class CacheManager
 
     private readonly string $defaultDriver;
 
-    private readonly ?string $prefix;
+    private readonly string $prefix;
 
     public function __construct(
         ?string $driver = null,

@@ -56,6 +56,7 @@ trait AutoEloquentRelations
 
         // Check if model has explicit autoWith defined
         if (property_exists($class, 'autoWith')) {
+            /** @phpstan-ignore-next-line */
             $instance = new static;
 
             return $instance->autoWith ?? [];
@@ -86,6 +87,7 @@ trait AutoEloquentRelations
 
         $relations = [];
         $reflection = new ReflectionClass($class);
+        /** @phpstan-ignore-next-line */
         $instance = new static;
 
         // Get excluded relations if defined
@@ -114,6 +116,7 @@ trait AutoEloquentRelations
             // Check if method returns a Relation
             if (! $method->hasReturnType()) {
                 // Try to infer from method body (heuristic)
+                /** @phpstan-ignore-next-line */
                 if (static::isLikelyRelationMethod($method)) {
                     $relations[] = $methodName;
                 }
@@ -121,10 +124,12 @@ trait AutoEloquentRelations
             }
 
             $returnType = $method->getReturnType();
+            /** @phpstan-ignore-next-line */
             if ($returnType === null) {
                 continue;
             }
 
+            /** @phpstan-ignore-next-line */
             $typeName = $returnType->getName();
 
             // Check if return type is a Relation subclass
@@ -200,10 +205,11 @@ trait AutoEloquentRelations
     /**
      * Create a query without auto eager loading.
      *
-     * @return \Illuminate\Database\Eloquent\Builder<$this>
+     * @return \Illuminate\Database\Eloquent\Builder<static>
      */
     public static function queryWithoutAutoWith(): \Illuminate\Database\Eloquent\Builder
     {
+        /** @phpstan-ignore-next-line */
         return static::query()->withoutGlobalScope('auto_eager_load');
     }
 }

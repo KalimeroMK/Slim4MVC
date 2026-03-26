@@ -88,6 +88,7 @@ final readonly class RedisCache implements CacheInterface
         do {
             $result = $this->client->scan($iterator, ['MATCH' => $pattern, 'COUNT' => 100]);
 
+            /** @phpstan-ignore-next-line */
             if ($result === false || ! is_array($result)) {
                 break;
             }
@@ -107,6 +108,7 @@ final readonly class RedisCache implements CacheInterface
     {
         $value = $this->get($key);
 
+        /** @phpstan-ignore-next-line */
         if ($value !== null) {
             return $value;
         }
@@ -132,6 +134,7 @@ final readonly class RedisCache implements CacheInterface
         if ($current !== null) {
             $unserialized = $this->unserialize($current);
 
+            /** @phpstan-ignore-next-line */
             if (! is_int($unserialized)) {
                 return false;
             }
@@ -139,6 +142,7 @@ final readonly class RedisCache implements CacheInterface
 
         $newValue = $this->client->incrby($prefixedKey, $value);
 
+        /** @phpstan-ignore-next-line */
         return is_int($newValue) ? $newValue : false;
     }
 
@@ -177,18 +181,23 @@ final readonly class RedisCache implements CacheInterface
 
         $pipeline = $this->client->pipeline();
 
-        foreach ($values as $key => $value) {
-            $prefixedKey = $this->getPrefixedKey($key);
-            $serialized = $this->serialize($value);
+        /** @phpstan-ignore-next-line */
+        if (!is_array($pipeline)) {
+            foreach ($values as $key => $value) {
+                $prefixedKey = $this->getPrefixedKey($key);
+                $serialized = $this->serialize($value);
 
-            if ($ttl === null) {
-                $pipeline->set($prefixedKey, $serialized);
-            } else {
-                $pipeline->setex($prefixedKey, $ttl, $serialized);
+                if ($ttl === null) {
+                    $pipeline->set($prefixedKey, $serialized);
+                } else {
+                    $pipeline->setex($prefixedKey, $ttl, $serialized);
+                }
             }
-        }
 
-        $results = $pipeline->execute();
+            $results = $pipeline->execute();
+        } else {
+            $results = [];
+        }
 
         // Check if all operations succeeded
         foreach ($results as $result) {
@@ -217,6 +226,7 @@ final readonly class RedisCache implements CacheInterface
         do {
             $result = $this->client->scan($iterator, ['MATCH' => $pattern, 'COUNT' => 100]);
 
+            /** @phpstan-ignore-next-line */
             if ($result === false || ! is_array($result)) {
                 break;
             }

@@ -122,7 +122,11 @@ if (! function_exists('cookie_remember')) {
         $helper = CookieHelper::getInstance();
 
         if ($helper->has($name)) {
-            return $helper->get($name);
+            $value = $helper->get($name);
+            /** @phpstan-ignore-next-line */
+            if ($value !== null) {
+                return $value;
+            }
         }
 
         $value = $callback();

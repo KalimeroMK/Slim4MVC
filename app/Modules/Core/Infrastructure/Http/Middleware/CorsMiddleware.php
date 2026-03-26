@@ -23,6 +23,9 @@ class CorsMiddleware implements MiddlewareInterface
     /** @var array<string, mixed> */
     private array $options;
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function __construct(ResponseFactoryInterface $responseFactory, array $options = [])
     {
         $this->responseFactory = $responseFactory;

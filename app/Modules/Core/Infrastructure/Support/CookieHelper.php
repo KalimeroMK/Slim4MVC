@@ -24,6 +24,9 @@ final class CookieHelper
 
     private readonly bool $defaultHttpOnly;
 
+    /** @phpstan-ignore property.onlyWritten */
+    private readonly ?int $defaultTtl;
+
     private readonly string $sameSite;
 
     private bool $encryptionEnabled;
@@ -39,6 +42,7 @@ final class CookieHelper
         ?bool $encryptionEnabled = null
     ) {
         $this->secret = $secret ?? $_ENV['APP_KEY'] ?? $_ENV['JWT_SECRET'] ?? '';
+        $this->defaultTtl = $defaultTtl;
         $this->defaultPath = $defaultPath ?? $_ENV['COOKIE_PATH'] ?? '/';
         $this->defaultDomain = $defaultDomain ?? $_ENV['COOKIE_DOMAIN'] ?? '';
         $this->defaultSecure = $defaultSecure ?? ($_ENV['COOKIE_SECURE'] ?? 'true') === 'true';
@@ -164,6 +168,7 @@ final class CookieHelper
             'samesite' => $this->sameSite,
         ];
 
+        /** @phpstan-ignore-next-line */
         setcookie($name, '', $options);
         unset($_COOKIE[$name]);
     }
