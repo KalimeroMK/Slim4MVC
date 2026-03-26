@@ -7,6 +7,8 @@ declare(strict_types=1);
 require __DIR__.'/../vendor/autoload.php';
 
 use App\Modules\Core\Infrastructure\Http\RequestHandlers\FormRequestStrategy;
+use App\Modules\Core\Infrastructure\Validation\ConfigurationException;
+use App\Modules\Core\Infrastructure\Validation\EnvironmentValidator;
 use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Validation\Factory;
@@ -14,7 +16,36 @@ use Slim\Factory\AppFactory;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 
-// Initialize PHP-DI container
+// ═════════════════════════════════════════════════════════════════════════════
+// 1. ENVIRONMENT VALIDATION (Fail-Fast Pattern)
+// ═════════════════════════════════════════════════════════════════════════════
+try {
+    EnvironmentValidator::validate();
+} catch (ConfigurationException $e) {
+    $isCli = PHP_SAPI === 'cli';
+
+    if ($isCli) {
+        // CLI output - detailed error message
+        echo "\n" . $e->getDetailedMessage() . "\n\n";
+        exit(1);
+    }
+
+    // HTTP output - JSON error response
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode($e->getSummary());
+    exit(1);
+}
+
+// Check for warnings (non-critical issues)
+$warnings = EnvironmentValidator::getWarnings();
+if (!empty($warnings) && ($_ENV['APP_ENV'] ?? 'production') === 'local') {
+    error_log('Environment warnings: ' . implode(', ', $warnings));
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 2. CONTAINER INITIALIZATION
+// ═════════════════════════════════════════════════════════════════════════════
 $containerBuilder = new ContainerBuilder();
 $containerBuilder->useAutowiring(true);
 $containerBuilder->addDefinitions(require __DIR__.'/../bootstrap/dependencies.php');
@@ -30,6 +61,10 @@ $storage = new NativeSessionStorage();
 $session = new Session($storage);
 // Don't start again - just use the already started native session
 $container->set(Session::class, fn (): Session => $session);
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 3. SERVICE CONFIGURATION
+// ═════════════════════════════════════════════════════════════════════════════
 
 // Configure database
 $capsule = new Capsule;
@@ -48,7 +83,9 @@ $validation($container, $capsule);
 // Configure Eloquent features (auto eager loading, etc.)
 require __DIR__.'/../bootstrap/eloquent.php';
 
-// Set the container in Slim
+// ═════════════════════════════════════════════════════════════════════════════
+// 4. SLIM APPLICATION SETUP
+// ═════════════════════════════════════════════════════════════════════════════
 AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);
 
