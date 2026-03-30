@@ -38,10 +38,8 @@ class HelperTestChild extends Model
  * @covers \detect_lazy_loading
  * @covers \clear_relation_cache
  */
-class HelpersTest extends TestCase
+final class HelpersTest extends TestCase
 {
-    private Capsule $capsule;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,22 +51,22 @@ class HelpersTest extends TestCase
         Model::unguard();
 
         // Setup in-memory SQLite database
-        $this->capsule = new Capsule;
-        $this->capsule->addConnection([
+        $manager = new Capsule;
+        $manager->addConnection([
             'driver' => 'sqlite',
             'database' => ':memory:',
         ]);
-        $this->capsule->setAsGlobal();
-        $this->capsule->bootEloquent();
+        $manager->setAsGlobal();
+        $manager->bootEloquent();
 
         // Create test tables
-        $this->capsule->schema()->create('helper_test_models', function ($table) {
+        $manager->schema()->create('helper_test_models', function ($table): void {
             $table->increments('id');
             $table->string('name')->nullable();
             $table->timestamps();
         });
 
-        $this->capsule->schema()->create('helper_test_children', function ($table) {
+        $manager->schema()->create('helper_test_children', function ($table): void {
             $table->increments('id');
             $table->unsignedInteger('parent_id');
             $table->string('name')->nullable();

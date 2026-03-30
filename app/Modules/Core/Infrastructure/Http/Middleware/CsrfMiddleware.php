@@ -38,6 +38,7 @@ class CsrfMiddleware implements MiddlewareInterface
             if (! is_array($data)) {
                 throw new RuntimeException('Invalid request body', 400);
             }
+
             $token = $data['_token'] ?? null;
 
             if (! $token || $token !== $_SESSION['csrf_token']) {

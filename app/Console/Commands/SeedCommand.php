@@ -10,7 +10,7 @@ class SeedCommand
 {
     public function execute(): void
     {
-        $seeder = new DatabaseSeeder();
-        $seeder->run();
+        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder->run();
     }
 }

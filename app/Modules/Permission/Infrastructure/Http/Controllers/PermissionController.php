@@ -31,7 +31,7 @@ class PermissionController extends Controller
         private readonly CreatePermissionAction $createPermissionAction,
         private readonly UpdatePermissionAction $updatePermissionAction,
         private readonly DeletePermissionAction $deletePermissionAction,
-        private readonly GetPermissionAction $getAction,
+        private readonly GetPermissionAction $getPermissionAction,
         private readonly ListPermissionAction $listPermissionAction
     ) {
         parent::__construct($container);
@@ -73,7 +73,7 @@ class PermissionController extends Controller
      */
     public function show(Request $request, Response $response, array $args): Response
     {
-        $permission = $this->getAction->execute($this->getParamAsInt($args, 'id'));
+        $permission = $this->getPermissionAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(PermissionResource::make($permission));
     }

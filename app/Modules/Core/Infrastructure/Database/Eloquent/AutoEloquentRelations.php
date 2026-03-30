@@ -36,7 +36,7 @@ trait AutoEloquentRelations
      */
     public static function bootAutoEloquentRelations(): void
     {
-        static::addGlobalScope('auto_eager_load', function ($query) {
+        static::addGlobalScope('auto_eager_load', function ($query): void {
             $relations = static::getAutoLoadableRelations();
 
             if ($relations !== []) {
@@ -57,9 +57,9 @@ trait AutoEloquentRelations
         // Check if model has explicit autoWith defined
         if (property_exists($class, 'autoWith')) {
             /** @phpstan-ignore-next-line */
-            $instance = new static;
+            $static = new static;
 
-            return $instance->autoWith ?? [];
+            return $static->autoWith ?? [];
         }
 
         // Auto-detect all relations if enabled globally
@@ -86,20 +86,20 @@ trait AutoEloquentRelations
         }
 
         $relations = [];
-        $reflection = new ReflectionClass($class);
+        $reflectionClass = new ReflectionClass($class);
         /** @phpstan-ignore-next-line */
-        $instance = new static;
+        $static = new static;
 
         // Get excluded relations if defined
         $excluded = property_exists($class, 'excludeAutoWith')
-            ? ($instance->excludeAutoWith ?? [])
+            ? ($static->excludeAutoWith ?? [])
             : [];
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $methodName = $method->getName();
+        foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
+            $methodName = $reflectionMethod->getName();
 
             // Skip inherited methods from Model class
-            if ($method->getDeclaringClass()->getName() === Model::class) {
+            if ($reflectionMethod->getDeclaringClass()->getName() === Model::class) {
                 continue;
             }
 
@@ -114,16 +114,17 @@ trait AutoEloquentRelations
             }
 
             // Check if method returns a Relation
-            if (! $method->hasReturnType()) {
+            if (! $reflectionMethod->hasReturnType()) {
                 // Try to infer from method body (heuristic)
                 /** @phpstan-ignore-next-line */
-                if (static::isLikelyRelationMethod($method)) {
+                if (static::isLikelyRelationMethod($reflectionMethod)) {
                     $relations[] = $methodName;
                 }
+
                 continue;
             }
 
-            $returnType = $method->getReturnType();
+            $returnType = $reflectionMethod->getReturnType();
             /** @phpstan-ignore-next-line */
             if ($returnType === null) {
                 continue;
@@ -148,15 +149,15 @@ trait AutoEloquentRelations
      * Heuristic to check if a method is likely a relation method.
      * Used when return type is not explicitly declared.
      */
-    private static function isLikelyRelationMethod(ReflectionMethod $method): bool
+    private static function isLikelyRelationMethod(ReflectionMethod $reflectionMethod): bool
     {
-        $filename = $method->getFileName();
+        $filename = $reflectionMethod->getFileName();
         if ($filename === false) {
             return false;
         }
 
-        $startLine = $method->getStartLine();
-        $endLine = $method->getEndLine();
+        $startLine = $reflectionMethod->getStartLine();
+        $endLine = $reflectionMethod->getEndLine();
 
         if ($startLine === false || $endLine === false) {
             return false;
@@ -180,14 +181,7 @@ trait AutoEloquentRelations
             '->morphMany(',
             '->morphToMany(',
         ];
-
-        foreach ($relationPatterns as $pattern) {
-            if (str_contains($methodBody, $pattern)) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($relationPatterns, fn($pattern): bool => str_contains($methodBody, (string) $pattern));
     }
 
     /**

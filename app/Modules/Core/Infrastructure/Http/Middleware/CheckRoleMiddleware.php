@@ -24,6 +24,7 @@ class CheckRoleMiddleware
         if (! is_array($roles)) {
             $roles = [$roles];
         }
+
         $hasRole = array_any($roles, fn ($role): bool => $user && $user->hasRole($role));
 
         if (! $hasRole) {

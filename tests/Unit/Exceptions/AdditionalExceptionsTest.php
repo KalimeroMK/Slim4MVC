@@ -13,7 +13,7 @@ use App\Modules\Core\Infrastructure\Exceptions\ValidationException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
-class AdditionalExceptionsTest extends TestCase
+final class AdditionalExceptionsTest extends TestCase
 {
     public function test_bad_request_exception_exists(): void
     {
@@ -55,8 +55,6 @@ class AdditionalExceptionsTest extends TestCase
             new UnauthorizedException('test'),
         ];
 
-        foreach ($exceptions as $exception) {
-            $this->assertInstanceOf(RuntimeException::class, $exception);
-        }
+        $this->assertContainsOnlyInstancesOf(RuntimeException::class, $exceptions);
     }
 }

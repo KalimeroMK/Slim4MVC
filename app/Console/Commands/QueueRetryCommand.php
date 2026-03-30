@@ -79,9 +79,9 @@ class QueueRetryCommand extends Command
 
         foreach ($failedJobs as $failedJob) {
             if ($failedJob->retry($queue)) {
-                $retried++;
+                ++$retried;
             } else {
-                $failed++;
+                ++$failed;
             }
         }
 

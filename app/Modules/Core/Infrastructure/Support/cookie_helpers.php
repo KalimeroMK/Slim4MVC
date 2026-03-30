@@ -19,17 +19,17 @@ if (! function_exists('cookie')) {
      */
     function cookie(?string $name = null, mixed $value = null, ?int $ttl = null): mixed
     {
-        $helper = CookieHelper::getInstance();
+        $cookieHelper = CookieHelper::getInstance();
 
         if ($name === null) {
-            return $helper;
+            return $cookieHelper;
         }
 
         if ($value === null && $ttl === null) {
-            return $helper->get($name);
+            return $cookieHelper->get($name);
         }
 
-        $helper->set($name, $value, $ttl);
+        $cookieHelper->set($name, $value, $ttl);
 
         return null;
     }
@@ -100,10 +100,10 @@ if (! function_exists('cookie_flush')) {
      */
     function cookie_flush(): void
     {
-        $helper = CookieHelper::getInstance();
+        $cookieHelper = CookieHelper::getInstance();
 
-        foreach ($_COOKIE as $name => $value) {
-            $helper->delete($name);
+        foreach (array_keys($_COOKIE) as $name) {
+            $cookieHelper->delete($name);
         }
     }
 }
@@ -119,10 +119,10 @@ if (! function_exists('cookie_remember')) {
      */
     function cookie_remember(string $name, ?int $ttl, callable $callback): mixed
     {
-        $helper = CookieHelper::getInstance();
+        $cookieHelper = CookieHelper::getInstance();
 
-        if ($helper->has($name)) {
-            $value = $helper->get($name);
+        if ($cookieHelper->has($name)) {
+            $value = $cookieHelper->get($name);
             /** @phpstan-ignore-next-line */
             if ($value !== null) {
                 return $value;
@@ -130,7 +130,7 @@ if (! function_exists('cookie_remember')) {
         }
 
         $value = $callback();
-        $helper->set($name, $value, $ttl);
+        $cookieHelper->set($name, $value, $ttl);
 
         return $value;
     }

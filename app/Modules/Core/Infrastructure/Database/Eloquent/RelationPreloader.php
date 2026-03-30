@@ -47,7 +47,7 @@ final class RelationPreloader
         // Check which relations are already loaded
         $relationsToLoad = array_filter(
             $relations,
-            fn ($relation) => ! $model->relationLoaded($relation)
+            fn ($relation): bool => ! $model->relationLoaded($relation)
         );
 
         if ($relationsToLoad === []) {
@@ -81,7 +81,7 @@ final class RelationPreloader
 
         foreach ($relations as $relation) {
             $needsLoading = $models->contains(
-                fn (Model $model) => ! $model->relationLoaded($relation)
+                fn (Model $model): bool => ! $model->relationLoaded($relation)
             );
 
             if ($needsLoading) {
@@ -103,15 +103,15 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Builder<TModel> $query
+     * @param Builder<TModel> $builder
      * @param list<string>|string $relations
      * @return Builder<TModel>
      */
-    public static function with(Builder $query, array|string $relations): Builder
+    public static function with(Builder $builder, array|string $relations): Builder
     {
         $relations = is_string($relations) ? [$relations] : $relations;
 
-        return $query->with($relations);
+        return $builder->with($relations);
     }
 
     /**
@@ -186,7 +186,7 @@ final class RelationPreloader
 
         foreach ($relations as $relation) {
             $someMissing = $models->contains(
-                fn (Model $model) => ! $model->relationLoaded($relation)
+                fn (Model $model): bool => ! $model->relationLoaded($relation)
             );
 
             if ($someMissing) {

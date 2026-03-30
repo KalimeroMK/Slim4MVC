@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  * 
  * @group feature
  */
-class EnvironmentValidationFeatureTest extends TestCase
+final class EnvironmentValidationFeatureTest extends TestCase
 {
     private array $originalEnv;
 
@@ -60,8 +60,8 @@ class EnvironmentValidationFeatureTest extends TestCase
         try {
             \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
             $this->fail('Expected exception');
-        } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $e) {
-            $message = $e->getMessage();
+        } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $configurationException) {
+            $message = $configurationException->getMessage();
             $this->assertStringContainsString('production', strtolower($message));
             $this->assertStringContainsString('REDIS_HOST', $message);
         }
@@ -104,10 +104,10 @@ class EnvironmentValidationFeatureTest extends TestCase
             'your-secret-key',
         ];
 
-        foreach ($weakSecrets as $secret) {
+        foreach ($weakSecrets as $weakSecret) {
             $_ENV = [
                 'APP_ENV' => 'local',
-                'JWT_SECRET' => $secret,
+                'JWT_SECRET' => $weakSecret,
                 'DB_HOST' => 'localhost',
                 'DB_DATABASE' => 'test',
                 'DB_USERNAME' => 'user',
@@ -116,7 +116,7 @@ class EnvironmentValidationFeatureTest extends TestCase
 
             try {
                 \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
-                $this->fail("Should reject weak secret: {$secret}");
+                $this->fail('Should reject weak secret: ' . $weakSecret);
             } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $e) {
                 $this->assertStringContainsString('weak', strtolower($e->getMessage()));
             }

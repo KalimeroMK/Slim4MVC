@@ -54,21 +54,21 @@ final class CacheTest extends TestCase
 
     public function test_null_cache_always_returns_default(): void
     {
-        $cache = new NullCache();
+        $nullCache = new NullCache();
         
-        $this->assertNull($cache->get('key'));
-        $this->assertEquals('default', $cache->get('key', 'default'));
-        $this->assertFalse($cache->has('key'));
-        $this->assertTrue($cache->set('key', 'value'));
-        $this->assertFalse($cache->has('key'));
+        $this->assertNull($nullCache->get('key'));
+        $this->assertEquals('default', $nullCache->get('key', 'default'));
+        $this->assertFalse($nullCache->has('key'));
+        $this->assertTrue($nullCache->set('key', 'value'));
+        $this->assertFalse($nullCache->has('key'));
     }
 
     public function test_null_cache_remember_executes_callback(): void
     {
-        $cache = new NullCache();
+        $nullCache = new NullCache();
         $called = false;
         
-        $result = $cache->remember('key', 60, function () use (&$called) {
+        $result = $nullCache->remember('key', 60, function () use (&$called): string {
             $called = true;
             return 'computed';
         });
@@ -79,130 +79,130 @@ final class CacheTest extends TestCase
 
     public function test_file_cache_stores_and_retrieves_values(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $this->assertTrue($cache->set('key', 'value'));
-        $this->assertEquals('value', $cache->get('key'));
-        $this->assertTrue($cache->has('key'));
+        $this->assertTrue($fileCache->set('key', 'value'));
+        $this->assertEquals('value', $fileCache->get('key'));
+        $this->assertTrue($fileCache->has('key'));
     }
 
     public function test_file_cache_returns_default_for_missing_key(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $this->assertNull($cache->get('nonexistent'));
-        $this->assertEquals('default', $cache->get('nonexistent', 'default'));
+        $this->assertNull($fileCache->get('nonexistent'));
+        $this->assertEquals('default', $fileCache->get('nonexistent', 'default'));
     }
 
     public function test_file_cache_deletes_value(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $cache->set('key', 'value');
-        $this->assertTrue($cache->has('key'));
+        $fileCache->set('key', 'value');
+        $this->assertTrue($fileCache->has('key'));
         
-        $this->assertTrue($cache->delete('key'));
-        $this->assertFalse($cache->has('key'));
+        $this->assertTrue($fileCache->delete('key'));
+        $this->assertFalse($fileCache->has('key'));
     }
 
     public function test_file_cache_respects_ttl(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
         // Set with very short TTL
-        $cache->set('key', 'value', 1);
-        $this->assertEquals('value', $cache->get('key'));
+        $fileCache->set('key', 'value', 1);
+        $this->assertEquals('value', $fileCache->get('key'));
         
         // Wait for expiration
         sleep(2);
         
-        $this->assertNull($cache->get('key'));
-        $this->assertFalse($cache->has('key'));
+        $this->assertNull($fileCache->get('key'));
+        $this->assertFalse($fileCache->has('key'));
     }
 
     public function test_file_cache_remember_stores_callback_result(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         $callCount = 0;
         
-        $result1 = $cache->remember('key', 3600, function () use (&$callCount) {
-            $callCount++;
+        $result1 = $fileCache->remember('key', 3600, function () use (&$callCount): string {
+            ++$callCount;
             return 'computed';
         });
         
-        $this->assertEquals(1, $callCount);
+        $this->assertSame(1, $callCount);
         $this->assertEquals('computed', $result1);
         
         // Second call should use cached value
-        $result2 = $cache->remember('key', 3600, function () use (&$callCount) {
-            $callCount++;
+        $result2 = $fileCache->remember('key', 3600, function () use (&$callCount): string {
+            ++$callCount;
             return 'new_value';
         });
         
-        $this->assertEquals(1, $callCount); // Callback not called again
+        $this->assertSame(1, $callCount); // Callback not called again
         $this->assertEquals('computed', $result2);
     }
 
     public function test_file_cache_clear_removes_all_values(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $cache->set('key1', 'value1');
-        $cache->set('key2', 'value2');
+        $fileCache->set('key1', 'value1');
+        $fileCache->set('key2', 'value2');
         
-        $this->assertTrue($cache->clear());
+        $this->assertTrue($fileCache->clear());
         
-        $this->assertNull($cache->get('key1'));
-        $this->assertNull($cache->get('key2'));
+        $this->assertNull($fileCache->get('key1'));
+        $this->assertNull($fileCache->get('key2'));
     }
 
     public function test_file_cache_increment_and_decrement(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $cache->set('counter', 10);
+        $fileCache->set('counter', 10);
         
-        $this->assertEquals(11, $cache->increment('counter'));
-        $this->assertEquals(15, $cache->increment('counter', 4));
+        $this->assertSame(11, $fileCache->increment('counter'));
+        $this->assertSame(15, $fileCache->increment('counter', 4));
         
-        $this->assertEquals(14, $cache->decrement('counter'));
-        $this->assertEquals(10, $cache->decrement('counter', 4));
+        $this->assertSame(14, $fileCache->decrement('counter'));
+        $this->assertSame(10, $fileCache->decrement('counter', 4));
     }
 
     public function test_file_cache_many_operations(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $cache->setMany(['key1' => 'value1', 'key2' => 'value2']);
+        $fileCache->setMany(['key1' => 'value1', 'key2' => 'value2']);
         
-        $results = $cache->many(['key1', 'key2', 'key3']);
+        $results = $fileCache->many(['key1', 'key2', 'key3']);
         
         $this->assertEquals(['key1' => 'value1', 'key2' => 'value2', 'key3' => null], $results);
     }
 
     public function test_file_cache_delete_multiple(): void
     {
-        $cache = new FileCache($this->testCachePath, 'test');
+        $fileCache = new FileCache($this->testCachePath, 'test');
         
-        $cache->set('key1', 'value1');
-        $cache->set('key2', 'value2');
-        $cache->set('key3', 'value3');
+        $fileCache->set('key1', 'value1');
+        $fileCache->set('key2', 'value2');
+        $fileCache->set('key3', 'value3');
         
-        $cache->deleteMultiple(['key1', 'key2']);
+        $fileCache->deleteMultiple(['key1', 'key2']);
         
-        $this->assertNull($cache->get('key1'));
-        $this->assertNull($cache->get('key2'));
-        $this->assertEquals('value3', $cache->get('key3'));
+        $this->assertNull($fileCache->get('key1'));
+        $this->assertNull($fileCache->get('key2'));
+        $this->assertEquals('value3', $fileCache->get('key3'));
     }
 
     public function test_cache_manager_creates_different_drivers(): void
     {
-        $manager = new CacheManager();
+        $cacheManager = new CacheManager();
         
-        $nullCache = $manager->driver('null');
+        $nullCache = $cacheManager->driver('null');
         $this->assertInstanceOf(NullCache::class, $nullCache);
         
-        $fileCache = $manager->driver('file');
+        $fileCache = $cacheManager->driver('file');
         $this->assertInstanceOf(FileCache::class, $fileCache);
     }
 
@@ -210,10 +210,10 @@ final class CacheTest extends TestCase
     {
         CacheManager::resetInstance();
         
-        $instance1 = CacheManager::getInstance();
+        $cache = CacheManager::getInstance();
         $instance2 = CacheManager::getInstance();
         
-        $this->assertSame($instance1, $instance2);
+        $this->assertSame($cache, $instance2);
     }
 
     public function test_cache_helper_functions(): void
@@ -247,12 +247,12 @@ final class CacheTest extends TestCase
         
         $callCount = 0;
         
-        $result = cache_remember('key', 60, function () use (&$callCount) {
-            $callCount++;
+        $result = cache_remember('key', 60, function () use (&$callCount): string {
+            ++$callCount;
             return 'computed_value';
         });
         
-        $this->assertEquals(1, $callCount);
+        $this->assertSame(1, $callCount);
         $this->assertEquals('computed_value', $result);
     }
 }

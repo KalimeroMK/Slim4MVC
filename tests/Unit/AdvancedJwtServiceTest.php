@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  * @covers \App\Modules\Core\Infrastructure\Support\AdvancedJwtService
  * @covers \App\Modules\Core\Infrastructure\Support\Token\TokenPair
  */
-class AdvancedJwtServiceTest extends TestCase
+final class AdvancedJwtServiceTest extends TestCase
 {
     private string $validSecret;
 
@@ -40,8 +40,8 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_generateAccessToken_returns_valid_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(123, ['role' => 'admin']);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(123, ['role' => 'admin']);
 
         $this->assertIsString($token);
         $this->assertCount(3, explode('.', $token)); // header.payload.signature
@@ -49,14 +49,14 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_generateAccessToken_includes_claims(): void
     {
-        $service = new AdvancedJwtService(
+        $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
             issuer: 'test-app',
             audience: 'test-api'
         );
 
-        $token = $service->generateAccessToken(123, ['custom' => 'value']);
-        $payload = $service->decode($token);
+        $token = $advancedJwtService->generateAccessToken(123, ['custom' => 'value']);
+        $payload = $advancedJwtService->decode($token);
 
         $this->assertEquals('123', $payload->sub);
         $this->assertEquals('access', $payload->type);
@@ -70,9 +70,9 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_generateAccessToken_custom_ttl(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(123, [], 3600);
-        $payload = $service->decode($token);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(123, [], 3600);
+        $payload = $advancedJwtService->decode($token);
 
         $expectedExp = time() + 3600;
         $this->assertEqualsWithDelta($expectedExp, $payload->exp, 5);
@@ -80,21 +80,21 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_generateRefreshToken_returns_token_pair(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $tokenPair = $service->generateRefreshToken(123);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $tokenPair = $advancedJwtService->generateRefreshToken(123);
 
         $this->assertInstanceOf(\App\Modules\Core\Infrastructure\Support\Token\TokenPair::class, $tokenPair);
         $this->assertIsString($tokenPair->getAccessToken());
         $this->assertIsString($tokenPair->getRefreshToken());
-        $this->assertEquals(2592000, $tokenPair->getExpiresIn());
+        $this->assertSame(2592000, $tokenPair->getExpiresIn());
     }
 
     public function test_generateRefreshToken_includes_correct_claims(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $tokenPair = $service->generateRefreshToken(123);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $tokenPair = $advancedJwtService->generateRefreshToken(123);
 
-        $payload = $service->decode($tokenPair->getRefreshToken());
+        $payload = $advancedJwtService->decode($tokenPair->getRefreshToken());
 
         $this->assertEquals('123', $payload->sub);
         $this->assertEquals('refresh', $payload->type);
@@ -104,53 +104,53 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_rotateRefreshToken_throws_without_redis(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $originalPair = $service->generateRefreshToken(123);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $tokenPair = $advancedJwtService->generateRefreshToken(123);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Token rotation requires Redis');
 
-        $service->rotateRefreshToken($originalPair->getRefreshToken());
+        $advancedJwtService->rotateRefreshToken($tokenPair->getRefreshToken());
     }
 
     public function test_rotateRefreshToken_throws_on_access_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $accessToken = $service->generateAccessToken(123);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $accessToken = $advancedJwtService->generateAccessToken(123);
 
         // Without Redis, it will throw "Token rotation requires Redis" before checking type
         // With Redis, it would throw "Invalid token type"
         $this->expectException(\RuntimeException::class);
 
-        $service->rotateRefreshToken($accessToken);
+        $advancedJwtService->rotateRefreshToken($accessToken);
     }
 
     public function test_verify_returns_true_for_valid_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(123);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(123);
 
-        $this->assertTrue($service->verify($token));
+        $this->assertTrue($advancedJwtService->verify($token));
     }
 
     public function test_verify_returns_false_for_invalid_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
 
         // Invalid token format (wrong number of parts)
-        $this->assertFalse($service->verify('invalid'));
+        $this->assertFalse($advancedJwtService->verify('invalid'));
     }
 
     public function test_getTokenInfo_returns_expected_structure(): void
     {
-        $service = new AdvancedJwtService(
+        $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
             issuer: 'test-app',
             audience: 'test-api'
         );
 
-        $token = $service->generateAccessToken(123, ['role' => 'admin']);
-        $info = $service->getTokenInfo($token);
+        $token = $advancedJwtService->generateAccessToken(123, ['role' => 'admin']);
+        $info = $advancedJwtService->getTokenInfo($token);
 
         $this->assertArrayHasKey('valid', $info);
         $this->assertArrayHasKey('algorithm', $info);
@@ -174,10 +174,10 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_getTokenInfo_returns_error_for_invalid_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
         
         // Invalid format
-        $info = $service->getTokenInfo('invalid');
+        $info = $advancedJwtService->getTokenInfo('invalid');
         $this->assertArrayHasKey('valid', $info);
         $this->assertArrayHasKey('error', $info);
         $this->assertFalse($info['valid']);
@@ -185,41 +185,41 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_decode_validates_issuer_when_requested(): void
     {
-        $service = new AdvancedJwtService(
+        $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
             issuer: 'test-app'
         );
 
-        $token = $service->generateAccessToken(123);
+        $token = $advancedJwtService->generateAccessToken(123);
 
         // Should work when validating issuer
-        $payload = $service->decode($token, validateIssuer: true);
+        $payload = $advancedJwtService->decode($token, validateIssuer: true);
         $this->assertEquals('test-app', $payload->iss);
     }
 
     public function test_decode_validates_audience_when_requested(): void
     {
-        $service = new AdvancedJwtService(
+        $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
             audience: 'test-api'
         );
 
-        $token = $service->generateAccessToken(123);
+        $token = $advancedJwtService->generateAccessToken(123);
 
         // Should work when validating audience
-        $payload = $service->decode($token, validateAudience: true);
+        $payload = $advancedJwtService->decode($token, validateAudience: true);
         $this->assertEquals('test-api', $payload->aud);
     }
 
     public function test_tokenPair_toArray(): void
     {
-        $pair = new \App\Modules\Core\Infrastructure\Support\Token\TokenPair(
+        $tokenPair = new \App\Modules\Core\Infrastructure\Support\Token\TokenPair(
             accessToken: 'access123',
             refreshToken: 'refresh456',
             expiresIn: 3600
         );
 
-        $array = $pair->toArray();
+        $array = $tokenPair->toArray();
 
         $this->assertEquals('access123', $array['access_token']);
         $this->assertEquals('refresh456', $array['refresh_token']);
@@ -229,11 +229,11 @@ class AdvancedJwtServiceTest extends TestCase
 
     public function test_decode_throws_on_expired_token(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
 
         // Create token that expired 1 hour ago
-        $encoder = new \App\Modules\Core\Infrastructure\Support\JwtEncoder();
-        $expiredToken = $encoder->encode([
+        $jwtEncoder = new \App\Modules\Core\Infrastructure\Support\JwtEncoder();
+        $expiredToken = $jwtEncoder->encode([
             'sub' => '123',
             'exp' => time() - 3600,
             'iat' => time() - 7200,
@@ -241,14 +241,14 @@ class AdvancedJwtServiceTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
 
-        $service->decode($expiredToken);
+        $advancedJwtService->decode($expiredToken);
     }
 
     public function test_generateAccessToken_with_string_user_id(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken('user-uuid-123');
-        $payload = $service->decode($token);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken('user-uuid-123');
+        $payload = $advancedJwtService->decode($token);
 
         $this->assertEquals('user-uuid-123', $payload->sub);
     }

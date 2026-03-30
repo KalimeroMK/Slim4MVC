@@ -13,19 +13,18 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class GenericDeleteAction
+final readonly class GenericDeleteAction
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository
+        private Repository $repository
     ) {}
 
     /**
      * Execute the delete action.
      *
-     * @param int|string $id
      *
      * @throws NotFoundException
      */
@@ -33,7 +32,7 @@ final class GenericDeleteAction
     {
         $model = $this->repository->find((int) $id);
 
-        if ($model === null) {
+        if (!$model instanceof \Illuminate\Database\Eloquent\Model) {
             throw new NotFoundException('Resource not found');
         }
 

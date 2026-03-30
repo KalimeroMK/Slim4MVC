@@ -41,13 +41,13 @@ final class CacheClearCommand extends Command
         $tags = $input->getOption('tag');
 
         try {
-            $cache = (new CacheManager())->driver($driver);
+            $cache = new CacheManager()->driver($driver);
 
             if ($tags !== []) {
                 // Clear by tags
                 foreach ($tags as $tag) {
                     $cache->flushByTag($tag);
-                    $output->writeln("<info>Cache cleared for tag: {$tag}</info>");
+                    $output->writeln(sprintf('<info>Cache cleared for tag: %s</info>', $tag));
                 }
             } else {
                 // Clear all
@@ -56,8 +56,8 @@ final class CacheClearCommand extends Command
             }
 
             return Command::SUCCESS;
-        } catch (\Throwable $e) {
-            $output->writeln("<error>Failed to clear cache: {$e->getMessage()}</error>");
+        } catch (\Throwable $throwable) {
+            $output->writeln(sprintf('<error>Failed to clear cache: %s</error>', $throwable->getMessage()));
 
             return Command::FAILURE;
         }

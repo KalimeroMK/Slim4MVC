@@ -18,17 +18,14 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class CorsMiddleware implements MiddlewareInterface
 {
-    private ResponseFactoryInterface $responseFactory;
-
     /** @var array<string, mixed> */
     private array $options;
 
     /**
      * @param array<string, mixed> $options
      */
-    public function __construct(ResponseFactoryInterface $responseFactory, array $options = [])
+    public function __construct(private readonly ResponseFactoryInterface $responseFactory, array $options = [])
     {
-        $this->responseFactory = $responseFactory;
         $this->options = array_merge([
             'origin' => ['*'],
             'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -59,9 +56,9 @@ class CorsMiddleware implements MiddlewareInterface
         return $this->responseFactory->createResponse(200);
     }
 
-    private function addCorsHeaders(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    private function addCorsHeaders(ServerRequestInterface $serverRequest, ResponseInterface $response): ResponseInterface
     {
-        $origin = $this->getOrigin($request);
+        $origin = $this->getOrigin($serverRequest);
 
         // Add Origin header
         if ($this->isOriginAllowed($origin)) {
@@ -100,7 +97,7 @@ class CorsMiddleware implements MiddlewareInterface
 
         // Add cache header
         if ($this->options['cache'] > 0) {
-            $response = $response->withHeader(
+            return $response->withHeader(
                 'Access-Control-Max-Age',
                 (string) $this->options['cache']
             );
@@ -109,9 +106,9 @@ class CorsMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    private function getOrigin(ServerRequestInterface $request): string
+    private function getOrigin(ServerRequestInterface $serverRequest): string
     {
-        $headers = $request->getHeader('Origin');
+        $headers = $serverRequest->getHeader('Origin');
         return $headers[0] ?? '';
     }
 

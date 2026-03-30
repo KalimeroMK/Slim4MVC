@@ -16,7 +16,7 @@ use App\Console\Commands\QueueWorkCommand;
 use App\Console\Commands\SeedDatabaseCommand;
 use PHPUnit\Framework\TestCase;
 
-class ConsoleCommandsTest extends TestCase
+final class ConsoleCommandsTest extends TestCase
 {
     public function test_create_controller_command_exists(): void
     {

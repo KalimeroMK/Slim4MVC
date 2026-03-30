@@ -88,10 +88,10 @@ class Blade
         $this->share('_token', $_SESSION['csrf_token'] ?? '');
 
         // Register CSRF directive
-        $this->directive('csrf', fn () => '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>');
+        $this->directive('csrf', fn (): string => '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>');
 
         // Register method directive
-        $this->directive('method', fn ($method) => '<?php echo \'<input type="hidden" name="_method" value="\' . '.$method.' . \'">\'; ?>');
+        $this->directive('method', fn ($method): string => '<?php echo \'<input type="hidden" name="_method" value="\' . '.$method.' . \'">\'; ?>');
     }
 
     /**
@@ -114,36 +114,36 @@ class Blade
     protected function registerDirectives(): void
     {
         // @csrf - CSRF token field
-        $this->engine->directive('csrf', fn () => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfField(); ?>');
+        $this->engine->directive('csrf', fn (): string => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfField(); ?>');
 
         // @csrfToken - CSRF token value only
-        $this->engine->directive('csrfToken', fn () => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfToken(); ?>');
+        $this->engine->directive('csrfToken', fn (): string => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::csrfToken(); ?>');
 
         // @method('PUT') - HTTP method spoofing
-        $this->engine->directive('method', fn ($method) => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::methodField('.$method.'); ?>');
+        $this->engine->directive('method', fn ($method): string => '<?php echo '.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::methodField('.$method.'); ?>');
 
         // @auth - Check if user is authenticated
-        $this->engine->directive('auth', fn () => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::check()): ?>');
+        $this->engine->directive('auth', fn (): string => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::check()): ?>');
 
         // @endauth
-        $this->engine->directive('endauth', fn () => '<?php endif; ?>');
+        $this->engine->directive('endauth', fn (): string => '<?php endif; ?>');
 
         // @guest - Check if user is not authenticated
-        $this->engine->directive('guest', fn () => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::guest()): ?>');
+        $this->engine->directive('guest', fn (): string => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::guest()): ?>');
 
         // @endguest
-        $this->engine->directive('endguest', fn () => '<?php endif; ?>');
+        $this->engine->directive('endguest', fn (): string => '<?php endif; ?>');
 
         // @can('permission') - Check if user has permission
-        $this->engine->directive('can', fn ($permission) => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::can('.$permission.')): ?>');
+        $this->engine->directive('can', fn ($permission): string => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::can('.$permission.')): ?>');
 
         // @endcan
-        $this->engine->directive('endcan', fn () => '<?php endif; ?>');
+        $this->engine->directive('endcan', fn (): string => '<?php endif; ?>');
 
         // @role('admin') - Check if user has role
-        $this->engine->directive('role', fn ($role) => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::hasRole('.$role.')): ?>');
+        $this->engine->directive('role', fn ($role): string => '<?php if ('.\App\Modules\Core\Infrastructure\Support\AuthHelper::class.'::hasRole('.$role.')): ?>');
 
         // @endrole
-        $this->engine->directive('endrole', fn () => '<?php endif; ?>');
+        $this->engine->directive('endrole', fn (): string => '<?php endif; ?>');
     }
 }

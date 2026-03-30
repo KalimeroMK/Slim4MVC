@@ -12,25 +12,24 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class GenericUpdateAction
+final readonly class GenericUpdateAction
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository
+        private Repository $repository
     ) {}
 
     /**
      * Execute the update action.
      *
-     * @param int|string $id
      * @param array<string, mixed> $data
      * @return TModel
      */
     public function execute(int|string $id, array $data): Model
     {
-        if (empty($data)) {
+        if ($data === []) {
             /** @var TModel $result */
             $result = $this->repository->findOrFail((int) $id);
 

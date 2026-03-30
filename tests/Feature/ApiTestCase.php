@@ -59,7 +59,7 @@ abstract class ApiTestCase extends TestCase
      */
     protected function assertResponseStatus(ResponseInterface $response, int $expectedStatus): void
     {
-        $this->assertEquals($expectedStatus, $response->getStatusCode());
+        $this->assertSame($expectedStatus, $response->getStatusCode());
     }
 
     /**

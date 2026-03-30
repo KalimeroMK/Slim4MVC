@@ -23,7 +23,7 @@ abstract class BaseJob implements Job
      */
     final public function incrementAttempts(): void
     {
-        $this->attempts++;
+        ++$this->attempts;
     }
 
     /**

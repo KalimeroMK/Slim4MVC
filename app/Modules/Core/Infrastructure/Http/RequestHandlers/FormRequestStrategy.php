@@ -48,7 +48,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
         return call_user_func_array($callable, $parameters);
     }
 
-    private function resolveCallable(callable $callable, ServerRequestInterface $request): callable
+    private function resolveCallable(callable $callable, ServerRequestInterface $serverRequest): callable
     {
         if (is_array($callable) && is_string($callable[0])) {
             $callable[0] = $this->container->get($callable[0]);
@@ -56,7 +56,7 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
 
         // Set request on controller for later use
         if (is_array($callable) && $callable[0] instanceof Controller) {
-            $callable[0]->setRequest($request);
+            $callable[0]->setRequest($serverRequest);
         }
 
         return $callable;
@@ -124,10 +124,6 @@ class FormRequestStrategy implements RequestHandlerInvocationStrategyInterface
     {
         if (is_array($callable)) {
             return new ReflectionMethod($callable[0], $callable[1]);
-        }
-
-        if (is_string($callable)) {
-            return new ReflectionFunction($callable);
         }
 
         /** @phpstan-ignore-next-line */

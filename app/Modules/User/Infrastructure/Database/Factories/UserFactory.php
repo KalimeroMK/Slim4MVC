@@ -42,20 +42,20 @@ class UserFactory extends Factory
      */
     public function withRole(string|int $role): User
     {
-        /** @var User $model */
-        $model = $this->create();
+        /** @var User $user */
+        $user = $this->create();
 
         if (is_string($role)) {
             /** @var \App\Modules\Role\Infrastructure\Models\Role|null $roleModel */
             $roleModel = \App\Modules\Role\Infrastructure\Models\Role::where('name', $role)->first();
             if ($roleModel) {
-                $model->roles()->attach($roleModel->id);
+                $user->roles()->attach($roleModel->id);
             }
         } else {
-            $model->roles()->attach($role);
+            $user->roles()->attach($role);
         }
 
-        return $model->fresh() ?? $model;
+        return $user->fresh() ?? $user;
     }
 
     protected function model(): string

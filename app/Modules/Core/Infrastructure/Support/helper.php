@@ -94,6 +94,7 @@ if (! function_exists('config')) {
         if ($folder === false) {
             return null;
         }
+
         $config_files = array_slice($folder, 2);
 
         foreach ($config_files as $config_file) {

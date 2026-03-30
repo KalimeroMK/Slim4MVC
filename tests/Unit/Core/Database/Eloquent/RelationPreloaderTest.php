@@ -39,10 +39,8 @@ class PreloadChildModel extends Model
 /**
  * @covers \App\Modules\Core\Infrastructure\Database\Eloquent\RelationPreloader
  */
-class RelationPreloaderTest extends TestCase
+final class RelationPreloaderTest extends TestCase
 {
-    private Capsule $capsule;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -51,22 +49,22 @@ class RelationPreloaderTest extends TestCase
         Model::unguard();
 
         // Setup in-memory SQLite database
-        $this->capsule = new Capsule;
-        $this->capsule->addConnection([
+        $manager = new Capsule;
+        $manager->addConnection([
             'driver' => 'sqlite',
             'database' => ':memory:',
         ]);
-        $this->capsule->setAsGlobal();
-        $this->capsule->bootEloquent();
+        $manager->setAsGlobal();
+        $manager->bootEloquent();
 
         // Create test tables
-        $this->capsule->schema()->create('preload_parents', function ($table) {
+        $manager->schema()->create('preload_parents', function ($table): void {
             $table->increments('id');
             $table->string('name')->nullable();
             $table->timestamps();
         });
 
-        $this->capsule->schema()->create('preload_children', function ($table) {
+        $manager->schema()->create('preload_children', function ($table): void {
             $table->increments('id');
             $table->unsignedInteger('parent_id');
             $table->string('name')->nullable();
@@ -92,10 +90,10 @@ class RelationPreloaderTest extends TestCase
         $this->assertFalse($fresh->relationLoaded('children'));
 
         // Load relations
-        $result = RelationPreloader::load($fresh, 'children');
+        $model = RelationPreloader::load($fresh, 'children');
 
         // Should be the same instance
-        $this->assertSame($fresh, $result);
+        $this->assertSame($fresh, $model);
 
         // Relation should now be loaded
         $this->assertTrue($fresh->relationLoaded('children'));
@@ -125,9 +123,9 @@ class RelationPreloaderTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('children'));
 
         // Should not cause any new queries
-        $result = RelationPreloader::load($fresh, 'children');
+        $preloadParentModel = RelationPreloader::load($fresh, 'children');
 
-        $this->assertSame($fresh, $result);
+        $this->assertSame($fresh, $preloadParentModel);
         $this->assertTrue($fresh->relationLoaded('children'));
     }
 
@@ -240,7 +238,7 @@ class RelationPreloaderTest extends TestCase
 
         $missing = RelationPreloader::getMissingRelations($parents, ['children', 'otherChildren']);
 
-        $this->assertEquals(['otherChildren'], $missing);
+        $this->assertSame(['otherChildren'], $missing);
     }
 
     public function testWithAddsRelationsToQuery(): void
@@ -250,6 +248,7 @@ class RelationPreloaderTest extends TestCase
 
         $query = PreloadParentModel::query();
         $result = RelationPreloader::with($query, 'children')->first();
+        $this->assertInstanceOf(\Tests\Unit\Core\Database\Eloquent\PreloadParentModel::class, $result);
 
         $this->assertTrue($result->relationLoaded('children'));
     }
@@ -267,8 +266,8 @@ class RelationPreloaderTest extends TestCase
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
 
-        $result = RelationPreloader::load($parent, []);
+        $model = RelationPreloader::load($parent, []);
 
-        $this->assertSame($parent, $result);
+        $this->assertSame($parent, $model);
     }
 }

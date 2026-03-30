@@ -17,16 +17,18 @@ use Symfony\Component\Console\Tester\CommandTester;
  * 
  * @group feature
  */
-class DiscoveryCommandFeatureTest extends TestCase
+final class DiscoveryCommandFeatureTest extends TestCase
 {
     private CommandTester $commandTester;
+
     private string $cacheFile;
+
     private array $originalEnv;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->cacheFile = OptimizedDiscovery::getCacheFile();
         $this->originalEnv = $_ENV;
 
@@ -62,7 +64,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('Auto-Discovery Statistics', $output);
         $this->assertStringContainsString('Total Bindings', $output);
     }
@@ -85,7 +87,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('Environment Validation', $output);
         $this->assertStringContainsString('Environment configuration is valid', $output);
     }
@@ -101,7 +103,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(1, $statusCode);
+        $this->assertSame(1, $statusCode);
         $this->assertStringContainsString('CONFIGURATION VALIDATION FAILED', $output);
     }
 
@@ -116,7 +118,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('Warming Discovery Cache', $output);
         $this->assertStringContainsString('Cache warmed successfully', $output);
         $this->assertFileExists($this->cacheFile);
@@ -135,7 +137,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('Clearing Discovery Cache', $output);
         $this->assertFileDoesNotExist($this->cacheFile);
     }
@@ -155,7 +157,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('Refreshing Discovery Cache', $output);
         $this->assertStringContainsString('Cache refreshed successfully', $output);
 
@@ -200,7 +202,7 @@ class DiscoveryCommandFeatureTest extends TestCase
         $output = $this->commandTester->getDisplay();
         $statusCode = $this->commandTester->getStatusCode();
 
-        $this->assertEquals(0, $statusCode);
+        $this->assertSame(0, $statusCode);
         $this->assertStringContainsString('No cache file to clear', $output);
     }
 }

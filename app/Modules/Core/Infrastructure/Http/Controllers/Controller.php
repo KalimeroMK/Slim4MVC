@@ -43,7 +43,7 @@ abstract class Controller
      */
     protected function getRequest(): Request
     {
-        if ($this->currentRequest !== null) {
+        if ($this->currentRequest instanceof \Psr\Http\Message\ServerRequestInterface) {
             return $this->currentRequest;
         }
 
@@ -127,8 +127,8 @@ abstract class Controller
      */
     protected function getPaginationParams(): array
     {
-        $request = $this->getRequest();
-        $queryParams = $request->getQueryParams();
+        $serverRequest = $this->getRequest();
+        $queryParams = $serverRequest->getQueryParams();
         $page = max(1, (int) ($queryParams['page'] ?? 1));
         $perPage = max(1, min(100, (int) ($queryParams['per_page'] ?? 15))); // Max 100 per page
 
@@ -143,11 +143,11 @@ abstract class Controller
      */
     protected function getPaginationBaseUrl(): string
     {
-        $request = $this->getRequest();
-        $uri = $request->getUri();
+        $serverRequest = $this->getRequest();
+        $uri = $serverRequest->getUri();
         $path = $uri->getPath();
         $query = $uri->getQuery();
 
-        return $path.($query ? '?'.$query : '');
+        return $path.($query !== '' && $query !== '0' ? '?'.$query : '');
     }
 }

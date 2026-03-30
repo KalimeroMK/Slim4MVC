@@ -62,6 +62,7 @@ class MakeModelCommand extends Command
 
                 return;
             }
+
             $modelTemplate = str_replace('{{className}}', $modelName, $stubContent);
         } else {
             $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
@@ -95,6 +96,7 @@ class MakeModelCommand extends Command
 
                 return;
             }
+
             $migrationTemplate = str_replace(
                 ['{{className}}', '{{tableName}}'],
                 [$className, $tableName],

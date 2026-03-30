@@ -54,25 +54,25 @@ HELP
             return $this->handleValidate($output);
         }
 
-        $discovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery();
 
         // Handle cache warming (for production deployments)
         if ($input->getOption('warm')) {
-            return $this->handleWarm($discovery, $output);
+            return $this->handleWarm($optimizedDiscovery, $output);
         }
 
         // Handle cache clearing
         if ($input->getOption('clear')) {
-            return $this->handleClear($discovery, $output);
+            return $this->handleClear($optimizedDiscovery, $output);
         }
 
         // Handle cache refresh
         if ($input->getOption('refresh')) {
-            return $this->handleRefresh($discovery, $output);
+            return $this->handleRefresh($optimizedDiscovery, $output);
         }
 
         // Default: show stats
-        return $this->handleStats($discovery, $output);
+        return $this->handleStats($optimizedDiscovery, $output);
     }
 
     /**
@@ -87,8 +87,8 @@ HELP
 
         try {
             EnvironmentValidator::validate();
-        } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $e) {
-            $output->writeln('<error>' . $e->getDetailedMessage() . '</error>');
+        } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $configurationException) {
+            $output->writeln('<error>' . $configurationException->getDetailedMessage() . '</error>');
             $output->writeln('');
 
             return Command::FAILURE;
@@ -116,11 +116,11 @@ HELP
         $table->render();
 
         // Show warnings if any
-        if (!empty($warnings)) {
+        if ($warnings !== []) {
             $output->writeln('');
             $output->writeln('⚠️  <comment>Warnings:</comment>');
             foreach ($warnings as $warning) {
-                $output->writeln("   • {$warning}");
+                $output->writeln('   • ' . $warning);
             }
         }
 
@@ -132,13 +132,13 @@ HELP
     /**
      * Handle cache warming.
      */
-    private function handleWarm(OptimizedDiscovery $discovery, OutputInterface $output): int
+    private function handleWarm(OptimizedDiscovery $optimizedDiscovery, OutputInterface $output): int
     {
         $output->writeln('');
         $output->writeln('🔥 <comment>Warming Discovery Cache...</comment>');
         $output->writeln('');
 
-        $result = $discovery->warmCache();
+        $result = $optimizedDiscovery->warmCache();
 
         $output->writeln(sprintf(
             '✅ <info>Cache warmed successfully in %sms</info>',
@@ -156,13 +156,13 @@ HELP
     /**
      * Handle cache clearing.
      */
-    private function handleClear(OptimizedDiscovery $discovery, OutputInterface $output): int
+    private function handleClear(OptimizedDiscovery $optimizedDiscovery, OutputInterface $output): int
     {
         $output->writeln('');
         $output->writeln('🗑️  <comment>Clearing Discovery Cache...</comment>');
         $output->writeln('');
 
-        $success = $discovery->clearCache();
+        $success = $optimizedDiscovery->clearCache();
 
         if ($success) {
             $output->writeln('✅ <info>Cache cleared successfully</info>');
@@ -178,14 +178,14 @@ HELP
     /**
      * Handle cache refresh.
      */
-    private function handleRefresh(OptimizedDiscovery $discovery, OutputInterface $output): int
+    private function handleRefresh(OptimizedDiscovery $optimizedDiscovery, OutputInterface $output): int
     {
         $output->writeln('');
         $output->writeln('🔄 <comment>Refreshing Discovery Cache...</comment>');
         $output->writeln('');
 
-        $discovery->clearCache();
-        $result = $discovery->warmCache();
+        $optimizedDiscovery->clearCache();
+        $result = $optimizedDiscovery->warmCache();
 
         $output->writeln(sprintf(
             '✅ <info>Cache refreshed successfully in %sms</info>',
@@ -203,9 +203,9 @@ HELP
     /**
      * Handle stats display.
      */
-    private function handleStats(OptimizedDiscovery $discovery, OutputInterface $output): int
+    private function handleStats(OptimizedDiscovery $optimizedDiscovery, OutputInterface $output): int
     {
-        $stats = $discovery->getStats();
+        $stats = $optimizedDiscovery->getStats();
 
         $output->writeln('');
         $output->writeln('🔍 <comment>Auto-Discovery Statistics</comment>');
@@ -240,10 +240,11 @@ HELP
                 } elseif (is_object($definition)) {
                     $implementation = $definition instanceof \ReflectionClass
                         ? $definition->getName()
-                        : get_class($definition);
+                        : $definition::class;
                 } else {
                     $implementation = gettype($definition);
                 }
+
                 $shortInterface = $this->shortenClassName($interface);
                 $shortImplementation = $this->shortenClassName($implementation);
 

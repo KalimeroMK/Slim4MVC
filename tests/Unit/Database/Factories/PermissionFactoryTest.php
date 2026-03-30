@@ -13,34 +13,34 @@ final class PermissionFactoryTest extends TestCase
     public function test_factory_creates_permission_with_default_attributes(): void
     {
         $permissionFactory = new PermissionFactory();
-        $model = $permissionFactory->create();
+        $permission = $permissionFactory->create();
 
-        $this->assertInstanceOf(Permission::class, $model);
-        $this->assertNotNull($model->id);
-        $this->assertNotNull($model->name);
-        $this->assertStringContainsString('-', (string) $model->name);
+        $this->assertInstanceOf(Permission::class, $permission);
+        $this->assertNotNull($permission->id);
+        $this->assertNotNull($permission->name);
+        $this->assertStringContainsString('-', (string) $permission->name);
     }
 
     public function test_factory_creates_permission_with_custom_attributes(): void
     {
         $permissionFactory = new PermissionFactory();
-        $model = $permissionFactory->create(['name' => 'custom-permission']);
+        $permission = $permissionFactory->create(['name' => 'custom-permission']);
 
-        $this->assertEquals('custom-permission', $model->name);
+        $this->assertEquals('custom-permission', $permission->name);
     }
 
     public function test_factory_with_name(): void
     {
         $permissionFactory = new PermissionFactory();
-        $model = $permissionFactory->withName('test-permission')->create();
+        $permission = $permissionFactory->withName('test-permission')->create();
 
-        $this->assertEquals('test-permission', $model->name);
+        $this->assertEquals('test-permission', $permission->name);
     }
 
     public function test_factory_creates_many_permissions(): void
     {
         $permissions = [];
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 4; ++$i) {
             $factory = new PermissionFactory();
             $permissions[] = $factory->withName('permission-'.uniqid())->create();
         }

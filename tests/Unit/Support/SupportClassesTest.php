@@ -11,7 +11,7 @@ use App\Modules\Core\Infrastructure\Support\Mailer;
 use App\Modules\Core\Infrastructure\Support\SessionHelper;
 use PHPUnit\Framework\TestCase;
 
-class SupportClassesTest extends TestCase
+final class SupportClassesTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -61,6 +61,6 @@ class SupportClassesTest extends TestCase
 
     public function test_auth_helper_csrf_token_returns_empty_string_when_not_set(): void
     {
-        $this->assertEquals('', AuthHelper::csrfToken());
+        $this->assertSame('', AuthHelper::csrfToken());
     }
 }

@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  * @covers \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator
  * @covers \App\Modules\Core\Infrastructure\Validation\ConfigurationException
  */
-class EnvironmentValidatorTest extends TestCase
+final class EnvironmentValidatorTest extends TestCase
 {
     private array $originalEnv;
 
@@ -247,17 +247,17 @@ class EnvironmentValidatorTest extends TestCase
     public function test_configuration_exception_getErrors(): void
     {
         $errors = ['Error 1', 'Error 2'];
-        $exception = new ConfigurationException($errors);
+        $configurationException = new ConfigurationException($errors);
 
-        $this->assertEquals($errors, $exception->getErrors());
+        $this->assertSame($errors, $configurationException->getErrors());
     }
 
     public function test_configuration_exception_getSummary(): void
     {
         $errors = ['JWT_SECRET is required'];
-        $exception = new ConfigurationException($errors);
+        $configurationException = new ConfigurationException($errors);
 
-        $summary = $exception->getSummary();
+        $summary = $configurationException->getSummary();
 
         $this->assertArrayHasKey('error', $summary);
         $this->assertArrayHasKey('message', $summary);
@@ -269,9 +269,9 @@ class EnvironmentValidatorTest extends TestCase
     public function test_configuration_exception_getDetailedMessage(): void
     {
         $errors = ['JWT_SECRET is required'];
-        $exception = new ConfigurationException($errors);
+        $configurationException = new ConfigurationException($errors);
 
-        $message = $exception->getDetailedMessage();
+        $message = $configurationException->getDetailedMessage();
 
         $this->assertStringContainsString('CONFIGURATION VALIDATION FAILED', $message);
         $this->assertStringContainsString('JWT_SECRET is required', $message);

@@ -73,10 +73,8 @@ class TestExcludeModel extends Model
 /**
  * @covers \App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations
  */
-class AutoEloquentRelationsTest extends TestCase
+final class AutoEloquentRelationsTest extends TestCase
 {
-    private Capsule $capsule;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -88,28 +86,28 @@ class AutoEloquentRelationsTest extends TestCase
         Model::unguard();
 
         // Setup in-memory SQLite database
-        $this->capsule = new Capsule;
-        $this->capsule->addConnection([
+        $manager = new Capsule;
+        $manager->addConnection([
             'driver' => 'sqlite',
             'database' => ':memory:',
         ]);
-        $this->capsule->setAsGlobal();
-        $this->capsule->bootEloquent();
+        $manager->setAsGlobal();
+        $manager->bootEloquent();
 
         // Create test tables
-        $this->capsule->schema()->create('test_models', function ($table) {
+        $manager->schema()->create('test_models', function ($table): void {
             $table->increments('id');
             $table->string('name')->nullable();
             $table->timestamps();
         });
 
-        $this->capsule->schema()->create('test_no_auto', function ($table) {
+        $manager->schema()->create('test_no_auto', function ($table): void {
             $table->increments('id');
             $table->string('name')->nullable();
             $table->timestamps();
         });
 
-        $this->capsule->schema()->create('test_children', function ($table) {
+        $manager->schema()->create('test_children', function ($table): void {
             $table->increments('id');
             $table->unsignedInteger('parent_id');
             $table->string('name')->nullable();
@@ -252,7 +250,7 @@ class AutoEloquentRelationsTest extends TestCase
     {
         $relations = TestAutoLoadModel::getAutoLoadableRelations();
 
-        $this->assertEquals(['children'], $relations);
+        $this->assertSame(['children'], $relations);
     }
 
     public function testGetAutoLoadableRelationsReturnsEmptyWhenNoAutoWith(): void

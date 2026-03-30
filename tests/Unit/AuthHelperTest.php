@@ -72,7 +72,7 @@ final class AuthHelperTest extends TestCase
     {
         $_SESSION['user_id'] = 123;
 
-        $this->assertEquals(123, AuthHelper::id());
+        $this->assertSame(123, AuthHelper::id());
     }
 
     public function test_set_user_stores_user_data_in_session(): void
@@ -100,9 +100,9 @@ final class AuthHelperTest extends TestCase
 
         AuthHelper::logout();
 
-        $this->assertFalse(isset($_SESSION['user_id']));
-        $this->assertFalse(isset($_SESSION['user_name']));
-        $this->assertFalse(isset($_SESSION['user_email']));
+        $this->assertArrayNotHasKey('user_id', $_SESSION);
+        $this->assertArrayNotHasKey('user_name', $_SESSION);
+        $this->assertArrayNotHasKey('user_email', $_SESSION);
         $this->assertTrue(AuthHelper::guest());
     }
 

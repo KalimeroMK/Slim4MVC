@@ -11,7 +11,7 @@ use App\Modules\Role\Infrastructure\Providers\RoleServiceProvider;
 use App\Modules\User\Infrastructure\Providers\UserServiceProvider;
 use PHPUnit\Framework\TestCase;
 
-class ServiceProvidersTest extends TestCase
+final class ServiceProvidersTest extends TestCase
 {
     public function test_auth_service_provider_exists(): void
     {

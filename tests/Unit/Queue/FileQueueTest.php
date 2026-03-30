@@ -37,7 +37,7 @@ final class FileQueueTest extends TestCase
 
         $this->fileQueue->push($sendEmailJob);
 
-        $this->assertEquals(1, $this->fileQueue->size());
+        $this->assertSame(1, $this->fileQueue->size());
     }
 
     public function test_pop_removes_job_from_queue(): void
@@ -45,30 +45,30 @@ final class FileQueueTest extends TestCase
         $sendEmailJob = new SendEmailJob('test@example.com', 'Test', 'email.test', []);
 
         $this->fileQueue->push($sendEmailJob);
-        $this->assertEquals(1, $this->fileQueue->size());
+        $this->assertSame(1, $this->fileQueue->size());
 
         $poppedJob = $this->fileQueue->pop();
 
         $this->assertInstanceOf(SendEmailJob::class, $poppedJob);
-        $this->assertEquals(0, $this->fileQueue->size());
+        $this->assertSame(0, $this->fileQueue->size());
     }
 
     public function test_pop_returns_null_when_queue_is_empty(): void
     {
         $job = $this->fileQueue->pop();
 
-        $this->assertNull($job);
+        $this->assertNotInstanceOf(\App\Modules\Core\Infrastructure\Jobs\Job::class, $job);
     }
 
     public function test_size_returns_correct_count(): void
     {
-        $this->assertEquals(0, $this->fileQueue->size());
+        $this->assertSame(0, $this->fileQueue->size());
 
         $this->fileQueue->push(new SendEmailJob('test1@example.com', 'Test 1', 'email.test', []));
-        $this->assertEquals(1, $this->fileQueue->size());
+        $this->assertSame(1, $this->fileQueue->size());
 
         $this->fileQueue->push(new SendEmailJob('test2@example.com', 'Test 2', 'email.test', []));
-        $this->assertEquals(2, $this->fileQueue->size());
+        $this->assertSame(2, $this->fileQueue->size());
     }
 
     public function test_clear_removes_all_jobs(): void
@@ -76,11 +76,11 @@ final class FileQueueTest extends TestCase
         $this->fileQueue->push(new SendEmailJob('test1@example.com', 'Test 1', 'email.test', []));
         $this->fileQueue->push(new SendEmailJob('test2@example.com', 'Test 2', 'email.test', []));
 
-        $this->assertEquals(2, $this->fileQueue->size());
+        $this->assertSame(2, $this->fileQueue->size());
 
         $this->fileQueue->clear();
 
-        $this->assertEquals(0, $this->fileQueue->size());
+        $this->assertSame(0, $this->fileQueue->size());
     }
 
     public function test_jobs_are_processed_in_fifo_order(): void

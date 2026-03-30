@@ -24,11 +24,11 @@ final class CreateUserActionTest extends TestCase
     public function test_execute_creates_user_with_hashed_password(): void
     {
         $createUserDTO = new CreateUserDTO('Test User', 'test@example.com', 'password123');
-        $result = $this->createUserAction->execute($createUserDTO);
+        $user = $this->createUserAction->execute($createUserDTO);
 
-        $this->assertInstanceOf(User::class, $result);
-        $this->assertEquals('Test User', $result->name);
-        $this->assertEquals('test@example.com', $result->email);
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertEquals('Test User', $user->name);
+        $this->assertEquals('test@example.com', $user->email);
     }
 
     public function test_execute_hashes_password_correctly(): void
@@ -37,7 +37,7 @@ final class CreateUserActionTest extends TestCase
         $this->createUserAction->execute($createUserDTO);
 
         $user = User::where('email', 'test@example.com')->first();
-        $this->assertNotNull($user);
+        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $user);
         $this->assertTrue(password_verify('password123', (string) $user->password));
     }
 

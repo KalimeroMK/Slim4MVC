@@ -34,7 +34,7 @@ final class RoleRepositoryTest extends TestCase
 
         $found = $this->roleRepository->find($role->id);
 
-        $this->assertNotNull($found);
+        $this->assertInstanceOf(\App\Modules\Role\Infrastructure\Models\Role::class, $found);
         $this->assertEquals($role->id, $found->id);
         $this->assertEquals('Test Role', $found->name);
     }
@@ -74,7 +74,7 @@ final class RoleRepositoryTest extends TestCase
 
         $found = $this->roleRepository->findByName('Find Me');
 
-        $this->assertNotNull($found);
+        $this->assertInstanceOf(\App\Modules\Role\Infrastructure\Models\Role::class, $found);
         $this->assertEquals($role->id, $found->id);
     }
 
@@ -82,6 +82,6 @@ final class RoleRepositoryTest extends TestCase
     {
         $found = $this->roleRepository->findByName('Nonexistent');
 
-        $this->assertNull($found);
+        $this->assertNotInstanceOf(\App\Modules\Role\Infrastructure\Models\Role::class, $found);
     }
 }

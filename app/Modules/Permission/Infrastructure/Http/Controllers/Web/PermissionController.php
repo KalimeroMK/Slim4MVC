@@ -104,6 +104,7 @@ class PermissionController extends Controller
             if (Permission::where('name', $data['name'])->where('id', '!=', $id)->exists()) {
                 throw new RuntimeException('Permission name already taken');
             }
+
             $permission->name = $data['name'];
             $permission->save();
         }

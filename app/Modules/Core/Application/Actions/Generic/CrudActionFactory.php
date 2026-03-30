@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class CrudActionFactory
+final readonly class CrudActionFactory
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository
+        private Repository $repository
     ) {}
 
     /**
@@ -41,10 +41,7 @@ final class CrudActionFactory
      */
     public function create(): GenericCreateAction
     {
-        /** @var GenericCreateAction<TModel> $action */
-        $action = new GenericCreateAction($this->repository);
-
-        return $action;
+        return new GenericCreateAction($this->repository);
     }
 
     /**
@@ -52,10 +49,7 @@ final class CrudActionFactory
      */
     public function update(): GenericUpdateAction
     {
-        /** @var GenericUpdateAction<TModel> $action */
-        $action = new GenericUpdateAction($this->repository);
-
-        return $action;
+        return new GenericUpdateAction($this->repository);
     }
 
     /**
@@ -63,10 +57,7 @@ final class CrudActionFactory
      */
     public function delete(): GenericDeleteAction
     {
-        /** @var GenericDeleteAction<TModel> $action */
-        $action = new GenericDeleteAction($this->repository);
-
-        return $action;
+        return new GenericDeleteAction($this->repository);
     }
 
     /**
@@ -74,10 +65,7 @@ final class CrudActionFactory
      */
     public function get(): GenericGetAction
     {
-        /** @var GenericGetAction<TModel> $action */
-        $action = new GenericGetAction($this->repository);
-
-        return $action;
+        return new GenericGetAction($this->repository);
     }
 
     /**
@@ -85,10 +73,7 @@ final class CrudActionFactory
      */
     public function list(): GenericListAction
     {
-        /** @var GenericListAction<TModel> $action */
-        $action = new GenericListAction($this->repository);
-
-        return $action;
+        return new GenericListAction($this->repository);
     }
 
     /**

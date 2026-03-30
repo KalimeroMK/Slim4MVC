@@ -7,7 +7,7 @@ namespace Tests\Unit\Policies;
 use App\Modules\Core\Infrastructure\Policies\Policy;
 use PHPUnit\Framework\TestCase;
 
-class PolicyTest extends TestCase
+final class PolicyTest extends TestCase
 {
     public function test_policy_class_exists(): void
     {

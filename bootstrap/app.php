@@ -17,6 +17,7 @@ if (file_exists(__DIR__.'/../.env')) {
     $dotenv = Dotenv::createUnsafeImmutable(__DIR__.'/..');
     $dotenv->safeLoad();
 }
+
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Validation\Factory;
 use Slim\Factory\AppFactory;
@@ -28,25 +29,25 @@ use Symfony\Component\HttpFoundation\Session\Storage\NativeSessionStorage;
 // ═════════════════════════════════════════════════════════════════════════════
 try {
     EnvironmentValidator::validate();
-} catch (ConfigurationException $e) {
+} catch (ConfigurationException $configurationException) {
     $isCli = PHP_SAPI === 'cli';
 
     if ($isCli) {
         // CLI output - detailed error message
-        echo "\n" . $e->getDetailedMessage() . "\n\n";
+        echo "\n" . $configurationException->getDetailedMessage() . "\n\n";
         exit(1);
     }
 
     // HTTP output - JSON error response
     http_response_code(500);
     header('Content-Type: application/json');
-    echo json_encode($e->getSummary(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    echo json_encode($configurationException->getSummary(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     exit(1);
 }
 
 // Check for warnings (non-critical issues)
 $warnings = EnvironmentValidator::getWarnings();
-if (!empty($warnings) && ($_ENV['APP_ENV'] ?? 'production') === 'local') {
+if ($warnings !== [] && ($_ENV['APP_ENV'] ?? 'production') === 'local') {
     error_log('Environment warnings: ' . implode(', ', $warnings));
 }
 

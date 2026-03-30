@@ -9,93 +9,94 @@ use PHPUnit\Framework\TestCase;
 
 final class CookieHelperTest extends TestCase
 {
-    private CookieHelper $helper;
+    private CookieHelper $cookieHelper;
 
     protected function setUp(): void
     {
         parent::setUp();
         $_ENV['APP_KEY'] = 'test-secret-key-32-chars-long!!';
         $_ENV['COOKIE_ENCRYPT'] = 'false';
-        $this->helper = new CookieHelper(encryptionEnabled: false);
+        $this->cookieHelper = new CookieHelper(encryptionEnabled: false);
     }
 
     protected function tearDown(): void
     {
         // Clean up test cookies
-        foreach ($_COOKIE as $name => $value) {
+        foreach (array_keys($_COOKIE) as $name) {
             unset($_COOKIE[$name]);
         }
+
         parent::tearDown();
     }
 
     public function test_singleton_instance(): void
     {
-        $instance1 = CookieHelper::getInstance();
+        $cookieHelper = CookieHelper::getInstance();
         $instance2 = CookieHelper::getInstance();
 
-        $this->assertSame($instance1, $instance2);
+        $this->assertSame($cookieHelper, $instance2);
     }
 
     public function test_set_and_get_cookie(): void
     {
-        $this->helper->set('test_key', 'test_value', 3600);
+        $this->cookieHelper->set('test_key', 'test_value', 3600);
 
-        $this->assertEquals('test_value', $this->helper->get('test_key'));
+        $this->assertEquals('test_value', $this->cookieHelper->get('test_key'));
     }
 
     public function test_get_returns_default_for_missing_cookie(): void
     {
-        $this->assertNull($this->helper->get('nonexistent'));
-        $this->assertEquals('default', $this->helper->get('nonexistent', 'default'));
+        $this->assertNull($this->cookieHelper->get('nonexistent'));
+        $this->assertEquals('default', $this->cookieHelper->get('nonexistent', 'default'));
     }
 
     public function test_has_cookie(): void
     {
-        $this->assertFalse($this->helper->has('test_key'));
+        $this->assertFalse($this->cookieHelper->has('test_key'));
 
-        $this->helper->set('test_key', 'value');
+        $this->cookieHelper->set('test_key', 'value');
 
-        $this->assertTrue($this->helper->has('test_key'));
+        $this->assertTrue($this->cookieHelper->has('test_key'));
     }
 
     public function test_delete_cookie(): void
     {
-        $this->helper->set('test_key', 'value');
-        $this->assertTrue($this->helper->has('test_key'));
+        $this->cookieHelper->set('test_key', 'value');
+        $this->assertTrue($this->cookieHelper->has('test_key'));
 
-        $this->helper->delete('test_key');
+        $this->cookieHelper->delete('test_key');
 
-        $this->assertFalse($this->helper->has('test_key'));
-        $this->assertNull($this->helper->get('test_key'));
+        $this->assertFalse($this->cookieHelper->has('test_key'));
+        $this->assertNull($this->cookieHelper->get('test_key'));
     }
 
     public function test_delete_multiple_cookies(): void
     {
-        $this->helper->set('key1', 'value1');
-        $this->helper->set('key2', 'value2');
-        $this->helper->set('key3', 'value3');
+        $this->cookieHelper->set('key1', 'value1');
+        $this->cookieHelper->set('key2', 'value2');
+        $this->cookieHelper->set('key3', 'value3');
 
-        $this->helper->deleteMultiple(['key1', 'key2']);
+        $this->cookieHelper->deleteMultiple(['key1', 'key2']);
 
-        $this->assertFalse($this->helper->has('key1'));
-        $this->assertFalse($this->helper->has('key2'));
-        $this->assertTrue($this->helper->has('key3'));
+        $this->assertFalse($this->cookieHelper->has('key1'));
+        $this->assertFalse($this->cookieHelper->has('key2'));
+        $this->assertTrue($this->cookieHelper->has('key3'));
     }
 
     public function test_forever_cookie(): void
     {
-        $this->helper->forever('remember_me', 'user123');
+        $this->cookieHelper->forever('remember_me', 'user123');
 
-        $this->assertEquals('user123', $this->helper->get('remember_me'));
-        $this->assertTrue($this->helper->has('remember_me'));
+        $this->assertEquals('user123', $this->cookieHelper->get('remember_me'));
+        $this->assertTrue($this->cookieHelper->has('remember_me'));
     }
 
     public function test_get_all_cookies(): void
     {
-        $this->helper->set('key1', 'value1');
-        $this->helper->set('key2', 'value2');
+        $this->cookieHelper->set('key1', 'value1');
+        $this->cookieHelper->set('key2', 'value2');
 
-        $all = $this->helper->all();
+        $all = $this->cookieHelper->all();
 
         $this->assertArrayHasKey('key1', $all);
         $this->assertArrayHasKey('key2', $all);
@@ -105,7 +106,7 @@ final class CookieHelperTest extends TestCase
 
     public function test_make_cookie_for_slim_response(): void
     {
-        $cookie = $this->helper->make('test', 'value', 3600);
+        $cookie = $this->cookieHelper->make('test', 'value', 3600);
 
         $this->assertArrayHasKey('value', $cookie);
         $this->assertArrayHasKey('expires', $cookie);
@@ -123,9 +124,9 @@ final class CookieHelperTest extends TestCase
     public function test_store_array_value(): void
     {
         $data = ['user_id' => 123, 'role' => 'admin'];
-        $this->helper->set('user_data', $data);
+        $this->cookieHelper->set('user_data', $data);
 
-        $retrieved = $this->helper->get('user_data');
+        $retrieved = $this->cookieHelper->get('user_data');
 
         $this->assertEquals($data, $retrieved);
     }
@@ -136,8 +137,8 @@ final class CookieHelperTest extends TestCase
         $obj->name = 'Test';
         $obj->value = 123;
 
-        $this->helper->set('test_obj', $obj);
-        $retrieved = $this->helper->get('test_obj');
+        $this->cookieHelper->set('test_obj', $obj);
+        $retrieved = $this->cookieHelper->get('test_obj');
 
         $this->assertEquals($obj, $retrieved);
     }
@@ -156,67 +157,67 @@ final class CookieHelperTest extends TestCase
         $_ENV['COOKIE_ENCRYPT'] = 'false';
         $callCount = 0;
 
-        $result1 = cookie_remember('remember_test', 3600, function () use (&$callCount) {
-            $callCount++;
+        $result1 = cookie_remember('remember_test', 3600, function () use (&$callCount): string {
+            ++$callCount;
             return 'computed_value';
         });
 
-        $this->assertEquals(1, $callCount);
+        $this->assertSame(1, $callCount);
         $this->assertEquals('computed_value', $result1);
 
         // Second call should use cached value
-        $result2 = cookie_remember('remember_test', 3600, function () use (&$callCount) {
-            $callCount++;
+        $result2 = cookie_remember('remember_test', 3600, function () use (&$callCount): string {
+            ++$callCount;
             return 'new_value';
         });
 
-        $this->assertEquals(1, $callCount);
+        $this->assertSame(1, $callCount);
         $this->assertEquals('computed_value', $result2);
     }
 
     public function test_encryption_enabled(): void
     {
-        $encryptedHelper = new CookieHelper(
+        $cookieHelper = new CookieHelper(
             secret: 'test-secret-key-32-chars-long!!',
             encryptionEnabled: true
         );
 
-        $this->assertTrue($encryptedHelper->isEncryptionEnabled());
+        $this->assertTrue($cookieHelper->isEncryptionEnabled());
 
         // Test encryption via make() which doesn't use setcookie
-        $cookie = $encryptedHelper->make('secret', 'my-secret-data', 3600);
+        $cookie = $cookieHelper->make('secret', 'my-secret-data', 3600);
         
         // Set the cookie manually in $_COOKIE
         $_COOKIE['secret'] = $cookie['value'];
         
-        $value = $encryptedHelper->get('secret');
+        $value = $cookieHelper->get('secret');
 
         $this->assertEquals('my-secret-data', $value);
     }
 
     public function test_encryption_disable_enable(): void
     {
-        $helper = new CookieHelper(secret: 'test-key', encryptionEnabled: true);
+        $cookieHelper = new CookieHelper(secret: 'test-key', encryptionEnabled: true);
 
-        $this->assertTrue($helper->isEncryptionEnabled());
+        $this->assertTrue($cookieHelper->isEncryptionEnabled());
 
-        $helper->disableEncryption();
-        $this->assertFalse($helper->isEncryptionEnabled());
+        $cookieHelper->disableEncryption();
+        $this->assertFalse($cookieHelper->isEncryptionEnabled());
 
-        $helper->enableEncryption();
-        $this->assertTrue($helper->isEncryptionEnabled());
+        $cookieHelper->enableEncryption();
+        $this->assertTrue($cookieHelper->isEncryptionEnabled());
     }
 
     public function test_custom_cookie_options(): void
     {
-        $helper = new CookieHelper(
+        $cookieHelper = new CookieHelper(
             defaultPath: '/admin',
             defaultSecure: true,
             defaultHttpOnly: true,
             sameSite: 'Strict'
         );
 
-        $cookie = $helper->make('test', 'value');
+        $cookie = $cookieHelper->make('test', 'value');
 
         $this->assertEquals('/admin', $cookie['path']);
         $this->assertTrue($cookie['secure']);
@@ -226,7 +227,7 @@ final class CookieHelperTest extends TestCase
 
     public function test_session_cookie_no_expires(): void
     {
-        $cookie = $this->helper->make('session', 'value', null);
+        $cookie = $this->cookieHelper->make('session', 'value', null);
 
         $this->assertEquals(0, $cookie['expires']);
     }

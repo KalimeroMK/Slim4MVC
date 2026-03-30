@@ -29,8 +29,10 @@ final readonly class UpdateUserAction implements UpdateUserActionInterface
             $attributes['email'] = $updateUserDTO->email;
         }
 
-        $user = $this->userRepository->update($updateUserDTO->id, $attributes);
+        if ($updateUserDTO->password !== null) {
+            $attributes['password'] = password_hash($updateUserDTO->password, PASSWORD_BCRYPT);
+        }
 
-        return $user;
+        return $this->userRepository->update($updateUserDTO->id, $attributes);
     }
 }

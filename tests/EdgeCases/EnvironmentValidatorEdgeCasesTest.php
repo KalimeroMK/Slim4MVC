@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  * 
  * @group edge-case
  */
-class EnvironmentValidatorEdgeCasesTest extends TestCase
+final class EnvironmentValidatorEdgeCasesTest extends TestCase
 {
     private array $originalEnv;
 

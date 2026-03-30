@@ -12,8 +12,9 @@ namespace App\Modules\Core\Infrastructure\Validation;
  */
 final class EnvironmentValidator
 {
-    private const MIN_JWT_SECRET_LENGTH = 32;
-    private const VALID_ENVIRONMENTS = ['local', 'development', 'testing', 'staging', 'production'];
+    private const int MIN_JWT_SECRET_LENGTH = 32;
+
+    private const array VALID_ENVIRONMENTS = ['local', 'development', 'testing', 'staging', 'production'];
 
     /**
      * Validation rules configuration.
@@ -61,19 +62,19 @@ final class EnvironmentValidator
             $value = $_ENV[$key] ?? null;
 
             if (($rules['required'] ?? false) && self::isEmpty($value)) {
-                $errors[] = "{$key} is required but not set";
+                $errors[] = $key . ' is required but not set';
                 continue;
             }
 
             if (!self::isEmpty($value)) {
                 // Check minimum length
                 if (isset($rules['min_length']) && strlen((string) $value) < $rules['min_length']) {
-                    $errors[] = "{$key} must be at least {$rules['min_length']} characters (current: " . strlen((string) $value) . ')';
+                    $errors[] = sprintf('%s must be at least %s characters (current: ', $key, $rules['min_length']) . strlen((string) $value) . ')';
                 }
 
                 // Check allowed values
                 if (isset($rules['allowed_values']) && !in_array($value, $rules['allowed_values'], true)) {
-                    $errors[] = "{$key} must be one of: " . implode(', ', $rules['allowed_values']) . " (got: {$value})";
+                    $errors[] = $key . ' must be one of: ' . implode(', ', $rules['allowed_values']) . sprintf(' (got: %s)', $value);
                 }
             }
         }
@@ -85,7 +86,7 @@ final class EnvironmentValidator
                 $value = $_ENV[$key] ?? null;
 
                 if (($rules['required'] ?? false) && self::isEmpty($value)) {
-                    $errors[] = "{$key} is required in production environment";
+                    $errors[] = $key . ' is required in production environment';
                 }
             }
 
@@ -98,14 +99,14 @@ final class EnvironmentValidator
         // JWT Secret warnings
         $jwtSecret = $_ENV['JWT_SECRET'] ?? '';
         if (!self::isEmpty($jwtSecret)) {
-            $length = strlen($jwtSecret);
+            $length = strlen((string) $jwtSecret);
             $minLength = $config['warnings']['JWT_SECRET_LENGTH'] ?? self::MIN_JWT_SECRET_LENGTH;
 
             if ($length < $minLength) {
-                $warnings[] = "JWT_SECRET is only {$length} characters. Recommended: at least {$minLength} characters";
+                $warnings[] = sprintf('JWT_SECRET is only %d characters. Recommended: at least %s characters', $length, $minLength);
             }
 
-            if (preg_match('/^[a-zA-Z]+$/', $jwtSecret)) {
+            if (preg_match('/^[a-zA-Z]+$/', (string) $jwtSecret)) {
                 $warnings[] = 'JWT_SECRET should contain numbers and special characters for better security';
             }
 
@@ -115,12 +116,12 @@ final class EnvironmentValidator
         }
 
         // Store warnings for later retrieval
-        if (!empty($warnings)) {
+        if ($warnings !== []) {
             $_ENV['_VALIDATION_WARNINGS'] = json_encode($warnings);
         }
 
         // Throw if critical errors found
-        if (!empty($errors)) {
+        if ($errors !== []) {
             throw new ConfigurationException($errors);
         }
     }
@@ -151,7 +152,7 @@ final class EnvironmentValidator
             'environment' => $_ENV['APP_ENV'] ?? 'not set',
             'is_production' => $isProduction,
             'jwt_configured' => !self::isEmpty($jwtSecret),
-            'jwt_secret_length' => strlen($jwtSecret),
+            'jwt_secret_length' => strlen((string) $jwtSecret),
             'db_connection' => $_ENV['DB_CONNECTION'] ?? 'not set',
             'db_configured' => !self::isEmpty($_ENV['DB_HOST'] ?? null),
             'cache_driver' => $_ENV['CACHE_DRIVER'] ?? 'not set',
@@ -208,7 +209,7 @@ final class EnvironmentValidator
     public static function required(string $key): void
     {
         if (self::isEmpty($_ENV[$key] ?? null)) {
-            throw new ConfigurationException(["{$key} is required but not set"]);
+            throw new ConfigurationException([$key . ' is required but not set']);
         }
     }
 }

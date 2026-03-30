@@ -24,6 +24,7 @@ class CheckPermissionMiddleware
         if (! is_array($permissions)) {
             $permissions = [$permissions];
         }
+
         $hasPermission = array_any($permissions, fn ($permission): bool => $user && $user->hasPermission($permission));
 
         if (! $hasPermission) {

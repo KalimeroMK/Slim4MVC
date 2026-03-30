@@ -30,7 +30,7 @@ final readonly class LoginAction implements LoginActionInterface
     {
         $user = $this->userRepository->findByEmail($loginDTO->email);
 
-        if (! $user || ! password_verify($loginDTO->password, (string) $user->password)) {
+        if (! $user instanceof \App\Modules\User\Infrastructure\Models\User || ! password_verify($loginDTO->password, (string) $user->password)) {
             throw new InvalidCredentialsException('Invalid credentials');
         }
 

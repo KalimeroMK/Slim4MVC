@@ -10,9 +10,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \App\Modules\Core\Infrastructure\DI\OptimizedDiscovery
  */
-class OptimizedDiscoveryTest extends TestCase
+final class OptimizedDiscoveryTest extends TestCase
 {
     private string $cacheFile;
+
     private array $originalEnv;
 
     protected function setUp(): void
@@ -41,8 +42,8 @@ class OptimizedDiscoveryTest extends TestCase
 
     public function test_buildDefinitions_returns_array(): void
     {
-        $discovery = new OptimizedDiscovery();
-        $definitions = $discovery->buildDefinitions();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $definitions = $optimizedDiscovery->buildDefinitions();
 
         $this->assertIsArray($definitions);
     }
@@ -51,8 +52,8 @@ class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $discovery = new OptimizedDiscovery();
-        $discovery->buildDefinitions();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery->buildDefinitions();
 
         $this->assertFileExists($this->cacheFile);
     }
@@ -61,8 +62,8 @@ class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $discovery = new OptimizedDiscovery();
-        $this->assertFalse($discovery->shouldUseCache());
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
     public function test_shouldUseCache_returns_true_when_cache_exists_in_production(): void
@@ -72,8 +73,8 @@ class OptimizedDiscoveryTest extends TestCase
         // Create cache file
         file_put_contents($this->cacheFile, '<?php return [];');
 
-        $discovery = new OptimizedDiscovery();
-        $this->assertTrue($discovery->shouldUseCache());
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $this->assertTrue($optimizedDiscovery->shouldUseCache());
     }
 
     public function test_shouldUseCache_returns_false_for_expired_cache_in_development(): void
@@ -84,14 +85,14 @@ class OptimizedDiscoveryTest extends TestCase
         file_put_contents($this->cacheFile, '<?php return [];');
         touch($this->cacheFile, time() - 7200); // 2 hours ago
 
-        $discovery = new OptimizedDiscovery();
-        $this->assertFalse($discovery->shouldUseCache());
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
     public function test_warmCache_returns_stats(): void
     {
-        $discovery = new OptimizedDiscovery();
-        $result = $discovery->warmCache();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $result = $optimizedDiscovery->warmCache();
 
         $this->assertArrayHasKey('count', $result);
         $this->assertArrayHasKey('duration', $result);
@@ -106,8 +107,8 @@ class OptimizedDiscoveryTest extends TestCase
         file_put_contents($this->cacheFile, '<?php return [];');
         $this->assertFileExists($this->cacheFile);
 
-        $discovery = new OptimizedDiscovery();
-        $result = $discovery->clearCache();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $result = $optimizedDiscovery->clearCache();
 
         $this->assertTrue($result);
         $this->assertFileDoesNotExist($this->cacheFile);
@@ -117,16 +118,16 @@ class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $discovery = new OptimizedDiscovery();
-        $result = $discovery->clearCache();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $result = $optimizedDiscovery->clearCache();
 
         $this->assertFalse($result);
     }
 
     public function test_getStats_returns_expected_structure(): void
     {
-        $discovery = new OptimizedDiscovery();
-        $stats = $discovery->getStats();
+        $optimizedDiscovery = new OptimizedDiscovery();
+        $stats = $optimizedDiscovery->getStats();
 
         $this->assertArrayHasKey('total_bindings', $stats);
         $this->assertArrayHasKey('cache_enabled', $stats);
@@ -146,10 +147,10 @@ class OptimizedDiscoveryTest extends TestCase
 
     public function test_cached_definitions_is_array(): void
     {
-        $discovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery();
 
         // Build definitions (creates cache)
-        $discovery->buildDefinitions();
+        $optimizedDiscovery->buildDefinitions();
 
         // Get cached definitions
         $cachedDefinitions = require $this->cacheFile;

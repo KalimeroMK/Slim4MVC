@@ -69,14 +69,14 @@ abstract class GenericCrudController extends Controller
      */
     protected int $defaultPerPage = 15;
 
-    private CrudActionFactory $actionFactory;
+    private CrudActionFactory $crudActionFactory;
 
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
 
         // Initialize action factory
-        $this->actionFactory = CrudActionFactory::for($this->repositoryClass);
+        $this->crudActionFactory = CrudActionFactory::for($this->repositoryClass);
     }
 
     /**
@@ -84,16 +84,16 @@ abstract class GenericCrudController extends Controller
      */
     public function index(Request $request, Response $response): Response
     {
-        $params = $this->getPaginationParams($this->defaultPerPage);
+        $params = $this->getPaginationParams();
 
-        if (!empty($this->defaultRelations)) {
-            $result = $this->actionFactory->list()->executeWith(
+        if ($this->defaultRelations !== []) {
+            $result = $this->crudActionFactory->list()->executeWith(
                 $this->defaultRelations,
                 $params['page'],
                 $params['perPage']
             );
         } else {
-            $result = $this->actionFactory->list()->execute(
+            $result = $this->crudActionFactory->list()->execute(
                 $params['page'],
                 $params['perPage']
             );
@@ -104,11 +104,11 @@ abstract class GenericCrudController extends Controller
             : $result['items'];
 
         return ApiResponse::paginated(
-            items: $items,
             total: $result['total'],
             page: $result['page'],
             perPage: $result['perPage'],
-            baseUrl: $this->getPaginationBaseUrl()
+            baseUrl: $this->getPaginationBaseUrl(),
+            items: $items
         );
     }
 
@@ -123,10 +123,10 @@ abstract class GenericCrudController extends Controller
             return ApiResponse::error('ID is required', 400);
         }
 
-        if (!empty($this->defaultRelations)) {
-            $model = $this->actionFactory->get()->executeWith($id, $this->defaultRelations);
+        if ($this->defaultRelations !== []) {
+            $model = $this->crudActionFactory->get()->executeWith($id, $this->defaultRelations);
         } else {
-            $model = $this->actionFactory->get()->execute($id);
+            $model = $this->crudActionFactory->get()->execute($id);
         }
 
         $data = $this->resourceClass
@@ -144,14 +144,14 @@ abstract class GenericCrudController extends Controller
         $data = $request->getParsedBody() ?? [];
 
         // Filter to fillable fields if specified
-        if (!empty($this->fillable)) {
+        if ($this->fillable !== []) {
             $data = array_intersect_key($data, array_flip($this->fillable));
         }
 
-        $model = $this->actionFactory->create()->execute($data);
+        $model = $this->crudActionFactory->create()->execute($data);
 
         // Load default relations if specified
-        if (!empty($this->defaultRelations)) {
+        if ($this->defaultRelations !== []) {
             $model->load($this->defaultRelations);
         }
 
@@ -176,14 +176,14 @@ abstract class GenericCrudController extends Controller
         $data = $request->getParsedBody() ?? [];
 
         // Filter to fillable fields if specified
-        if (!empty($this->fillable)) {
+        if ($this->fillable !== []) {
             $data = array_intersect_key($data, array_flip($this->fillable));
         }
 
-        $model = $this->actionFactory->update()->execute($id, $data);
+        $model = $this->crudActionFactory->update()->execute($id, $data);
 
         // Load default relations if specified
-        if (!empty($this->defaultRelations)) {
+        if ($this->defaultRelations !== []) {
             $model->load($this->defaultRelations);
         }
 
@@ -205,7 +205,7 @@ abstract class GenericCrudController extends Controller
             return ApiResponse::error('ID is required', 400);
         }
 
-        $this->actionFactory->delete()->execute($id);
+        $this->crudActionFactory->delete()->execute($id);
 
         return ApiResponse::success(null, 204);
     }
@@ -215,7 +215,7 @@ abstract class GenericCrudController extends Controller
      */
     protected function actions(): CrudActionFactory
     {
-        return $this->actionFactory;
+        return $this->crudActionFactory;
     }
 
     /**
@@ -225,6 +225,6 @@ abstract class GenericCrudController extends Controller
      */
     protected function repository(): Repository
     {
-        return $this->actionFactory->getRepository();
+        return $this->crudActionFactory->getRepository();
     }
 }

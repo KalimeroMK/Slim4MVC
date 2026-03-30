@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
  * 
  * @group edge-case
  */
-class JwtServiceEdgeCasesTest extends TestCase
+final class JwtServiceEdgeCasesTest extends TestCase
 {
     private string $validSecret;
 
@@ -26,10 +26,10 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_zero_user_id(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: 0);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: 0);
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertEquals('0', $payload->sub);
     }
 
@@ -37,10 +37,10 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_negative_user_id(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: -1);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: -1);
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertEquals('-1', $payload->sub);
     }
 
@@ -48,10 +48,10 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_empty_claims_array(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: 1, claims: []);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: 1, claims: []);
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertEquals('1', $payload->sub);
     }
 
@@ -59,13 +59,13 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_unicode_in_claims(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: 1, claims: [
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
             'message' => 'Hello 世界 🌍',
             'name' => 'José García'
         ]);
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertEquals('Hello 世界 🌍', $payload->message);
         $this->assertEquals('José García', $payload->name);
     }
@@ -74,10 +74,10 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_very_large_ttl(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: 1, ttl: 31536000); // 1 year
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: 1, ttl: 31536000); // 1 year
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertGreaterThan(time() + 30000000, $payload->exp);
     }
 
@@ -85,21 +85,21 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_array_claims(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
-        $token = $service->generateAccessToken(userId: 1, claims: [
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
+        $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
             'roles' => ['admin', 'user', 'editor'],
             'permissions' => ['read', 'write', 'delete']
         ]);
 
-        $payload = $service->decode($token);
-        $this->assertEquals(['admin', 'user', 'editor'], (array) $payload->roles);
+        $payload = $advancedJwtService->decode($token);
+        $this->assertSame(['admin', 'user', 'editor'], (array) $payload->roles);
     }
 
     /**
      */
     public function test_it_rejects_base64_garbage(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
 
         $garbageTokens = [
             '!!!.!!!.!!!',
@@ -107,8 +107,8 @@ class JwtServiceEdgeCasesTest extends TestCase
             str_repeat('=', 100),
         ];
 
-        foreach ($garbageTokens as $token) {
-            $this->assertFalse($service->verify($token), "Token should be invalid: {$token}");
+        foreach ($garbageTokens as $garbageToken) {
+            $this->assertFalse($advancedJwtService->verify($garbageToken), 'Token should be invalid: ' . $garbageToken);
         }
     }
 
@@ -116,11 +116,11 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_concurrent_token_generation(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $tokens = [];
 
-        for ($i = 0; $i < 100; $i++) {
-            $tokens[] = $service->generateAccessToken(userId: $i);
+        for ($i = 0; $i < 100; ++$i) {
+            $tokens[] = $advancedJwtService->generateAccessToken(userId: $i);
         }
 
         // All should be unique
@@ -128,7 +128,7 @@ class JwtServiceEdgeCasesTest extends TestCase
 
         // All should be valid
         foreach ($tokens as $token) {
-            $this->assertTrue($service->verify($token));
+            $this->assertTrue($advancedJwtService->verify($token));
         }
     }
 
@@ -136,14 +136,14 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_handles_very_long_claim_values(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $longValue = str_repeat('a', 10000);
 
-        $token = $service->generateAccessToken(userId: 1, claims: [
+        $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
             'long_value' => $longValue
         ]);
 
-        $payload = $service->decode($token);
+        $payload = $advancedJwtService->decode($token);
         $this->assertEquals($longValue, $payload->long_value);
     }
 
@@ -161,12 +161,12 @@ class JwtServiceEdgeCasesTest extends TestCase
      */
     public function test_it_gets_info_for_malformed_tokens(): void
     {
-        $service = new AdvancedJwtService($this->validSecret);
+        $advancedJwtService = new AdvancedJwtService($this->validSecret);
 
         $malformedTokens = ['', 'just-one-part', 'part.one'];
 
-        foreach ($malformedTokens as $token) {
-            $info = $service->getTokenInfo($token);
+        foreach ($malformedTokens as $malformedToken) {
+            $info = $advancedJwtService->getTokenInfo($malformedToken);
             $this->assertFalse($info['valid'], "Token should be invalid");
             $this->assertArrayHasKey('error', $info);
         }

@@ -31,7 +31,7 @@ final class CacheManager
      */
     public static function getInstance(?string $driver = null, ?string $prefix = null): CacheInterface
     {
-        if (self::$cache === null) {
+        if (!self::$cache instanceof \App\Modules\Core\Infrastructure\Cache\CacheInterface) {
             $manager = new self($driver, $prefix);
             self::$cache = $manager->driver();
         }

@@ -8,7 +8,7 @@ use App\Modules\Role\Infrastructure\Models\PermissionRole;
 use App\Modules\User\Infrastructure\Models\RoleUser;
 use PHPUnit\Framework\TestCase;
 
-class AdditionalModelsTest extends TestCase
+final class AdditionalModelsTest extends TestCase
 {
     public function test_permission_role_model_exists(): void
     {

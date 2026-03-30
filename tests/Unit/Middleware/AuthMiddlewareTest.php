@@ -42,36 +42,36 @@ final class AuthMiddlewareTest extends TestCase
         $this->auth->method('check')->willReturn(true);
         $this->auth->method('user')->willReturn($user);
 
-        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $serverRequest = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
         $requestHandler = $this->createHandler();
 
-        $response = $this->authMiddleware->process($request, $requestHandler);
+        $response = $this->authMiddleware->process($serverRequest, $requestHandler);
 
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     public function test_process_blocks_request_when_user_is_not_authenticated(): void
     {
         $this->auth->method('check')->willReturn(false);
 
-        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $serverRequest = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
         $requestHandler = $this->createHandler();
 
-        $response = $this->authMiddleware->process($request, $requestHandler);
+        $response = $this->authMiddleware->process($serverRequest, $requestHandler);
 
-        $this->assertEquals(401, $response->getStatusCode());
+        $this->assertSame(401, $response->getStatusCode());
         $this->assertStringContainsString('Unauthorized', (string) $response->getBody());
-        $this->assertEquals('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
     }
 
     public function test_process_returns_json_error_response(): void
     {
         $this->auth->method('check')->willReturn(false);
 
-        $request = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
+        $serverRequest = $this->serverRequestFactory->createServerRequest('GET', '/api/test');
         $requestHandler = $this->createHandler();
 
-        $response = $this->authMiddleware->process($request, $requestHandler);
+        $response = $this->authMiddleware->process($serverRequest, $requestHandler);
         $body = json_decode((string) $response->getBody(), true);
 
         $this->assertArrayHasKey('status', $body);

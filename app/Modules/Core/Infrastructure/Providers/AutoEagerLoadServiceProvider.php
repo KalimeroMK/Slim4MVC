@@ -27,11 +27,9 @@ class AutoEagerLoadServiceProvider
         // In development environment, enable lazy loading detection
         $environment = $_ENV['APP_ENV'] ?? 'production';
 
-        if ($environment === 'development' || $environment === 'local') {
-            // Only enable if explicitly configured or if detection is enabled
-            if ($config['lazy_loading_detection'] ?? false) {
-                AutoRelationConfig::enableLazyLoadingDetection();
-            }
+        // Only enable if explicitly configured or if detection is enabled
+        if (($environment === 'development' || $environment === 'local') && ($config['lazy_loading_detection'] ?? false)) {
+            AutoRelationConfig::enableLazyLoadingDetection();
         }
     }
 

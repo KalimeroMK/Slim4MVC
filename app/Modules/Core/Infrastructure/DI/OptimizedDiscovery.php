@@ -20,25 +20,21 @@ use RegexIterator;
  * - Configurable scan paths
  * - Statistics and reporting
  */
-final class OptimizedDiscovery
+final readonly class OptimizedDiscovery
 {
-    private const CACHE_FILE = __DIR__.'/../../../../storage/cache/autowiring.php';
-    private const CACHE_TTL_DEV = 3600; // 1 hour in development
-    private const DEFAULT_SCAN_PATHS = [
+    private const string CACHE_FILE = __DIR__.'/../../../../storage/cache/autowiring.php';
+
+    private const int CACHE_TTL_DEV = 3600;
+     // 1 hour in development
+    private const array DEFAULT_SCAN_PATHS = [
         __DIR__.'/../../../../../app/Modules',
     ];
 
     /**
-     * @var array<int, string>
-     */
-    private array $scanPaths;
-
-    /**
      * @param array<int, string> $scanPaths
      */
-    public function __construct(array $scanPaths = self::DEFAULT_SCAN_PATHS)
+    public function __construct(private array $scanPaths = self::DEFAULT_SCAN_PATHS)
     {
-        $this->scanPaths = $scanPaths;
     }
 
     /**
@@ -122,31 +118,31 @@ final class OptimizedDiscovery
     public function getStats(): array
     {
         $isCached = file_exists(self::CACHE_FILE);
-        
+
         // Get bindings from scan (not definitions to avoid serialization issues)
         $bindings = [];
-        foreach ($this->scanPaths as $path) {
-            if (!is_dir($path)) {
+        foreach ($this->scanPaths as $scanPath) {
+            if (!is_dir($scanPath)) {
                 continue;
             }
-            
+
             $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
+                new RecursiveDirectoryIterator($scanPath, RecursiveDirectoryIterator::SKIP_DOTS)
             );
-            
+
             $phpFiles = new RegexIterator($iterator, '/\.php$/');
-            
-            foreach ($phpFiles as $file) {
-                $className = $this->getClassFromFile($file->getPathname());
-                
+
+            foreach ($phpFiles as $phpFile) {
+                $className = $this->getClassFromFile($phpFile->getPathname());
+
                 if ($className === null) {
                     continue;
                 }
-                
+
                 try {
                     /** @phpstan-ignore-next-line */
                     $reflection = new ReflectionClass($className);
-                    
+
                     if ($reflection->isInterface()) {
                         /** @phpstan-ignore-next-line */
                         $implementation = $this->findImplementation($className);
@@ -190,19 +186,19 @@ final class OptimizedDiscovery
         $interfaces = [];
 
         // Step 1: Find all interface files
-        foreach ($this->scanPaths as $path) {
-            if (!is_dir($path)) {
+        foreach ($this->scanPaths as $scanPath) {
+            if (!is_dir($scanPath)) {
                 continue;
             }
 
             $iterator = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
+                new RecursiveDirectoryIterator($scanPath, RecursiveDirectoryIterator::SKIP_DOTS)
             );
 
             $phpFiles = new RegexIterator($iterator, '/\.php$/');
 
-            foreach ($phpFiles as $file) {
-                $className = $this->getClassFromFile($file->getPathname());
+            foreach ($phpFiles as $phpFile) {
+                $className = $this->getClassFromFile($phpFile->getPathname());
 
                 if ($className === null) {
                     continue;
@@ -213,7 +209,7 @@ final class OptimizedDiscovery
                     $reflection = new ReflectionClass($className);
 
                     if ($reflection->isInterface()) {
-                        $interfaces[$className] = $file->getPathname();
+                        $interfaces[$className] = $phpFile->getPathname();
                     }
                 } catch (ReflectionException) {
                     // Skip classes that can't be reflected
@@ -223,7 +219,7 @@ final class OptimizedDiscovery
         }
 
         // Step 2: Find implementations for each interface
-        foreach ($interfaces as $interfaceName => $interfaceFile) {
+        foreach (array_keys($interfaces) as $interfaceName) {
             $implementation = $this->findImplementation($interfaceName);
 
             if ($implementation !== null) {
@@ -262,7 +258,7 @@ final class OptimizedDiscovery
             return null;
         }
 
-        return $namespace ? $namespace . '\\' . $class : $class;
+        return $namespace !== '' && $namespace !== '0' ? $namespace . '\\' . $class : $class;
     }
 
     /**
@@ -324,10 +320,12 @@ final class OptimizedDiscovery
 
             $phpFiles = new RegexIterator($iterator, '/\.php$/');
 
-            foreach ($phpFiles as $file) {
-                $className = $this->getClassFromFile($file->getPathname());
-
-                if ($className === null || $className === $interfaceName) {
+            foreach ($phpFiles as $phpFile) {
+                $className = $this->getClassFromFile($phpFile->getPathname());
+                if ($className === null) {
+                    continue;
+                }
+                if ($className === $interfaceName) {
                     continue;
                 }
 
@@ -355,8 +353,8 @@ final class OptimizedDiscovery
     {
         try {
             /** @phpstan-ignore-next-line */
-            $reflection = new ReflectionClass($interfaceName);
-            $file = $reflection->getFileName();
+            $reflectionClass = new ReflectionClass($interfaceName);
+            $file = $reflectionClass->getFileName();
 
             return $file ? dirname($file) : null;
         } catch (ReflectionException) {
@@ -379,11 +377,11 @@ final class OptimizedDiscovery
 
         // Convert definitions to serializable format
         $serializable = [];
-        foreach ($definitions as $interface => $definition) {
+        foreach (array_keys($definitions) as $interface) {
             // Store the class name that implements the interface
             $reflection = new \ReflectionClass($interface);
             $implementation = $this->findImplementation($interface);
-            
+
             if ($implementation !== null) {
                 $serializable[$interface] = $implementation;
             }

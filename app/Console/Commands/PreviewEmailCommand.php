@@ -46,16 +46,16 @@ class PreviewEmailCommand extends Command
 
         // Create test user
         $userFactory = new UserFactory();
-        /** @var User $model */
-        $model = $userFactory->make([
+        /** @var User $user */
+        $user = $userFactory->make([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
         // Create mailable based on type
         $mailable = match ($type) {
-            'welcome' => new WelcomeEmail($mailer, $blade, $model),
-            'password-reset' => new PasswordResetEmail($mailer, $blade, $model, 'test-reset-token-123'),
+            'welcome' => new WelcomeEmail($mailer, $blade, $user),
+            'password-reset' => new PasswordResetEmail($mailer, $blade, $user, 'test-reset-token-123'),
             default => throw new InvalidArgumentException('Unknown email type: '.$type),
         };
 

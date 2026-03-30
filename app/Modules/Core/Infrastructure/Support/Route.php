@@ -34,14 +34,14 @@ class Route
     public static function url(string $name, array $params = []): string
     {
         if (! isset(self::$routes[$name])) {
-            throw new InvalidArgumentException("Route [{$name}] not found.");
+            throw new InvalidArgumentException(sprintf('Route [%s] not found.', $name));
         }
 
         $url = self::$routes[$name];
 
         // Replace route parameters
         foreach ($params as $key => $value) {
-            $url = str_replace("{{$key}}", (string) $value, $url);
+            $url = str_replace(sprintf('{%s}', $key), (string) $value, $url);
         }
 
         return $url;

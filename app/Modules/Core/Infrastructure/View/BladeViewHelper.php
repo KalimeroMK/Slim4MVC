@@ -16,7 +16,7 @@ if (! function_exists('view')) {
     {
         $app = app();
         
-        if ($app !== null && $app->has(Blade::class)) {
+        if ($app instanceof \Psr\Container\ContainerInterface && $app->has(Blade::class)) {
             $blade = $app->get(Blade::class);
         } else {
             $cache = __DIR__.'/../../../../../storage/cache/view';

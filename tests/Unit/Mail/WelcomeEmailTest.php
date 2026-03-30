@@ -8,7 +8,7 @@ use App\Modules\Core\Infrastructure\Mail\PasswordResetEmail;
 use App\Modules\Core\Infrastructure\Mail\WelcomeEmail;
 use PHPUnit\Framework\TestCase;
 
-class WelcomeEmailTest extends TestCase
+final class WelcomeEmailTest extends TestCase
 {
     public function test_welcome_email_class_exists(): void
     {

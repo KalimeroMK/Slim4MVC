@@ -33,7 +33,7 @@ final class DeleteUserActionTest extends TestCase
         $this->deleteUserAction->execute($userId);
 
         $this->assertDatabaseMissing('users', ['id' => $userId]);
-        $this->assertNull(User::find($userId));
+        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, User::find($userId));
     }
 
     public function test_execute_throws_exception_when_user_not_found(): void

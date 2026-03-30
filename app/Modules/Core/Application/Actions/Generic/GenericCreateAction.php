@@ -13,13 +13,13 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class GenericCreateAction
+final readonly class GenericCreateAction
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository
+        private Repository $repository
     ) {}
 
     /**
@@ -32,13 +32,13 @@ final class GenericCreateAction
      */
     public function execute(array $data): Model
     {
-        if (empty($data)) {
+        if ($data === []) {
             throw new BadRequestException('Cannot create entity with empty data');
         }
 
-        /** @var TModel $result */
-        $result = $this->repository->create($data);
+        /** @var TModel $model */
+        $model = $this->repository->create($data);
 
-        return $result;
+        return $model;
     }
 }

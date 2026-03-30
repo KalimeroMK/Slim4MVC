@@ -42,7 +42,6 @@
     "slim/psr7": "^1.5",
     "slim/slim": "^4.0",
     "symfony/console": "^6.0",
-
     "vlucas/phpdotenv": "^5.6",
     "zircote/swagger-php": "^6.0"
   },

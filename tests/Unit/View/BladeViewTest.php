@@ -7,7 +7,7 @@ namespace Tests\Unit\View;
 use App\Modules\Core\Infrastructure\View\Blade;
 use PHPUnit\Framework\TestCase;
 
-class BladeViewTest extends TestCase
+final class BladeViewTest extends TestCase
 {
     protected function setUp(): void
     {

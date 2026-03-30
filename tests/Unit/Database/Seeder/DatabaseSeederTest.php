@@ -45,11 +45,11 @@ final class DatabaseSeederTest extends TestCase
         $databaseSeeder->run();
 
         $adminUser = \App\Modules\User\Infrastructure\Models\User::where('email', 'admin@demo.com')->first();
-        $this->assertNotNull($adminUser);
+        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $adminUser);
         $this->assertTrue($adminUser->roles->contains('name', 'admin'));
 
         $managerUser = \App\Modules\User\Infrastructure\Models\User::where('email', 'manager@demo.com')->first();
-        $this->assertNotNull($managerUser);
+        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $managerUser);
         $this->assertTrue($managerUser->roles->contains('name', 'manager'));
     }
 
@@ -59,7 +59,7 @@ final class DatabaseSeederTest extends TestCase
         $databaseSeeder->run();
 
         $adminRole = \App\Modules\Role\Infrastructure\Models\Role::where('name', 'admin')->first();
-        $this->assertNotNull($adminRole);
+        $this->assertInstanceOf(\App\Modules\Role\Infrastructure\Models\Role::class, $adminRole);
         $this->assertGreaterThan(0, $adminRole->permissions->count());
     }
 

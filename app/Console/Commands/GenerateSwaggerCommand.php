@@ -52,7 +52,7 @@ class GenerateSwaggerCommand extends Command
         }
 
         $output->writeln('<info>Generating OpenAPI documentation...</info>');
-        $output->writeln("<comment>Scanning: {$sourceDir}</comment>");
+        $output->writeln(sprintf('<comment>Scanning: %s</comment>', $sourceDir));
 
         try {
             // Create generator instance
@@ -61,7 +61,7 @@ class GenerateSwaggerCommand extends Command
             // Generate OpenAPI spec from annotations
             $openapi = $generator->generate([$sourceDir]);
 
-            if ($openapi === null) {
+            if (!$openapi instanceof \OpenApi\Annotations\OpenApi) {
                 $output->writeln('<error>No OpenAPI annotations found!</error>');
 
                 return Command::FAILURE;
@@ -69,7 +69,7 @@ class GenerateSwaggerCommand extends Command
 
             // Add base info if not present
             // @phpstan-ignore-next-line
-            if (! isset($openapi->info) || empty($openapi->info->title)) {
+            if ($openapi->info === null || empty($openapi->info->title)) {
                 $openapi->info = new Info([
                     'title' => 'Slim4MVC API',
                     'version' => '1.0.0',
@@ -102,7 +102,7 @@ class GenerateSwaggerCommand extends Command
             $json = $openapi->toJson();
 
             // Ensure directory exists
-            $dir = dirname($outputFile);
+            $dir = dirname((string) $outputFile);
             if (! is_dir($dir)) {
                 mkdir($dir, 0755, true);
             }
@@ -110,7 +110,7 @@ class GenerateSwaggerCommand extends Command
             // Write to file
             file_put_contents($outputFile, $json);
 
-            $output->writeln("<info>✓ Documentation generated: {$outputFile}</info>");
+            $output->writeln(sprintf('<info>✓ Documentation generated: %s</info>', $outputFile));
 
             // Output statistics
             /** @var array<array-key, mixed> $paths */
@@ -124,8 +124,8 @@ class GenerateSwaggerCommand extends Command
             $output->writeln('  - Schemas: '.count($schemas));
 
             return Command::SUCCESS;
-        } catch (Exception $e) {
-            $output->writeln("<error>Error: {$e->getMessage()}</error>");
+        } catch (Exception $exception) {
+            $output->writeln(sprintf('<error>Error: %s</error>', $exception->getMessage()));
 
             return Command::FAILURE;
         }

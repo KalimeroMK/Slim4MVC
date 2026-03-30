@@ -12,7 +12,7 @@ use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ValidationExceptionMiddleware;
 use PHPUnit\Framework\TestCase;
 
-class AdditionalMiddlewareTest extends TestCase
+final class AdditionalMiddlewareTest extends TestCase
 {
     public function test_auth_web_middleware_class_exists(): void
     {
@@ -57,7 +57,7 @@ class AdditionalMiddlewareTest extends TestCase
 
         foreach ($middlewares as $middleware) {
             $hasMethod = method_exists($middleware, 'process') || method_exists($middleware, '__invoke');
-            $this->assertTrue($hasMethod, "$middleware should have process or __invoke method");
+            $this->assertTrue($hasMethod, $middleware . ' should have process or __invoke method');
         }
     }
 }

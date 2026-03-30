@@ -21,30 +21,32 @@ use stdClass;
  * - Redis-backed token whitelist
  * - Comprehensive claims support
  */
-final class AdvancedJwtService
+final readonly class AdvancedJwtService
 {
-    private const ACCESS_TOKEN_TTL = 900;      // 15 minutes
-    private const REFRESH_TOKEN_TTL = 2592000;  // 30 days
+    private const int ACCESS_TOKEN_TTL = 900;
+          // 15 minutes
+    private const int REFRESH_TOKEN_TTL = 2592000;  // 30 days
 
-    private readonly JwtEncoder $encoder;
-    private readonly JwtDecoder $decoder;
+    private JwtEncoder $jwtEncoder;
+
+    private JwtDecoder $jwtDecoder;
 
     public function __construct(
-        private readonly string $secret,
-        private readonly string $algorithm = 'HS256',
-        private readonly int $defaultTtl = self::ACCESS_TOKEN_TTL,
-        private readonly ?string $issuer = null,
-        private readonly ?string $audience = null,
-        private readonly ?Client $redis = null
+        private string $secret,
+        private string $algorithm = 'HS256',
+        private int $defaultTtl = self::ACCESS_TOKEN_TTL,
+        private ?string $issuer = null,
+        private ?string $audience = null,
+        private ?Client $client = null
     ) {
         EnvironmentValidator::assertJwtSecret($secret);
 
         if (!in_array($algorithm, ['HS256', 'HS384', 'HS512'], true)) {
-            throw new RuntimeException("Unsupported algorithm: {$algorithm}");
+            throw new RuntimeException('Unsupported algorithm: ' . $algorithm);
         }
 
-        $this->encoder = new JwtEncoder();
-        $this->decoder = new JwtDecoder();
+        $this->jwtEncoder = new JwtEncoder();
+        $this->jwtDecoder = new JwtDecoder();
     }
 
     /**
@@ -99,8 +101,8 @@ final class AdvancedJwtService
         $refreshToken = $this->encode($payload);
 
         // Store in Redis for rotation tracking
-        if ($this->redis !== null) {
-            $this->redis->setex(
+        if ($this->client !== null) {
+            $this->client->setex(
                 $this->getRefreshTokenKey($jti),
                 self::REFRESH_TOKEN_TTL,
                 json_encode([
@@ -135,7 +137,7 @@ final class AdvancedJwtService
         }
 
         // Check if Redis is available for token rotation
-        if ($this->redis === null) {
+        if ($this->client === null) {
             throw new RuntimeException('Token rotation requires Redis. Please configure Redis or generate a new token pair.');
         }
 
@@ -147,7 +149,7 @@ final class AdvancedJwtService
         }
 
         // Verify token is in whitelist (not revoked)
-        $stored = $this->redis->get($this->getRefreshTokenKey($payload->jti));
+        $stored = $this->client->get($this->getRefreshTokenKey($payload->jti));
 
         if ($stored === null) {
             // Token was already used or revoked
@@ -156,7 +158,7 @@ final class AdvancedJwtService
         }
 
         // Delete old token (rotation)
-        $this->redis->del($this->getRefreshTokenKey($payload->jti));
+        $this->client->del($this->getRefreshTokenKey($payload->jti));
 
         // Generate new token pair
         return $this->generateRefreshToken($payload->sub);
@@ -175,7 +177,7 @@ final class AdvancedJwtService
      */
     public function decode(string $token, bool $validateIssuer = false, bool $validateAudience = false): stdClass
     {
-        $payload = $this->decoder->decode($token, $this->secret, $this->algorithm);
+        $payload = $this->jwtDecoder->decode($token, $this->secret, $this->algorithm);
 
         // Validate issuer if requested
         if ($validateIssuer && $this->issuer !== null && ($payload->iss ?? '') !== $this->issuer) {
@@ -213,7 +215,7 @@ final class AdvancedJwtService
     {
         try {
             // Decode without verification for inspection
-            $payload = $this->decoder->decode($token, $this->secret, $this->algorithm);
+            $payload = $this->jwtDecoder->decode($token, $this->secret, $this->algorithm);
 
             return [
                 'valid' => true,
@@ -240,33 +242,31 @@ final class AdvancedJwtService
      */
     public function revokeRefreshToken(string $jti): void
     {
-        if ($this->redis !== null) {
-            $this->redis->del($this->getRefreshTokenKey($jti));
+        if ($this->client !== null) {
+            $this->client->del($this->getRefreshTokenKey($jti));
         }
     }
 
     /**
      * Revoke all refresh tokens for a user.
-     *
-     * @param int|string $userId
      */
     public function revokeAllUserTokens(int|string $userId): void
     {
-        if ($this->redis === null) {
+        if ($this->client === null) {
             return;
         }
 
         // This is a simplified implementation
         // In production, you might want to use a set or scan pattern
         $pattern = "refresh_token:*";
-        $keys = $this->redis->keys($pattern);
+        $keys = $this->client->keys($pattern);
 
         foreach ($keys as $key) {
-            $data = $this->redis->get($key);
+            $data = $this->client->get($key);
             if ($data !== null) {
                 $tokenData = json_decode($data, true);
                 if (isset($tokenData['user_id']) && $tokenData['user_id'] == $userId) {
-                    $this->redis->del($key);
+                    $this->client->del($key);
                 }
             }
         }
@@ -279,7 +279,7 @@ final class AdvancedJwtService
      */
     private function encode(array $payload): string
     {
-        return $this->encoder->encode($payload, $this->secret, $this->algorithm);
+        return $this->jwtEncoder->encode($payload, $this->secret, $this->algorithm);
     }
 
     /**
@@ -331,6 +331,6 @@ final class AdvancedJwtService
      */
     private function getRefreshTokenKey(string $jti): string
     {
-        return "refresh_token:{$jti}";
+        return 'refresh_token:' . $jti;
     }
 }

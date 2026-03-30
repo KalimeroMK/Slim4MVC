@@ -32,7 +32,7 @@ class Auth
 
         try {
             $this->logger = $container->get(LoggerInterface::class);
-        } catch (DependencyException|NotFoundException $e) {
+        } catch (DependencyException|NotFoundException) {
             // Logger not available, continue without it
         }
 

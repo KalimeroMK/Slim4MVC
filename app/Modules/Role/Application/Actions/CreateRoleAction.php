@@ -24,7 +24,7 @@ final readonly class CreateRoleAction implements CreateRoleActionInterface
             'name' => $createRoleDTO->name,
         ]);
 
-        if (! empty($createRoleDTO->permissions)) {
+        if ($createRoleDTO->permissions !== []) {
             $role->givePermissionTo($createRoleDTO->permissions);
         }
 

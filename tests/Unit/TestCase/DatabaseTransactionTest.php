@@ -29,7 +29,7 @@ final class DatabaseTransactionTest extends TestCase
         // because transactions rollback after each test
         $user = \App\Modules\User\Infrastructure\Models\User::where('email', 'transaction-test@example.com')->first();
 
-        $this->assertNull($user, 'Database should be clean after transaction rollback');
+        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $user, 'Database should be clean after transaction rollback');
     }
 
     public function test_multiple_creations_in_single_test(): void
@@ -50,8 +50,8 @@ final class DatabaseTransactionTest extends TestCase
         $user2 = \App\Modules\User\Infrastructure\Models\User::where('email', 'user2@test.com')->first();
         $role = \App\Modules\Role\Infrastructure\Models\Role::where('name', 'test-role')->first();
 
-        $this->assertNull($user1);
-        $this->assertNull($user2);
-        $this->assertNull($role);
+        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $user1);
+        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $user2);
+        $this->assertNotInstanceOf(\App\Modules\Role\Infrastructure\Models\Role::class, $role);
     }
 }

@@ -70,7 +70,7 @@ final class AutoRelationConfig
             // Remove from disabled if present
             self::$disabledModels = array_values(array_filter(
                 self::$disabledModels,
-                fn ($c) => $c !== $class
+                fn (string $c): bool => $c !== $class
             ));
         }
     }
@@ -92,7 +92,7 @@ final class AutoRelationConfig
             // Remove from enabled if present
             self::$enabledModels = array_values(array_filter(
                 self::$enabledModels,
-                fn ($c) => $c !== $class
+                fn (string $c): bool => $c !== $class
             ));
         }
     }

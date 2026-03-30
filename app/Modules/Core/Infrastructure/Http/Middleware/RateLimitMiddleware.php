@@ -65,7 +65,7 @@ class RateLimitMiddleware implements MiddlewareInterface
 
         // If behind proxy, check X-Forwarded-For
         $forwardedFor = $request->getHeaderLine('X-Forwarded-For');
-        if (! empty($forwardedFor)) {
+        if ($forwardedFor !== '' && $forwardedFor !== '0') {
             $ips = explode(',', $forwardedFor);
             $ip = mb_trim($ips[0]);
         }
@@ -107,7 +107,7 @@ class RateLimitMiddleware implements MiddlewareInterface
                 'start' => $now,
             ];
         } else {
-            $this->requests[$identifier]['count']++;
+            ++$this->requests[$identifier]['count'];
         }
     }
 

@@ -66,7 +66,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
+            'password' => password_hash((string) $data['password'], PASSWORD_BCRYPT),
         ]);
 
         // Attach roles if provided
@@ -114,6 +114,7 @@ class UserController extends Controller
             if (User::where('email', $data['email'])->where('id', '!=', $id)->exists()) {
                 throw new RuntimeException('Email already taken');
             }
+
             $user->email = $data['email'];
         }
 
@@ -143,11 +144,11 @@ class UserController extends Controller
             throw new RuntimeException('Passwords do not match');
         }
 
-        if (mb_strlen($data['password']) < 6) {
+        if (mb_strlen((string) $data['password']) < 6) {
             throw new RuntimeException('Password must be at least 6 characters');
         }
 
-        $user->password = password_hash($data['password'], PASSWORD_BCRYPT);
+        $user->password = password_hash((string) $data['password'], PASSWORD_BCRYPT);
         $user->save();
 
         return $this->redirect('/admin/users');

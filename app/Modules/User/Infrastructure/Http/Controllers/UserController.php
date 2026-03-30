@@ -27,8 +27,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 #[OA\SecurityScheme(
     securityScheme: 'bearerAuth',
     type: 'http',
-    scheme: 'bearer',
-    bearerFormat: 'JWT'
+    bearerFormat: 'JWT',
+    scheme: 'bearer'
 )]
 class UserController extends Controller
 {
@@ -86,9 +86,9 @@ class UserController extends Controller
             content: new OA\JsonContent(
                 required: ['name', 'email', 'password', 'password_confirmation'],
                 properties: [
-                    new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'Jane Smith'),
+                    new OA\Property(property: 'name', type: 'string', example: 'Jane Smith', maxLength: 255),
                     new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jane@example.com'),
-                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'securepassword123'),
+                    new OA\Property(property: 'password', type: 'string', example: 'securepassword123', minLength: 8),
                     new OA\Property(property: 'password_confirmation', type: 'string', example: 'securepassword123'),
                 ]
             )
@@ -143,19 +143,19 @@ class UserController extends Controller
         operationId: 'updateUser',
         description: 'Full update of user',
         security: [['bearerAuth' => []]],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'name', type: 'string', nullable: true, maxLength: 255, example: 'Jane Smith Updated'),
-                    new OA\Property(property: 'email', type: 'string', nullable: true, format: 'email', example: 'jane.updated@example.com'),
+                    new OA\Property(property: 'name', type: 'string', example: 'Jane Smith Updated', nullable: true, maxLength: 255),
+                    new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jane.updated@example.com', nullable: true),
                     new OA\Property(property: 'password', type: 'string', nullable: true, minLength: 8),
                 ]
             )
         ),
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
         responses: [
             new OA\Response(response: 200, description: 'User updated'),
             new OA\Response(response: 401, description: 'Unauthorized'),
@@ -165,10 +165,7 @@ class UserController extends Controller
     public function update(UpdateUserRequest $updateUserRequest, Response $response, array $args): Response
     {
         $user = $this->updateUserAction->execute(
-            UpdateUserDTO::fromRequest(array_merge(
-                ['id' => $args['id']],
-                $updateUserRequest->validated()
-            ))
+            UpdateUserDTO::fromRequest((int) $args['id'], $updateUserRequest->validated())
         );
 
         // Load relationships for resource
@@ -198,6 +195,6 @@ class UserController extends Controller
     {
         $this->deleteUserAction->execute($args['id']);
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'User deleted successfully');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
     }
 }

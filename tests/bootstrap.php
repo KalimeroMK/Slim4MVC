@@ -47,10 +47,10 @@ function runTestMigrations(): void
         CreateFailedJobsTable::class,
     ];
 
-    foreach ($migrations as $migrationClass) {
+    foreach ($migrations as $migration) {
         try {
-            (new $migrationClass)->up();
-        } catch (\Exception $e) {
+            (new $migration)->up();
+        } catch (\Exception) {
             // Table might already exist, continue
         }
     }

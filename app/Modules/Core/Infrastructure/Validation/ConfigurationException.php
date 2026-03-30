@@ -11,18 +11,14 @@ use RuntimeException;
  */
 class ConfigurationException extends RuntimeException
 {
-    /** @var array<int, string> */
-    private array $errors;
-
     /**
      * @param array<int, string> $errors
      */
-    public function __construct(array $errors, int $code = 0, ?\Throwable $previous = null)
+    public function __construct(private readonly array $errors, int $code = 0, ?\Throwable $previous = null)
     {
-        $this->errors = $errors;
         $message = "Configuration validation failed:\n" . implode("\n", array_map(
-            fn ($error) => "  - {$error}",
-            $errors
+            fn (string $error): string => '  - ' . $error,
+            $this->errors
         ));
 
         parent::__construct($message, $code, $previous);
@@ -51,7 +47,7 @@ class ConfigurationException extends RuntimeException
         ];
 
         foreach ($this->errors as $error) {
-            $lines[] = "  ❌ {$error}";
+            $lines[] = '  ❌ ' . $error;
         }
 
         $lines[] = '';
@@ -73,7 +69,7 @@ class ConfigurationException extends RuntimeException
             'status_code' => 500,
             'timestamp' => date('c'),
             'errors' => array_map(
-                fn ($error) => [
+                fn (string $error): array => [
                     'field' => $this->extractFieldName($error),
                     'message' => $error,
                 ],

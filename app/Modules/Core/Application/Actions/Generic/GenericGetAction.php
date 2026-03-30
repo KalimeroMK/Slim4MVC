@@ -13,21 +13,19 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class GenericGetAction
+final readonly class GenericGetAction
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository
+        private Repository $repository
     ) {}
 
     /**
      * Execute the get action.
      *
-     * @param int|string $id
      * @return TModel
-     *
      * @throws NotFoundException
      */
     public function execute(int|string $id): Model
@@ -48,10 +46,8 @@ final class GenericGetAction
      * Note: This implementation loads relations after finding the model.
      * For better performance, consider implementing findWith() in your repository.
      *
-     * @param int|string $id
      * @param array<int, string> $relations
      * @return TModel
-     *
      * @throws NotFoundException
      */
     public function executeWith(int|string $id, array $relations): Model

@@ -70,9 +70,8 @@ return [
     // JWT Service
     JwtService::class => factory(function (): JwtService {
         $secret = $_ENV['JWT_SECRET'] ?? '';
-
         return new JwtService($secret);
     }),
     // Cache system
     CacheManager::class => autowire(CacheManager::class),
-    CacheInterface::class => factory(fn (CacheManager $manager): CacheInterface => $manager->driver()),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
+    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];

@@ -43,9 +43,9 @@ class AuthController extends Controller
             content: new OA\JsonContent(
                 required: ['name', 'email', 'password', 'password_confirmation'],
                 properties: [
-                    new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'John Doe'),
+                    new OA\Property(property: 'name', type: 'string', example: 'John Doe', maxLength: 255),
                     new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
-                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'password123'),
+                    new OA\Property(property: 'password', type: 'string', example: 'password123', minLength: 8),
                     new OA\Property(property: 'password_confirmation', type: 'string', example: 'password123'),
                 ]
             )
@@ -81,7 +81,7 @@ class AuthController extends Controller
                 required: ['email', 'password'],
                 properties: [
                     new OA\Property(property: 'email', type: 'string', format: 'email', example: 'john@example.com'),
-                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'password123'),
+                    new OA\Property(property: 'password', type: 'string', example: 'password123', minLength: 8),
                 ]
             )
         ),
@@ -155,7 +155,7 @@ class AuthController extends Controller
                 required: ['token', 'password', 'password_confirmation'],
                 properties: [
                     new OA\Property(property: 'token', type: 'string', example: 'reset-token-from-email'),
-                    new OA\Property(property: 'password', type: 'string', minLength: 8, example: 'newpassword123'),
+                    new OA\Property(property: 'password', type: 'string', example: 'newpassword123', minLength: 8),
                     new OA\Property(property: 'password_confirmation', type: 'string', example: 'newpassword123'),
                 ]
             )

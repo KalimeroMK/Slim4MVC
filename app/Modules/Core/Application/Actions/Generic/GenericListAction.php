@@ -13,26 +13,24 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  */
-final class GenericListAction
+final readonly class GenericListAction
 {
     /**
      * @param Repository<TModel> $repository
      */
     public function __construct(
-        private readonly Repository $repository,
-        private readonly int $defaultPerPage = 15
+        private Repository $repository,
+        private int $defaultPerPage = 15
     ) {}
 
     /**
      * Execute the list action with pagination.
      *
-     * @param int $page
-     * @param int|null $perPage
      * @return array{items: Collection<int, TModel>, total: int, page: int, perPage: int, totalPages: int}
      */
     public function execute(int $page = 1, ?int $perPage = null): array
     {
-        $perPage = $perPage ?? $this->defaultPerPage;
+        $perPage ??= $this->defaultPerPage;
 
         /** @var array{items: Collection<int, TModel>, total: int, page: int, perPage: int, totalPages: int} $result */
         $result = $this->repository->paginate($page, $perPage);
@@ -47,8 +45,6 @@ final class GenericListAction
      * For filtering support, implement paginateWithFilters() in your repository.
      *
      * @param array<string, mixed> $filters
-     * @param int $page
-     * @param int|null $perPage
      * @return array{items: Collection<int, TModel>, total: int, page: int, perPage: int}
      */
     public function executeWithFilters(array $filters, int $page = 1, ?int $perPage = null): array
@@ -76,24 +72,23 @@ final class GenericListAction
      * For better performance, implement paginateWithRelations() in your repository.
      *
      * @param array<int, string> $relations
-     * @param int $page
-     * @param int|null $perPage
      * @return array{items: Collection<int, TModel>, total: int, page: int, perPage: int}
      */
     public function executeWith(array $relations, int $page = 1, ?int $perPage = null): array
     {
         $result = $this->execute($page, $perPage);
-        
+
         // Load relations on the items
         /** @var Collection<int, TModel>|list<TModel> $items */
         $items = $result['items'];
         if (is_array($items)) {
             $items = new Collection($items);
         }
+
         /** @phpstan-ignore-next-line */
         $items->load($relations);
         $result['items'] = $items;
-        
+
         return $result;
     }
 }

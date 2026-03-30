@@ -84,7 +84,7 @@ class User extends Model
     public function hasPermission(string $permission): bool
     {
         return $this->roles()
-            ->whereHas('permissions', function ($query) use ($permission) {
+            ->whereHas('permissions', function ($query) use ($permission): void {
                 $query->where('name', $permission);
             })
             ->exists();
@@ -116,6 +116,7 @@ class User extends Model
      *
      * @param array<string, mixed> $options
      */
+    #[\Override]
     public function save(array $options = []): bool
     {
         $isNew = ! $this->exists;
@@ -151,6 +152,7 @@ class User extends Model
     /**
      * Boot the model and register observers.
      */
+    #[\Override]
     protected static function booted(): void
     {
         static::observe(UserObserver::class);

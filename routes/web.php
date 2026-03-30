@@ -22,7 +22,7 @@ return function (App $app): void {
     Route::add('dashboard', '/dashboard');
 
     // Admin Routes (require authentication)
-    $app->group('/admin', function ($group) {
+    $app->group('/admin', function ($group): void {
         // Roles Management
         $group->get('/roles', [RoleController::class, 'index']);
         $group->get('/roles/create', [RoleController::class, 'create']);
@@ -50,8 +50,6 @@ return function (App $app): void {
     })->add(AuthWebMiddleware::class);
 
     // API Documentation (Swagger UI)
-    $app->get('/api-docs', function (Request $request, Response $response) {
-        return view('swagger', $response);
-    });
+    $app->get('/api-docs', fn(Request $request, Response $response) => view('swagger', $response));
     Route::add('api.docs', '/api-docs');
 };

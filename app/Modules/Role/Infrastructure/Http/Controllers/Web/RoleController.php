@@ -104,6 +104,7 @@ class RoleController extends Controller
             if (Role::where('name', $data['name'])->where('id', '!=', $id)->exists()) {
                 throw new RuntimeException('Role name already taken');
             }
+
             $role->name = $data['name'];
             $role->save();
         }

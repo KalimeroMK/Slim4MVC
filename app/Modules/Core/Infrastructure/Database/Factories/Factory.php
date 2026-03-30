@@ -68,11 +68,9 @@ abstract class Factory
 
         // Apply state callbacks
         // @phpstan-ignore-next-line
-        if ($this->stateCallbacks !== []) {
-            foreach ($this->stateCallbacks as $stateCallback) {
-                $stateAttributes = $stateCallback($definition);
-                $definition = array_merge($definition, $stateAttributes);
-            }
+        foreach ($this->stateCallbacks as $stateCallback) {
+            $stateAttributes = $stateCallback($definition);
+            $definition = array_merge($definition, $stateAttributes);
         }
 
         $attributes = array_merge($definition, $attributes);
@@ -104,7 +102,7 @@ abstract class Factory
     {
         $models = [];
 
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 0; $i < $count; ++$i) {
             $models[] = $this->create($attributes);
         }
 

@@ -25,17 +25,14 @@ use PHPUnit\Framework\TestCase;
  * @covers \App\Modules\Core\Application\Actions\Generic\GenericGetAction
  * @covers \App\Modules\Core\Application\Actions\Generic\GenericListAction
  */
-class GenericCrudActionsTest extends TestCase
+final class GenericCrudActionsTest extends TestCase
 {
-    private Repository $repository;
-    private Model $model;
+    private \PHPUnit\Framework\MockObject\MockObject $repository;
+
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Create mock model
-        $this->model = $this->createMock(Model::class);
 
         // Create mock repository
         $this->repository = $this->createMock(Repository::class);
@@ -44,50 +41,50 @@ class GenericCrudActionsTest extends TestCase
     public function test_crudActionFactory_for_returns_instance(): void
     {
         // We can't easily test this with real classes, so we'll test the methods
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(CrudActionFactory::class, $factory);
+        $this->assertInstanceOf(CrudActionFactory::class, $crudActionFactory);
     }
 
     public function test_crudActionFactory_create_returns_createAction(): void
     {
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(GenericCreateAction::class, $factory->create());
+        $this->assertInstanceOf(GenericCreateAction::class, $crudActionFactory->create());
     }
 
     public function test_crudActionFactory_update_returns_updateAction(): void
     {
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(GenericUpdateAction::class, $factory->update());
+        $this->assertInstanceOf(GenericUpdateAction::class, $crudActionFactory->update());
     }
 
     public function test_crudActionFactory_delete_returns_deleteAction(): void
     {
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(GenericDeleteAction::class, $factory->delete());
+        $this->assertInstanceOf(GenericDeleteAction::class, $crudActionFactory->delete());
     }
 
     public function test_crudActionFactory_get_returns_getAction(): void
     {
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(GenericGetAction::class, $factory->get());
+        $this->assertInstanceOf(GenericGetAction::class, $crudActionFactory->get());
     }
 
     public function test_crudActionFactory_list_returns_listAction(): void
     {
-        $factory = new CrudActionFactory($this->repository);
+        $crudActionFactory = new CrudActionFactory($this->repository);
 
-        $this->assertInstanceOf(GenericListAction::class, $factory->list());
+        $this->assertInstanceOf(GenericListAction::class, $crudActionFactory->list());
     }
 
     public function test_crudActionFactory_all_returns_all_actions(): void
     {
-        $factory = new CrudActionFactory($this->repository);
-        $all = $factory->all();
+        $crudActionFactory = new CrudActionFactory($this->repository);
+        $all = $crudActionFactory->all();
 
         $this->assertArrayHasKey('create', $all);
         $this->assertArrayHasKey('update', $all);
@@ -112,12 +109,12 @@ class GenericCrudActionsTest extends TestCase
             ->expects($this->once())
             ->method('create')
             ->with($data)
-            ->willReturn($this->model);
+            ->willReturn($this->createStub(\Illuminate\Database\Eloquent\Model::class));
 
-        $action = new GenericCreateAction($this->repository);
-        $result = $action->execute($data);
+        $genericCreateAction = new GenericCreateAction($this->repository);
+        $model = $genericCreateAction->execute($data);
 
-        $this->assertSame($this->model, $result);
+        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
     }
 
     public function test_createAction_throws_on_empty_data(): void
@@ -125,8 +122,8 @@ class GenericCrudActionsTest extends TestCase
         $this->expectException(BadRequestException::class);
         $this->expectExceptionMessage('Cannot create entity with empty data');
 
-        $action = new GenericCreateAction($this->repository);
-        $action->execute([]);
+        $genericCreateAction = new GenericCreateAction($this->repository);
+        $genericCreateAction->execute([]);
     }
 
     public function test_updateAction_updates_and_returns_model(): void
@@ -138,12 +135,12 @@ class GenericCrudActionsTest extends TestCase
             ->expects($this->once())
             ->method('update')
             ->with($id, $data)
-            ->willReturn($this->model);
+            ->willReturn($this->createStub(\Illuminate\Database\Eloquent\Model::class));
 
-        $action = new GenericUpdateAction($this->repository);
-        $result = $action->execute($id, $data);
-        
-        $this->assertSame($this->model, $result);
+        $genericUpdateAction = new GenericUpdateAction($this->repository);
+        $model = $genericUpdateAction->execute($id, $data);
+
+        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
     }
 
     public function test_updateAction_throws_when_update_fails(): void
@@ -156,8 +153,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(999, ['name' => 'Test'])
             ->willThrowException(new \Exception('Not found'));
 
-        $action = new GenericUpdateAction($this->repository);
-        $action->execute(999, ['name' => 'Test']);
+        $genericUpdateAction = new GenericUpdateAction($this->repository);
+        $genericUpdateAction->execute(999, ['name' => 'Test']);
     }
 
     public function test_deleteAction_deletes_when_found(): void
@@ -168,15 +165,15 @@ class GenericCrudActionsTest extends TestCase
             ->expects($this->once())
             ->method('find')
             ->with($id)
-            ->willReturn($this->model);
+            ->willReturn($this->createStub(\Illuminate\Database\Eloquent\Model::class));
 
         $this->repository
             ->expects($this->once())
             ->method('delete')
             ->with($id);
 
-        $action = new GenericDeleteAction($this->repository);
-        $action->execute($id);
+        $genericDeleteAction = new GenericDeleteAction($this->repository);
+        $genericDeleteAction->execute($id);
 
         $this->assertTrue(true); // If we get here, no exception was thrown
     }
@@ -191,8 +188,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(999)
             ->willReturn(null);
 
-        $action = new GenericDeleteAction($this->repository);
-        $action->execute(999);
+        $genericDeleteAction = new GenericDeleteAction($this->repository);
+        $genericDeleteAction->execute(999);
     }
 
     public function test_getAction_returns_model_when_found(): void
@@ -203,12 +200,12 @@ class GenericCrudActionsTest extends TestCase
             ->expects($this->once())
             ->method('find')
             ->with($id)
-            ->willReturn($this->model);
+            ->willReturn($this->createStub(\Illuminate\Database\Eloquent\Model::class));
 
-        $action = new GenericGetAction($this->repository);
-        $result = $action->execute($id);
+        $genericGetAction = new GenericGetAction($this->repository);
+        $model = $genericGetAction->execute($id);
 
-        $this->assertSame($this->model, $result);
+        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
     }
 
     public function test_getAction_throws_when_not_found(): void
@@ -221,8 +218,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(999)
             ->willReturn(null);
 
-        $action = new GenericGetAction($this->repository);
-        $action->execute(999);
+        $genericGetAction = new GenericGetAction($this->repository);
+        $genericGetAction->execute(999);
     }
 
     public function test_getAction_executeWith_uses_find_and_loads_relations(): void
@@ -234,12 +231,12 @@ class GenericCrudActionsTest extends TestCase
             ->expects($this->once())
             ->method('find')
             ->with($id)
-            ->willReturn($this->model);
+            ->willReturn($this->createStub(\Illuminate\Database\Eloquent\Model::class));
 
-        $action = new GenericGetAction($this->repository);
-        $result = $action->executeWith($id, $relations);
+        $genericGetAction = new GenericGetAction($this->repository);
+        $model = $genericGetAction->executeWith($id, $relations);
 
-        $this->assertSame($this->model, $result);
+        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
     }
 
     public function test_listAction_executes_paginate(): void
@@ -258,8 +255,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(1, 15)
             ->willReturn($expected);
 
-        $action = new GenericListAction($this->repository);
-        $result = $action->execute(1, 15);
+        $genericListAction = new GenericListAction($this->repository);
+        $result = $genericListAction->execute(1, 15);
 
         $this->assertEquals($expected, $result);
     }
@@ -280,8 +277,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(1, 25)
             ->willReturn($expected);
 
-        $action = new GenericListAction($this->repository, 25);
-        $result = $action->execute();
+        $genericListAction = new GenericListAction($this->repository, 25);
+        $result = $genericListAction->execute();
 
         $this->assertEquals($expected, $result);
     }
@@ -295,8 +292,8 @@ class GenericCrudActionsTest extends TestCase
             ->method('all')
             ->willReturn($collection);
 
-        $action = new GenericListAction($this->repository);
-        $result = $action->all();
+        $genericListAction = new GenericListAction($this->repository);
+        $result = $genericListAction->all();
 
         $this->assertSame($collection, $result);
     }
@@ -317,8 +314,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(1, 15)
             ->willReturn($expected);
 
-        $action = new GenericListAction($this->repository);
-        $result = $action->executeWithFilters($filters, 1, 15);
+        $genericListAction = new GenericListAction($this->repository);
+        $result = $genericListAction->executeWithFilters($filters, 1, 15);
 
         $this->assertEquals($expected, $result);
     }
@@ -339,8 +336,8 @@ class GenericCrudActionsTest extends TestCase
             ->with(1, 15)
             ->willReturn($expected);
 
-        $action = new GenericListAction($this->repository);
-        $result = $action->executeWith($relations, 1, 15);
+        $genericListAction = new GenericListAction($this->repository);
+        $result = $genericListAction->executeWith($relations, 1, 15);
 
         $this->assertEquals($expected, $result);
     }

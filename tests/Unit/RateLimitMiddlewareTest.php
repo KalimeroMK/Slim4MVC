@@ -30,9 +30,9 @@ final class RateLimitMiddlewareTest extends TestCase
         $requestHandler = $this->createHandler();
 
         // Make 5 requests (within limit)
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; ++$i) {
             $response = $this->rateLimitMiddleware->process($serverRequest, $requestHandler);
-            $this->assertEquals(200, $response->getStatusCode());
+            $this->assertSame(200, $response->getStatusCode());
         }
     }
 
@@ -43,14 +43,14 @@ final class RateLimitMiddlewareTest extends TestCase
         $requestHandler = $this->createHandler();
 
         // Make 3 requests (at limit)
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 3; ++$i) {
             $response = $this->rateLimitMiddleware->process($serverRequest, $requestHandler);
-            $this->assertEquals(200, $response->getStatusCode());
+            $this->assertSame(200, $response->getStatusCode());
         }
 
         // 4th request should be blocked
         $response = $this->rateLimitMiddleware->process($serverRequest, $requestHandler);
-        $this->assertEquals(429, $response->getStatusCode());
+        $this->assertSame(429, $response->getStatusCode());
         $this->assertStringContainsString('Too Many Requests', (string) $response->getBody());
     }
 
@@ -81,7 +81,7 @@ final class RateLimitMiddlewareTest extends TestCase
 
         // IP 2 should still be able to make requests
         $response = $this->rateLimitMiddleware->process($request2, $requestHandler);
-        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame(200, $response->getStatusCode());
     }
 
     private function createRequest(string $ip): ServerRequestInterface

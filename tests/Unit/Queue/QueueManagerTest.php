@@ -9,7 +9,7 @@ use App\Modules\Core\Infrastructure\Queue\QueueManager;
 use App\Modules\Core\Infrastructure\Queue\RedisQueue;
 use PHPUnit\Framework\TestCase;
 
-class QueueManagerTest extends TestCase
+final class QueueManagerTest extends TestCase
 {
     public function test_queue_manager_class_exists(): void
     {

@@ -102,6 +102,7 @@ class CreateControllerCommand extends Command
 
                 continue;
             }
+
             $content = str_replace('{{controllerName}}', $name, $stubContent);
             file_put_contents($destination, $content);
 

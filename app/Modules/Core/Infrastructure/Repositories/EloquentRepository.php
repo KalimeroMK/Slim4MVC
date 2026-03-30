@@ -88,6 +88,7 @@ abstract class EloquentRepository implements Repository
         /** @var TModel $model */
         $model = $this->findOrFail($id);
         $model->update($attributes);
+
         $fresh = $model->fresh();
 
         return $fresh ?? $model;

@@ -18,12 +18,8 @@ trait AuthorizesRequests
     protected function authorize(string $ability, mixed $resource = null): bool
     {
         // Simple authorization check - can be extended with policies
-        if (! AuthHelper::check()) {
-            return false;
-        }
-
         // TODO: Implement policy checks here
-        return true;
+        return AuthHelper::check();
     }
 
     /**

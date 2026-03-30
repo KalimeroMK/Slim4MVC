@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
  * @covers \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator
  * @covers \App\Modules\Core\Infrastructure\Validation\ConfigurationException
  */
-class EnvironmentValidatorIntegrationTest extends TestCase
+final class EnvironmentValidatorIntegrationTest extends TestCase
 {
     private array $originalEnv;
 
@@ -138,12 +138,12 @@ class EnvironmentValidatorIntegrationTest extends TestCase
         try {
             EnvironmentValidator::validate();
             $this->fail('Expected ConfigurationException');
-        } catch (ConfigurationException $e) {
-            $detailed = $e->getDetailedMessage();
+        } catch (ConfigurationException $configurationException) {
+            $detailed = $configurationException->getDetailedMessage();
             $this->assertStringContainsString('CONFIGURATION VALIDATION FAILED', $detailed);
             $this->assertStringContainsString('❌', $detailed);
             
-            $summary = $e->getSummary();
+            $summary = $configurationException->getSummary();
             $this->assertArrayHasKey('error', $summary);
             $this->assertArrayHasKey('errors', $summary);
         }
@@ -325,10 +325,10 @@ class EnvironmentValidatorIntegrationTest extends TestCase
         try {
             EnvironmentValidator::validate();
             $this->fail('Expected ConfigurationException');
-        } catch (ConfigurationException $e) {
-            $errors = $e->getErrors();
+        } catch (ConfigurationException $configurationException) {
+            $errors = $configurationException->getErrors();
             $this->assertGreaterThanOrEqual(2, count($errors));
-            $this->assertStringContainsString('APP_ENV', $e->getMessage());
+            $this->assertStringContainsString('APP_ENV', $configurationException->getMessage());
         }
     }
 }

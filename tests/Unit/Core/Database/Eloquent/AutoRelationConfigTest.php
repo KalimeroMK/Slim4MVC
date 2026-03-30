@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers \App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig
  */
-class AutoRelationConfigTest extends TestCase
+final class AutoRelationConfigTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -113,7 +113,7 @@ class AutoRelationConfigTest extends TestCase
     {
         AutoRelationConfig::setMaxAutoLoadRelations(5);
 
-        $this->assertEquals(5, AutoRelationConfig::getMaxAutoLoadRelations());
+        $this->assertSame(5, AutoRelationConfig::getMaxAutoLoadRelations());
     }
 
     public function testResetRestoresDefaults(): void
@@ -128,7 +128,7 @@ class AutoRelationConfigTest extends TestCase
 
         // Verify defaults restored
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
-        $this->assertEquals(10, AutoRelationConfig::getMaxAutoLoadRelations());
+        $this->assertSame(10, AutoRelationConfig::getMaxAutoLoadRelations());
         $this->assertFalse(AutoRelationConfig::isEnabledFor('TestModel'));
     }
 
@@ -145,7 +145,7 @@ class AutoRelationConfigTest extends TestCase
         AutoRelationConfig::configure($config);
 
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
-        $this->assertEquals(15, AutoRelationConfig::getMaxAutoLoadRelations());
+        $this->assertSame(15, AutoRelationConfig::getMaxAutoLoadRelations());
         $this->assertTrue(AutoRelationConfig::isEnabledFor('Model1'));
         $this->assertTrue(AutoRelationConfig::isEnabledFor('Model2'));
     }

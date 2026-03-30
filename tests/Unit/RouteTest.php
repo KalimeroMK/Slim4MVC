@@ -20,7 +20,7 @@ final class RouteTest extends TestCase
     {
         Route::add('login', '/login');
 
-        $this->assertEquals('/login', Route::url('login'));
+        $this->assertSame('/login', Route::url('login'));
     }
 
     public function test_can_check_if_route_exists(): void
@@ -43,7 +43,7 @@ final class RouteTest extends TestCase
     {
         Route::add('user.show', '/users/{id}');
 
-        $this->assertEquals('/users/123', Route::url('user.show', ['id' => 123]));
+        $this->assertSame('/users/123', Route::url('user.show', ['id' => 123]));
     }
 
     public function test_can_replace_multiple_parameters(): void
@@ -52,7 +52,7 @@ final class RouteTest extends TestCase
 
         $url = Route::url('user.posts.show', ['userId' => 1, 'postId' => 42]);
 
-        $this->assertEquals('/users/1/posts/42', $url);
+        $this->assertSame('/users/1/posts/42', $url);
     }
 
     public function test_can_get_all_routes(): void
@@ -62,7 +62,7 @@ final class RouteTest extends TestCase
 
         $routes = Route::all();
 
-        $this->assertEquals(['login' => '/login', 'register' => '/register'], $routes);
+        $this->assertSame(['login' => '/login', 'register' => '/register'], $routes);
     }
 
     public function test_clear_removes_all_routes(): void
@@ -72,6 +72,6 @@ final class RouteTest extends TestCase
         Route::clear();
 
         $this->assertFalse(Route::has('login'));
-        $this->assertEquals([], Route::all());
+        $this->assertSame([], Route::all());
     }
 }

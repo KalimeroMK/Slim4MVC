@@ -13,19 +13,19 @@ final class RoleFactoryTest extends TestCase
     public function test_factory_creates_role_with_default_attributes(): void
     {
         $roleFactory = new RoleFactory();
-        $model = $roleFactory->create();
+        $role = $roleFactory->create();
 
-        $this->assertInstanceOf(Role::class, $model);
-        $this->assertNotNull($model->id);
-        $this->assertNotNull($model->name);
+        $this->assertInstanceOf(Role::class, $role);
+        $this->assertNotNull($role->id);
+        $this->assertNotNull($role->name);
     }
 
     public function test_factory_creates_role_with_custom_attributes(): void
     {
         $roleFactory = new RoleFactory();
-        $model = $roleFactory->create(['name' => 'custom-role']);
+        $role = $roleFactory->create(['name' => 'custom-role']);
 
-        $this->assertEquals('custom-role', $model->name);
+        $this->assertEquals('custom-role', $role->name);
     }
 
     public function test_factory_with_permissions(): void

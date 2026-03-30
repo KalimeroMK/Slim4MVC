@@ -215,6 +215,7 @@ class MakeModuleCommand extends Command
 
                 continue;
             }
+
             $content = $stubContent;
             foreach ($file['vars'] as $key => $value) {
                 $content = str_replace($key, $value, $content);
@@ -244,6 +245,7 @@ class MakeModuleCommand extends Command
 
                 return;
             }
+
             $content = str_replace(
                 ['{{className}}', '{{tableName}}'],
                 [$className, $tableName],
@@ -269,6 +271,7 @@ class MakeModuleCommand extends Command
 
             return;
         }
+
         $content = $fileContent;
         $providerClass = sprintf('App\Modules\%s\Infrastructure\Providers\%sServiceProvider', $moduleName, $moduleName);
 
@@ -365,6 +368,7 @@ class MakeModuleCommand extends Command
 
             return;
         }
+
         $content = $depsFileContent;
 
         // Collect all use statements to add

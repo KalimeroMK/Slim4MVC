@@ -61,16 +61,16 @@ final class FormRequestTest extends TestCase
             $this->fail('Expected ValidationException was not thrown');
         } catch (ValidationException $validationException) {
             $response = $validationException->getResponse();
-            $this->assertEquals(422, $response->getStatusCode());
+            $this->assertSame(422, $response->getStatusCode());
             $this->assertStringContainsString('errors', (string) $response->getBody());
         }
     }
 
     private function createRequest(array $body): ServerRequestInterface
     {
-        $request = $this->serverRequestFactory->createServerRequest('POST', '/test');
+        $serverRequest = $this->serverRequestFactory->createServerRequest('POST', '/test');
 
-        return $request->withParsedBody($body);
+        return $serverRequest->withParsedBody($body);
     }
 }
 

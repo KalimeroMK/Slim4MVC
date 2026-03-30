@@ -13,42 +13,42 @@ final class UserFactoryTest extends TestCase
     public function test_factory_creates_user_with_default_attributes(): void
     {
         $userFactory = new UserFactory();
-        $model = $userFactory->create();
+        $user = $userFactory->create();
 
-        $this->assertInstanceOf(User::class, $model);
-        $this->assertNotNull($model->id);
-        $this->assertNotNull($model->name);
-        $this->assertNotNull($model->email);
-        $this->assertNotNull($model->password);
-        $this->assertTrue(password_verify('password', $model->password));
+        $this->assertInstanceOf(User::class, $user);
+        $this->assertNotNull($user->id);
+        $this->assertNotNull($user->name);
+        $this->assertNotNull($user->email);
+        $this->assertNotNull($user->password);
+        $this->assertTrue(password_verify('password', $user->password));
     }
 
     public function test_factory_creates_user_with_custom_attributes(): void
     {
         $userFactory = new UserFactory();
-        $model = $userFactory->create([
+        $user = $userFactory->create([
             'name' => 'John Doe',
             'email' => 'john@example.com',
         ]);
 
-        $this->assertEquals('John Doe', $model->name);
-        $this->assertEquals('john@example.com', $model->email);
+        $this->assertEquals('John Doe', $user->name);
+        $this->assertEquals('john@example.com', $user->email);
     }
 
     public function test_factory_unverified_state(): void
     {
         $userFactory = new UserFactory();
-        $model = $userFactory->unverified()->create();
+        $user = $userFactory->unverified()->create();
 
-        $this->assertNull($model->email_verified_at);
+        $this->assertNotInstanceOf(\Illuminate\Support\Carbon::class, $user->email_verified_at);
     }
 
     public function test_factory_with_custom_password(): void
     {
         $userFactory = new UserFactory();
-        $model = $userFactory->withPassword('custom-password')->create();
+        $user = $userFactory->withPassword('custom-password')->create();
 
-        $this->assertTrue(password_verify('custom-password', $model->password));
+        $this->assertTrue(password_verify('custom-password', $user->password));
     }
 
     public function test_factory_with_role(): void

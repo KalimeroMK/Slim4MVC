@@ -34,7 +34,7 @@ final class PermissionRepositoryTest extends TestCase
 
         $found = $this->permissionRepository->find($permission->id);
 
-        $this->assertNotNull($found);
+        $this->assertInstanceOf(\App\Modules\Permission\Infrastructure\Models\Permission::class, $found);
         $this->assertEquals($permission->id, $found->id);
         $this->assertEquals('Test Permission', $found->name);
     }
@@ -74,7 +74,7 @@ final class PermissionRepositoryTest extends TestCase
 
         $found = $this->permissionRepository->findByName('Find Me');
 
-        $this->assertNotNull($found);
+        $this->assertInstanceOf(\App\Modules\Permission\Infrastructure\Models\Permission::class, $found);
         $this->assertEquals($permission->id, $found->id);
     }
 
@@ -82,6 +82,6 @@ final class PermissionRepositoryTest extends TestCase
     {
         $found = $this->permissionRepository->findByName('Nonexistent');
 
-        $this->assertNull($found);
+        $this->assertNotInstanceOf(\App\Modules\Permission\Infrastructure\Models\Permission::class, $found);
     }
 }

@@ -7,7 +7,7 @@ namespace Tests\Unit\Resources;
 use App\Modules\Core\Infrastructure\Http\Resources\Resource;
 use PHPUnit\Framework\TestCase;
 
-class ResourceTest extends TestCase
+final class ResourceTest extends TestCase
 {
     public function test_resource_class_exists(): void
     {

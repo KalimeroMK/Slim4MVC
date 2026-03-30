@@ -92,4 +92,11 @@ abstract class FormRequest
     {
         return $this->messages;
     }
+
+    protected function routeParam(string $name): ?string
+    {
+        $value = $this->request->getAttribute($name);
+
+        return $value !== null ? (string) $value : null;
+    }
 }
