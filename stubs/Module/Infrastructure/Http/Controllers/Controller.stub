@@ -14,9 +14,8 @@ use {{namespace}}\Application\DTOs\Update{{modelName}}DTO;
 use {{namespace}}\Infrastructure\Http\Requests\Create{{modelName}}Request;
 use {{namespace}}\Infrastructure\Http\Requests\Update{{modelName}}Request;
 use {{namespace}}\Infrastructure\Http\Resources\{{modelName}}Resource;
-use App\Modules\Core\Application\Enums\HttpStatusCode;
+use App\Modules\Core\Infrastructure\Http\Controllers\Concerns\HandlesCrudResponses;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Core\Infrastructure\Support\ApiResponse;
 use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -25,6 +24,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class {{modelName}}Controller extends Controller
 {
     use RouteParamsTrait;
+    use HandlesCrudResponses;
+
+    protected ?string $resourceClass = {{modelName}}Resource::class;
 
     public function __construct(
         ContainerInterface $container,
@@ -45,16 +47,7 @@ class {{modelName}}Controller extends Controller
         $params = $this->getPaginationParams();
         $result = $this->listAction->execute($params['page'], $params['perPage']);
 
-        $items = {{modelName}}Resource::collection($result['items']);
-
-        return ApiResponse::paginated(
-            $items,
-            $result['total'],
-            $result['page'],
-            $result['perPage'],
-            HttpStatusCode::OK,
-            $this->getPaginationBaseUrl()
-        );
+        return $this->respondPaginated($result);
     }
 
     /**
@@ -62,54 +55,48 @@ class {{modelName}}Controller extends Controller
      */
     public function store(Create{{modelName}}Request $request, Response $response): Response
     {
-        $data = $request->validated();
-        
-        // Map validated data to DTO
-        // Example: $dto = new Create{{modelName}}DTO(name: $data['name'], ...);
-        $dto = new Create{{modelName}}DTO();
-        
-        ${{lowerModelName}} = $this->createAction->execute($dto);
-
-        return ApiResponse::success(
-            {{modelName}}Resource::make(${{lowerModelName}}),
-            HttpStatusCode::CREATED
+        ${{lowerModelName}} = $this->createAction->execute(
+            Create{{modelName}}DTO::fromRequest($request->validated())
         );
+
+        return $this->respondCreated(${{lowerModelName}});
     }
 
     /**
      * Get a {{lowerModelName}} by ID.
+     *
+     * @param array<string, mixed> $args
      */
-    public function show(Request $request, Response $response, int $id): Response
+    public function show(Request $request, Response $response, array $args): Response
     {
-        ${{lowerModelName}} = $this->getAction->execute($id);
+        ${{lowerModelName}} = $this->getAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success({{modelName}}Resource::make(${{lowerModelName}}));
+        return $this->respondResource(${{lowerModelName}});
     }
 
     /**
      * Update a {{lowerModelName}}.
+     *
+     * @param array<string, mixed> $args
      */
-    public function update(Update{{modelName}}Request $request, Response $response, int $id): Response
+    public function update(Update{{modelName}}Request $request, Response $response, array $args): Response
     {
-        $data = $request->validated();
-        
-        // Map validated data to DTO
-        // Example: $dto = new Update{{modelName}}DTO($id, name: $data['name'] ?? null, ...);
-        $dto = new Update{{modelName}}DTO($id);
-        
-        ${{lowerModelName}} = $this->updateAction->execute($dto);
+        ${{lowerModelName}} = $this->updateAction->execute(
+            Update{{modelName}}DTO::fromRequest($this->getParamAsInt($args, 'id'), $request->validated())
+        );
 
-        return ApiResponse::success({{modelName}}Resource::make(${{lowerModelName}}));
+        return $this->respondUpdated(${{lowerModelName}});
     }
 
     /**
      * Delete a {{lowerModelName}}.
+     *
+     * @param array<string, mixed> $args
      */
-    public function destroy(Request $request, Response $response, int $id): Response
+    public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteAction->execute($id);
+        $this->deleteAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(['message' => '{{modelName}} deleted successfully']);
+        return $this->respondDeleted();
     }
 }
-

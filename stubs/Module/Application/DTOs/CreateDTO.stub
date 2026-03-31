@@ -14,6 +14,22 @@ final class Create{{modelName}}DTO
         // Example: 
         // public readonly string $name,
         // public readonly string $email,
+        // public readonly array $roles = [], // For relation support
     ) {}
-}
 
+    /**
+     * Create DTO from validated request data.
+     *
+     * @param array<string, mixed> $validated
+     */
+    public static function fromRequest(array $validated): self
+    {
+        return new self(
+            // Map validated data to constructor parameters
+            // Example:
+            // name: $validated['name'],
+            // email: $validated['email'],
+            // roles: $validated['roles'] ?? [],
+        );
+    }
+}

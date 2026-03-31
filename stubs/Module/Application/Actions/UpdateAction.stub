@@ -9,10 +9,10 @@ use {{namespace}}\Application\Interfaces\Update{{modelName}}ActionInterface;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
 
-final class Update{{modelName}}Action implements Update{{modelName}}ActionInterface
+final readonly class Update{{modelName}}Action implements Update{{modelName}}ActionInterface
 {
     public function __construct(
-        private readonly {{modelName}}Repository $repository
+        private {{modelName}}Repository $repository
     ) {}
 
     /**
@@ -31,7 +31,13 @@ final class Update{{modelName}}Action implements Update{{modelName}}ActionInterf
         //     $attributes['name'] = $dto->name;
         // }
         
-        return $this->repository->update($dto->id, $attributes);
+        ${{lowerModelName}} = $this->repository->update($dto->id, $attributes);
+
+        // Handle relations if needed (e.g., sync roles, permissions)
+        // Example:
+        // ${{lowerModelName}}->roles()->sync($dto->roles);
+
+        // Load relations for response
+        return ${{lowerModelName}}->load([]);
     }
 }
-

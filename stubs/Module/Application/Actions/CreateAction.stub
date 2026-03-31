@@ -9,10 +9,10 @@ use {{namespace}}\Application\Interfaces\Create{{modelName}}ActionInterface;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
 
-final class Create{{modelName}}Action implements Create{{modelName}}ActionInterface
+final readonly class Create{{modelName}}Action implements Create{{modelName}}ActionInterface
 {
     public function __construct(
-        private readonly {{modelName}}Repository $repository
+        private {{modelName}}Repository $repository
     ) {}
 
     /**
@@ -29,7 +29,15 @@ final class Create{{modelName}}Action implements Create{{modelName}}ActionInterf
             // Example: 'name' => $dto->name,
         ];
         
-        return $this->repository->create($attributes);
+        ${{lowerModelName}} = $this->repository->create($attributes);
+
+        // Handle relations if needed (e.g., sync roles, permissions)
+        // Example:
+        // if ($dto->roles !== []) {
+        //     ${{lowerModelName}}->roles()->sync($dto->roles);
+        // }
+
+        // Load relations for response
+        return ${{lowerModelName}}->load([]);
     }
 }
-

@@ -7,10 +7,10 @@ namespace {{namespace}}\Application\Actions;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 use {{namespace}}\Infrastructure\Repositories\{{modelName}}Repository;
 
-final class Get{{modelName}}Action
+final readonly class Get{{modelName}}Action
 {
     public function __construct(
-        private readonly {{modelName}}Repository $repository
+        private {{modelName}}Repository $repository
     ) {}
 
     /**
@@ -21,7 +21,11 @@ final class Get{{modelName}}Action
      */
     public function execute(int $id): {{modelName}}
     {
-        return $this->repository->findOrFail($id);
+        ${{lowerModelName}} = $this->repository->findOrFail($id);
+        
+        // Load relations if needed
+        // Example: ${{lowerModelName}}->load(['roles', 'permissions']);
+        
+        return ${{lowerModelName}};
     }
 }
-
