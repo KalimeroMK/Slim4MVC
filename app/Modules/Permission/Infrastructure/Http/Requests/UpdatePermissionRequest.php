@@ -10,8 +10,10 @@ class UpdatePermissionRequest extends FormRequest
 {
     protected function rules(): array
     {
+        $id = $this->routeParam('id');
+
         return [
-            'name' => 'required|string|max:20',
+            'name' => "required|string|unique:permissions,name,{$id}|max:20",
         ];
     }
 }

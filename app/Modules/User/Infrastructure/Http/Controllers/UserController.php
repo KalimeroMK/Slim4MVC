@@ -130,7 +130,7 @@ class UserController extends Controller
     )]
     public function show(Request $request, Response $response, array $args): Response
     {
-        $user = $this->getUserAction->execute($args['id']);
+        $user = $this->getUserAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(UserResource::make($user));
     }
@@ -193,7 +193,7 @@ class UserController extends Controller
     )]
     public function destroy(Request $request, Response $response, array $args): Response
     {
-        $this->deleteUserAction->execute($args['id']);
+        $this->deleteUserAction->execute($this->getParamAsInt($args, 'id'));
 
         return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
     }

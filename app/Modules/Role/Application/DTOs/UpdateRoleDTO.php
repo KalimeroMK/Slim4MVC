@@ -18,10 +18,10 @@ final class UpdateRoleDTO
     /**
      * @param  array<string, mixed>  $validated
      */
-    public static function fromRequest(array $validated): self
+    public static function fromRequest(int $id, array $validated): self
     {
         return new self(
-            id: $validated['id'],
+            id: $id,
             name: $validated['name'] ?? '',
             permissions: $validated['permissions'] ?? []
         );

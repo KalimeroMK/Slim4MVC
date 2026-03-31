@@ -84,7 +84,7 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $updateRoleRequest, Response $response, array $args): Response
     {
         $role = $this->updateRoleAction->execute(
-            UpdateRoleDTO::fromRequest($updateRoleRequest->validated())
+            UpdateRoleDTO::fromRequest($this->getParamAsInt($args, 'id'), $updateRoleRequest->validated())
         );
 
         return ApiResponse::success(RoleResource::make($role));
@@ -97,6 +97,6 @@ class RoleController extends Controller
     {
         $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Role deleted successfully');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
     }
 }

@@ -18,3 +18,7 @@ parameters:
         - '#Function route not found#'
         - '#Function url not found#'
         - '#Function asset not found#'
+        # Starter-kit traits are intentionally available for users to opt-in
+        - '#Trait App\\Modules\\Core\\Infrastructure\\Cache\\Cacheable is used zero times#'
+        - '#Trait App\\Modules\\Core\\Infrastructure\\Cache\\RepositoryCacheExample is used zero times#'
+        - '#Trait App\\Modules\\Core\\Infrastructure\\Query\\Filterable is used zero times#'

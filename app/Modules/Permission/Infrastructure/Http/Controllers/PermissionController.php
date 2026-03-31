@@ -84,7 +84,7 @@ class PermissionController extends Controller
     public function update(UpdatePermissionRequest $updatePermissionRequest, Response $response, array $args): Response
     {
         $permission = $this->updatePermissionAction->execute(
-            UpdatePermissionDTO::fromRequest($updatePermissionRequest->validated())
+            UpdatePermissionDTO::fromRequest($this->getParamAsInt($args, 'id'), $updatePermissionRequest->validated())
         );
 
         return ApiResponse::success(PermissionResource::make($permission));
@@ -97,6 +97,6 @@ class PermissionController extends Controller
     {
         $this->deletePermissionAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT, 'Permission deleted successfully');
+        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
     }
 }

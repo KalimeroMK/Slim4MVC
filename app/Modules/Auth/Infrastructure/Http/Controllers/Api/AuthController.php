@@ -16,7 +16,9 @@ use App\Modules\Auth\Infrastructure\Http\Requests\Auth\LoginRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\PasswordRecoveryRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\RegisterRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\ResetPasswordRequest;
+use App\Modules\Core\Application\Enums\HttpStatusCode;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
+use App\Modules\Core\Infrastructure\Support\ApiResponse;
 use OpenApi\Attributes as OA;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -62,13 +64,7 @@ class AuthController extends Controller
             RegisterDTO::fromRequest($registerRequest->validated())
         );
 
-        $json = json_encode([
-            'status' => 'success',
-            'user' => $user,
-        ]);
-        $response->getBody()->write($json !== false ? $json : '{}');
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success($user, HttpStatusCode::CREATED);
     }
 
     #[OA\Post(
@@ -106,10 +102,7 @@ class AuthController extends Controller
             LoginDTO::fromRequest($loginRequest->validated())
         );
 
-        $json = json_encode($result);
-        $response->getBody()->write($json !== false ? $json : '{}');
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success($result);
     }
 
     #[OA\Post(
@@ -136,13 +129,7 @@ class AuthController extends Controller
             PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
-        $json = json_encode([
-            'status' => 'success',
-            'message' => 'Password reset link has been sent to your email',
-        ]);
-        $response->getBody()->write($json !== false ? $json : '{}');
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(null, HttpStatusCode::OK, 'Password reset link has been sent to your email');
     }
 
     #[OA\Post(
@@ -172,12 +159,6 @@ class AuthController extends Controller
             ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
-        $json = json_encode([
-            'status' => 'success',
-            'message' => 'Password has been reset successfully',
-        ]);
-        $response->getBody()->write($json !== false ? $json : '{}');
-
-        return $response->withHeader('Content-Type', 'application/json');
+        return ApiResponse::success(null, HttpStatusCode::OK, 'Password has been reset successfully');
     }
 }

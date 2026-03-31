@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Http\Controllers;
 
 use App\Modules\Core\Application\Actions\Generic\CrudActionFactory;
+use App\Modules\Core\Application\Enums\HttpStatusCode;
 use App\Modules\Core\Infrastructure\Http\Resources\Resource;
 use App\Modules\Core\Infrastructure\Repositories\Repository;
 use App\Modules\Core\Infrastructure\Support\ApiResponse;
@@ -69,6 +70,7 @@ abstract class GenericCrudController extends Controller
      */
     protected int $defaultPerPage = 15;
 
+    /** @var CrudActionFactory<TModel> */
     private CrudActionFactory $crudActionFactory;
 
     public function __construct(ContainerInterface $container)
@@ -101,19 +103,22 @@ abstract class GenericCrudController extends Controller
 
         $items = $this->resourceClass
             ? ($this->resourceClass)::collection($result['items'])
-            : $result['items'];
+            : $result['items']->toArray();
 
         return ApiResponse::paginated(
-            total: $result['total'],
-            page: $result['page'],
-            perPage: $result['perPage'],
-            baseUrl: $this->getPaginationBaseUrl(),
-            items: $items
+            $items,
+            $result['total'],
+            $result['page'],
+            $result['perPage'],
+            HttpStatusCode::OK,
+            $this->getPaginationBaseUrl()
         );
     }
 
     /**
      * Show a single resource.
+     *
+     * @param  array<string, mixed>  $args
      */
     public function show(Request $request, Response $response, array $args): Response
     {
@@ -141,7 +146,8 @@ abstract class GenericCrudController extends Controller
      */
     public function store(Request $request, Response $response): Response
     {
-        $data = $request->getParsedBody() ?? [];
+        $body = $request->getParsedBody();
+        $data = is_array($body) ? $body : [];
 
         // Filter to fillable fields if specified
         if ($this->fillable !== []) {
@@ -164,6 +170,8 @@ abstract class GenericCrudController extends Controller
 
     /**
      * Update an existing resource.
+     *
+     * @param  array<string, mixed>  $args
      */
     public function update(Request $request, Response $response, array $args): Response
     {
@@ -173,7 +181,8 @@ abstract class GenericCrudController extends Controller
             return ApiResponse::error('ID is required', 400);
         }
 
-        $data = $request->getParsedBody() ?? [];
+        $body = $request->getParsedBody();
+        $data = is_array($body) ? $body : [];
 
         // Filter to fillable fields if specified
         if ($this->fillable !== []) {
@@ -196,6 +205,8 @@ abstract class GenericCrudController extends Controller
 
     /**
      * Delete a resource.
+     *
+     * @param  array<string, mixed>  $args
      */
     public function destroy(Request $request, Response $response, array $args): Response
     {
@@ -212,6 +223,8 @@ abstract class GenericCrudController extends Controller
 
     /**
      * Get the action factory (for custom methods).
+     *
+     * @return CrudActionFactory<TModel>
      */
     protected function actions(): CrudActionFactory
     {

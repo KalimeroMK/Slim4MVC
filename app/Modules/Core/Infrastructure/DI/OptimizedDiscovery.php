@@ -40,7 +40,7 @@ final readonly class OptimizedDiscovery
     /**
      * Build DI definitions from discovered interfaces.
      *
-     * @return array<class-string, object>
+     * @return array<string, object>
      */
     public function buildDefinitions(): array
     {
@@ -178,11 +178,12 @@ final readonly class OptimizedDiscovery
     /**
      * Scan modules for interfaces and their implementations.
      *
-     * @return array<class-string, object>
+     * @return array<string, object>
      */
     private function scanModules(): array
     {
         $definitions = [];
+        /** @var array<string, string> $interfaces */
         $interfaces = [];
 
         // Step 1: Find all interface files
@@ -220,6 +221,7 @@ final readonly class OptimizedDiscovery
 
         // Step 2: Find implementations for each interface
         foreach (array_keys($interfaces) as $interfaceName) {
+            /** @var class-string $interfaceName */
             $implementation = $this->findImplementation($interfaceName);
 
             if ($implementation !== null) {
@@ -335,6 +337,7 @@ final readonly class OptimizedDiscovery
 
                     /** @phpstan-ignore-next-line */
                     if ($reflection->implementsInterface($interfaceName) && !$reflection->isAbstract()) {
+                        /** @var class-string $className */
                         return $className;
                     }
                 } catch (ReflectionException) {
