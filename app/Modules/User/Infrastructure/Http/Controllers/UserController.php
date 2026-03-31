@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\User\Infrastructure\Http\Controllers;
 
-use App\Modules\Core\Application\Enums\HttpStatusCode;
+use App\Modules\Core\Infrastructure\Http\Controllers\Concerns\HandlesCrudResponses;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Core\Infrastructure\Support\ApiResponse;
 use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
 use App\Modules\User\Application\Actions\CreateUserAction;
 use App\Modules\User\Application\Actions\DeleteUserAction;
@@ -33,6 +32,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class UserController extends Controller
 {
     use RouteParamsTrait;
+    use HandlesCrudResponses;
+
+    protected ?string $resourceClass = UserResource::class;
 
     public function __construct(
         ContainerInterface $container,
@@ -64,16 +66,7 @@ class UserController extends Controller
         $params = $this->getPaginationParams();
         $result = $this->listUsersAction->execute($params['page'], $params['perPage']);
 
-        $items = UserResource::collection($result['items']);
-
-        return ApiResponse::paginated(
-            $items,
-            $result['total'],
-            $result['page'],
-            $result['perPage'],
-            HttpStatusCode::OK,
-            $this->getPaginationBaseUrl()
-        );
+        return $this->respondPaginated($result);
     }
 
     #[OA\Post(
@@ -99,16 +92,13 @@ class UserController extends Controller
             new OA\Response(response: 422, description: 'Validation error'),
         ]
     )]
-    public function store(CreateUserRequest $createUserRequest, Response $response): Response
+    public function store(CreateUserRequest $request, Response $response): Response
     {
         $user = $this->createUserAction->execute(
-            CreateUserDTO::fromRequest($createUserRequest->validated())
+            CreateUserDTO::fromRequest($request->validated())
         );
 
-        // Load relationships for resource
-        $user->load('roles');
-
-        return ApiResponse::success(UserResource::make($user), HttpStatusCode::CREATED);
+        return $this->respondCreated($user);
     }
 
     /**
@@ -132,7 +122,7 @@ class UserController extends Controller
     {
         $user = $this->getUserAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(UserResource::make($user));
+        return $this->respondResource($user);
     }
 
     /**
@@ -162,16 +152,13 @@ class UserController extends Controller
             new OA\Response(response: 404, description: 'User not found'),
         ]
     )]
-    public function update(UpdateUserRequest $updateUserRequest, Response $response, array $args): Response
+    public function update(UpdateUserRequest $request, Response $response, array $args): Response
     {
         $user = $this->updateUserAction->execute(
-            UpdateUserDTO::fromRequest((int) $args['id'], $updateUserRequest->validated())
+            UpdateUserDTO::fromRequest((int) $args['id'], $request->validated())
         );
 
-        // Load relationships for resource
-        $user->load('roles');
-
-        return ApiResponse::success(UserResource::make($user));
+        return $this->respondUpdated($user);
     }
 
     /**
@@ -195,6 +182,6 @@ class UserController extends Controller
     {
         $this->deleteUserAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
+        return $this->respondDeleted();
     }
 }

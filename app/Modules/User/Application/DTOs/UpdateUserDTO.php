@@ -6,11 +6,15 @@ namespace App\Modules\User\Application\DTOs;
 
 class UpdateUserDTO
 {
+    /**
+     * @param  list<int>|list<string>  $roles
+     */
     public function __construct(
         public int $id,
         public ?string $name = null,
         public ?string $email = null,
         public ?string $password = null,
+        public array $roles = [],
     ) {}
 
     /**
@@ -23,6 +27,7 @@ class UpdateUserDTO
             name: $validated['name'] ?? null,
             email: $validated['email'] ?? null,
             password: $validated['password'] ?? null,
+            roles: $validated['roles'] ?? [],
         );
     }
 }

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Permission\Infrastructure\Http\Controllers;
 
-use App\Modules\Core\Application\Enums\HttpStatusCode;
+use App\Modules\Core\Infrastructure\Http\Controllers\Concerns\HandlesCrudResponses;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Core\Infrastructure\Support\ApiResponse;
 use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
 use App\Modules\Permission\Application\Actions\CreatePermissionAction;
 use App\Modules\Permission\Application\Actions\DeletePermissionAction;
@@ -25,6 +24,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class PermissionController extends Controller
 {
     use RouteParamsTrait;
+    use HandlesCrudResponses;
+
+    protected ?string $resourceClass = PermissionResource::class;
 
     public function __construct(
         ContainerInterface $container,
@@ -47,25 +49,16 @@ class PermissionController extends Controller
         $params = $this->getPaginationParams();
         $result = $this->listPermissionAction->execute($params['page'], $params['perPage']);
 
-        $items = PermissionResource::collection($result['items']);
-
-        return ApiResponse::paginated(
-            $items,
-            $result['total'],
-            $result['page'],
-            $result['perPage'],
-            HttpStatusCode::OK,
-            $this->getPaginationBaseUrl()
-        );
+        return $this->respondPaginated($result);
     }
 
-    public function store(CreatePermissionRequest $createPermissionRequest, Response $response): Response
+    public function store(CreatePermissionRequest $request, Response $response): Response
     {
         $permission = $this->createPermissionAction->execute(
-            CreatePermissionDTO::fromRequest($createPermissionRequest->validated())
+            CreatePermissionDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success(PermissionResource::make($permission), HttpStatusCode::CREATED);
+        return $this->respondCreated($permission);
     }
 
     /**
@@ -75,19 +68,19 @@ class PermissionController extends Controller
     {
         $permission = $this->getPermissionAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(PermissionResource::make($permission));
+        return $this->respondResource($permission);
     }
 
     /**
      * @param  array<string, mixed>  $args
      */
-    public function update(UpdatePermissionRequest $updatePermissionRequest, Response $response, array $args): Response
+    public function update(UpdatePermissionRequest $request, Response $response, array $args): Response
     {
         $permission = $this->updatePermissionAction->execute(
-            UpdatePermissionDTO::fromRequest($this->getParamAsInt($args, 'id'), $updatePermissionRequest->validated())
+            UpdatePermissionDTO::fromRequest($this->getParamAsInt($args, 'id'), $request->validated())
         );
 
-        return ApiResponse::success(PermissionResource::make($permission));
+        return $this->respondUpdated($permission);
     }
 
     /**
@@ -97,6 +90,6 @@ class PermissionController extends Controller
     {
         $this->deletePermissionAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
+        return $this->respondDeleted();
     }
 }

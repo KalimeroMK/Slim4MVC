@@ -5,22 +5,40 @@ declare(strict_types=1);
 namespace App\Modules\Permission\Infrastructure\Http\Controllers\Web;
 
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Permission\Infrastructure\Models\Permission;
+use App\Modules\Core\Infrastructure\Support\Route;
+use App\Modules\Permission\Application\Actions\CreatePermissionAction;
+use App\Modules\Permission\Application\Actions\DeletePermissionAction;
+use App\Modules\Permission\Application\Actions\GetPermissionAction;
+use App\Modules\Permission\Application\Actions\ListPermissionAction;
+use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
+use App\Modules\Permission\Application\DTOs\CreatePermissionDTO;
+use App\Modules\Permission\Application\DTOs\UpdatePermissionDTO;
+use App\Modules\Permission\Infrastructure\Http\Requests\Web\CreatePermissionRequest;
+use App\Modules\Permission\Infrastructure\Http\Requests\Web\UpdatePermissionRequest;
 use App\Modules\Role\Infrastructure\Models\Role;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use RuntimeException;
 
 class PermissionController extends Controller
 {
+    public function __construct(
+        ContainerInterface $container,
+        private readonly CreatePermissionAction $createPermissionAction,
+        private readonly UpdatePermissionAction $updatePermissionAction,
+        private readonly DeletePermissionAction $deletePermissionAction,
+        private readonly GetPermissionAction $getPermissionAction,
+        private readonly ListPermissionAction $listPermissionAction
+    ) {
+        parent::__construct($container);
+    }
+
     /**
      * Display all permissions.
      */
     public function index(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
-        $permissions = Permission::with('roles')->get();
-        /** @phpstan-ignore-next-line */
+        $permissions = $this->listPermissionAction->execute(1, 100)['items'];
         $roles = Role::all();
 
         return view('admin.permissions.index', $response, [
@@ -34,7 +52,6 @@ class PermissionController extends Controller
      */
     public function create(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
         $roles = Role::all();
 
         return view('admin.permissions.create', $response, [
@@ -45,31 +62,13 @@ class PermissionController extends Controller
     /**
      * Store new permission.
      */
-    public function store(Request $request, Response $response): Response
+    public function store(CreatePermissionRequest $request, Response $response): Response
     {
-        /** @var array<string, mixed> $data */
-        $data = $request->getParsedBody();
+        $this->createPermissionAction->execute(
+            CreatePermissionDTO::fromRequest($request->validated())
+        );
 
-        if (empty($data['name'])) {
-            throw new RuntimeException('Permission name is required');
-        }
-
-        /** @phpstan-ignore-next-line */
-        if (Permission::where('name', $data['name'])->exists()) {
-            throw new RuntimeException('Permission already exists');
-        }
-
-        /** @phpstan-ignore-next-line */
-        $permission = Permission::create([
-            'name' => $data['name'],
-        ]);
-
-        // Attach roles if provided
-        if (! empty($data['roles'])) {
-            $permission->roles()->sync($data['roles']);
-        }
-
-        return $this->redirect('/admin/permissions');
+        return $this->redirect(Route::url('admin.permissions.index'));
     }
 
     /**
@@ -77,9 +76,7 @@ class PermissionController extends Controller
      */
     public function edit(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $permission = Permission::with('roles')->findOrFail($id);
-        /** @phpstan-ignore-next-line */
+        $permission = $this->getPermissionAction->execute($id);
         $roles = Role::all();
 
         return view('admin.permissions.edit', $response, [
@@ -91,28 +88,13 @@ class PermissionController extends Controller
     /**
      * Update permission.
      */
-    public function update(Request $request, Response $response, int $id): Response
+    public function update(UpdatePermissionRequest $request, Response $response, int $id): Response
     {
-        /** @var array<string, mixed> $data */
-        $data = $request->getParsedBody();
-        /** @phpstan-ignore-next-line */
-        $permission = Permission::findOrFail($id);
+        $this->updatePermissionAction->execute(
+            UpdatePermissionDTO::fromRequest($id, $request->validated())
+        );
 
-        // Update name
-        if (! empty($data['name']) && $data['name'] !== $permission->name) {
-            /** @phpstan-ignore-next-line */
-            if (Permission::where('name', $data['name'])->where('id', '!=', $id)->exists()) {
-                throw new RuntimeException('Permission name already taken');
-            }
-
-            $permission->name = $data['name'];
-            $permission->save();
-        }
-
-        // Sync roles
-        $permission->roles()->sync($data['roles'] ?? []);
-
-        return $this->redirect('/admin/permissions');
+        return $this->redirect(Route::url('admin.permissions.index'));
     }
 
     /**
@@ -120,10 +102,8 @@ class PermissionController extends Controller
      */
     public function delete(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $permission = Permission::findOrFail($id);
-        $permission->delete();
+        $this->deletePermissionAction->execute($id);
 
-        return $this->redirect('/admin/permissions');
+        return $this->redirect(Route::url('admin.permissions.index'));
     }
 }

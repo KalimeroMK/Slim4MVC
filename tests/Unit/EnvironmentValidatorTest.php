@@ -263,7 +263,10 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertArrayHasKey('message', $summary);
         $this->assertArrayHasKey('errors', $summary);
         $this->assertEquals('Configuration Error', $summary['error']);
-        $this->assertEquals(['JWT_SECRET is required'], $summary['errors']);
+        $this->assertEquals(
+            [['field' => 'JWT_SECRET', 'message' => 'JWT_SECRET is required']],
+            $summary['errors']
+        );
     }
 
     public function test_configuration_exception_getDetailedMessage(): void

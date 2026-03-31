@@ -18,6 +18,7 @@ use App\Modules\Auth\Infrastructure\Http\Requests\Auth\RegisterRequest;
 use App\Modules\Auth\Infrastructure\Http\Requests\Auth\ResetPasswordRequest;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
 use App\Modules\Core\Infrastructure\Support\AuthHelper;
+use App\Modules\Core\Infrastructure\Support\Route;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -64,7 +65,7 @@ class AuthController extends Controller
             RegisterDTO::fromRequest($registerRequest->validated())
         );
 
-        return $this->redirect('/login');
+        return $this->redirect(Route::url('login'));
     }
 
     public function login(LoginRequest $loginRequest, Response $response): Response
@@ -74,9 +75,9 @@ class AuthController extends Controller
                 LoginDTO::fromRequest($loginRequest->validated())
             );
 
-            return $this->redirect('/dashboard');
+            return $this->redirect(Route::url('dashboard'));
         } catch (RuntimeException) {
-            return $this->redirect('/login?error=invalid_credentials');
+            return $this->redirect(Route::url('login') . '?error=invalid_credentials');
         }
     }
 
@@ -84,7 +85,7 @@ class AuthController extends Controller
     {
         AuthHelper::logout();
 
-        return $this->redirect('/');
+        return $this->redirect(Route::url('home'));
     }
 
     public function sendPasswordResetLink(PasswordRecoveryRequest $passwordRecoveryRequest, Response $response): Response
@@ -93,7 +94,7 @@ class AuthController extends Controller
             PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
-        return $this->redirect('/login?message=password_reset_sent');
+        return $this->redirect(Route::url('login') . '?message=password_reset_sent');
     }
 
     public function updatePassword(ResetPasswordRequest $resetPasswordRequest, Response $response): Response
@@ -102,6 +103,6 @@ class AuthController extends Controller
             ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
-        return $this->redirect('/login?message=password_reset_success');
+        return $this->redirect(Route::url('login') . '?message=password_reset_success');
     }
 }

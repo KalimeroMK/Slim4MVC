@@ -11,3 +11,5 @@
 .env.example.backup
 .rector.cache/
 **/.DS_Store
+.phpstorm.meta.php
+.phpunit.cache

@@ -33,6 +33,11 @@ final readonly class UpdateUserAction implements UpdateUserActionInterface
             $attributes['password'] = password_hash($updateUserDTO->password, PASSWORD_BCRYPT);
         }
 
-        return $this->userRepository->update($updateUserDTO->id, $attributes);
+        $user = $this->userRepository->update($updateUserDTO->id, $attributes);
+
+        // Sync roles if provided
+        $user->roles()->sync($updateUserDTO->roles);
+
+        return $user->load('roles');
     }
 }

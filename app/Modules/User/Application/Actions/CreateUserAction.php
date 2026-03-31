@@ -27,6 +27,11 @@ final readonly class CreateUserAction implements CreateUserActionInterface
             'password' => password_hash($createUserDTO->password, PASSWORD_BCRYPT),
         ]);
 
-        return $user;
+        // Sync roles if provided
+        if ($createUserDTO->roles !== []) {
+            $user->roles()->sync($createUserDTO->roles);
+        }
+
+        return $user->load('roles');
     }
 }

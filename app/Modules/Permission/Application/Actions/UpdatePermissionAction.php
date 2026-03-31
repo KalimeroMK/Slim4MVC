@@ -27,9 +27,12 @@ final readonly class UpdatePermissionAction implements UpdatePermissionActionInt
 
         $this->permissionRepository->update($updatePermissionDTO->id, $attributes);
 
-        /** @var Permission|null $permission */
-        $permission = Permission::find($updatePermissionDTO->id);
+        /** @var Permission $permission */
+        $permission = Permission::findOrFail($updatePermissionDTO->id);
 
-        return $permission ?? new Permission();
+        // Sync roles if provided
+        $permission->roles()->sync($updatePermissionDTO->roles);
+
+        return $permission->load('roles');
     }
 }

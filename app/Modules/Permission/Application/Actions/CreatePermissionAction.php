@@ -25,6 +25,11 @@ final readonly class CreatePermissionAction implements CreatePermissionActionInt
             'name' => $createPermissionDTO->name,
         ]);
 
-        return $permission;
+        // Sync roles if provided
+        if ($createPermissionDTO->roles !== []) {
+            $permission->roles()->sync($createPermissionDTO->roles);
+        }
+
+        return $permission->load('roles');
     }
 }

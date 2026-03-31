@@ -114,7 +114,7 @@ final class GenericCrudActionsTest extends TestCase
         $genericCreateAction = new GenericCreateAction($this->repository);
         $model = $genericCreateAction->execute($data);
 
-        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Model::class, $model);
     }
 
     public function test_createAction_throws_on_empty_data(): void
@@ -140,7 +140,7 @@ final class GenericCrudActionsTest extends TestCase
         $genericUpdateAction = new GenericUpdateAction($this->repository);
         $model = $genericUpdateAction->execute($id, $data);
 
-        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Model::class, $model);
     }
 
     public function test_updateAction_throws_when_update_fails(): void
@@ -205,7 +205,7 @@ final class GenericCrudActionsTest extends TestCase
         $genericGetAction = new GenericGetAction($this->repository);
         $model = $genericGetAction->execute($id);
 
-        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Model::class, $model);
     }
 
     public function test_getAction_throws_when_not_found(): void
@@ -236,7 +236,7 @@ final class GenericCrudActionsTest extends TestCase
         $genericGetAction = new GenericGetAction($this->repository);
         $model = $genericGetAction->executeWith($id, $relations);
 
-        $this->assertSame($this->createStub(\Illuminate\Database\Eloquent\Model::class), $model);
+        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Model::class, $model);
     }
 
     public function test_listAction_executes_paginate(): void

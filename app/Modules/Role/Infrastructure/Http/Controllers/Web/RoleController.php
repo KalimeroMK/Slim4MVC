@@ -5,22 +5,40 @@ declare(strict_types=1);
 namespace App\Modules\Role\Infrastructure\Http\Controllers\Web;
 
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
+use App\Modules\Core\Infrastructure\Support\Route;
 use App\Modules\Permission\Infrastructure\Models\Permission;
-use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\Role\Application\Actions\CreateRoleAction;
+use App\Modules\Role\Application\Actions\DeleteRoleAction;
+use App\Modules\Role\Application\Actions\GetRoleAction;
+use App\Modules\Role\Application\Actions\ListRolesAction;
+use App\Modules\Role\Application\Actions\UpdateRoleAction;
+use App\Modules\Role\Application\DTOs\CreateRoleDTO;
+use App\Modules\Role\Application\DTOs\UpdateRoleDTO;
+use App\Modules\Role\Infrastructure\Http\Requests\Web\CreateRoleRequest;
+use App\Modules\Role\Infrastructure\Http\Requests\Web\UpdateRoleRequest;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use RuntimeException;
 
 class RoleController extends Controller
 {
+    public function __construct(
+        ContainerInterface $container,
+        private readonly CreateRoleAction $createRoleAction,
+        private readonly UpdateRoleAction $updateRoleAction,
+        private readonly DeleteRoleAction $deleteRoleAction,
+        private readonly GetRoleAction $getRoleAction,
+        private readonly ListRolesAction $listRolesAction
+    ) {
+        parent::__construct($container);
+    }
+
     /**
      * Display all roles.
      */
     public function index(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
-        $roles = Role::with('permissions')->get();
-        /** @phpstan-ignore-next-line */
+        $roles = $this->listRolesAction->execute(1, 100)['items'];
         $permissions = Permission::all();
 
         return view('admin.roles.index', $response, [
@@ -34,7 +52,6 @@ class RoleController extends Controller
      */
     public function create(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
         $permissions = Permission::all();
 
         return view('admin.roles.create', $response, [
@@ -45,31 +62,13 @@ class RoleController extends Controller
     /**
      * Store new role.
      */
-    public function store(Request $request, Response $response): Response
+    public function store(CreateRoleRequest $request, Response $response): Response
     {
-        /** @var array<string, mixed> $data */
-        $data = $request->getParsedBody();
+        $this->createRoleAction->execute(
+            CreateRoleDTO::fromRequest($request->validated())
+        );
 
-        if (empty($data['name'])) {
-            throw new RuntimeException('Role name is required');
-        }
-
-        /** @phpstan-ignore-next-line */
-        if (Role::where('name', $data['name'])->exists()) {
-            throw new RuntimeException('Role already exists');
-        }
-
-        /** @phpstan-ignore-next-line */
-        $role = Role::create([
-            'name' => $data['name'],
-        ]);
-
-        // Attach permissions if provided
-        if (! empty($data['permissions'])) {
-            $role->permissions()->sync($data['permissions']);
-        }
-
-        return $this->redirect('/admin/roles');
+        return $this->redirect(Route::url('admin.roles.index'));
     }
 
     /**
@@ -77,9 +76,7 @@ class RoleController extends Controller
      */
     public function edit(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $role = Role::with('permissions')->findOrFail($id);
-        /** @phpstan-ignore-next-line */
+        $role = $this->getRoleAction->execute($id);
         $permissions = Permission::all();
 
         return view('admin.roles.edit', $response, [
@@ -91,28 +88,13 @@ class RoleController extends Controller
     /**
      * Update role.
      */
-    public function update(Request $request, Response $response, int $id): Response
+    public function update(UpdateRoleRequest $request, Response $response, int $id): Response
     {
-        /** @var array<string, mixed> $data */
-        $data = $request->getParsedBody();
-        /** @phpstan-ignore-next-line */
-        $role = Role::findOrFail($id);
+        $this->updateRoleAction->execute(
+            UpdateRoleDTO::fromRequest($id, $request->validated())
+        );
 
-        // Update name
-        if (! empty($data['name']) && $data['name'] !== $role->name) {
-            /** @phpstan-ignore-next-line */
-            if (Role::where('name', $data['name'])->where('id', '!=', $id)->exists()) {
-                throw new RuntimeException('Role name already taken');
-            }
-
-            $role->name = $data['name'];
-            $role->save();
-        }
-
-        // Sync permissions
-        $role->permissions()->sync($data['permissions'] ?? []);
-
-        return $this->redirect('/admin/roles');
+        return $this->redirect(Route::url('admin.roles.index'));
     }
 
     /**
@@ -120,16 +102,8 @@ class RoleController extends Controller
      */
     public function delete(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $role = Role::findOrFail($id);
+        $this->deleteRoleAction->execute($id);
 
-        /** @phpstan-ignore-next-line */
-        if ($role->name === 'admin' && Role::count() === 1) {
-            throw new RuntimeException('Cannot delete the only admin role');
-        }
-
-        $role->delete();
-
-        return $this->redirect('/admin/roles');
+        return $this->redirect(Route::url('admin.roles.index'));
     }
 }

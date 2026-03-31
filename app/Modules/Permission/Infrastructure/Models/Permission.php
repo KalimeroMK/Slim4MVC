@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property \Carbon\Carbon|null $updated_at
  *
  * @method static static|null find(int $id)
+ * @method static static findOrFail(int $id)
  * @method static \Illuminate\Database\Eloquent\Builder<self> where(string $column, mixed $operator = null, mixed $value = null)
  * @method static static|null first()
  * @method static static create(array<string, mixed> $attributes)

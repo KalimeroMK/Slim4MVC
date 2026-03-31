@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Modules\Role\Infrastructure\Http\Controllers;
 
-use App\Modules\Core\Application\Enums\HttpStatusCode;
+use App\Modules\Core\Infrastructure\Http\Controllers\Concerns\HandlesCrudResponses;
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
-use App\Modules\Core\Infrastructure\Support\ApiResponse;
 use App\Modules\Core\Infrastructure\Traits\RouteParamsTrait;
 use App\Modules\Role\Application\Actions\CreateRoleAction;
 use App\Modules\Role\Application\Actions\DeleteRoleAction;
@@ -25,6 +24,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 class RoleController extends Controller
 {
     use RouteParamsTrait;
+    use HandlesCrudResponses;
+
+    protected ?string $resourceClass = RoleResource::class;
 
     public function __construct(
         ContainerInterface $container,
@@ -47,25 +49,16 @@ class RoleController extends Controller
         $params = $this->getPaginationParams();
         $result = $this->listRolesAction->execute($params['page'], $params['perPage']);
 
-        $items = RoleResource::collection($result['items']);
-
-        return ApiResponse::paginated(
-            $items,
-            $result['total'],
-            $result['page'],
-            $result['perPage'],
-            HttpStatusCode::OK,
-            $this->getPaginationBaseUrl()
-        );
+        return $this->respondPaginated($result);
     }
 
-    public function store(CreateRoleRequest $createRoleRequest, Response $response): Response
+    public function store(CreateRoleRequest $request, Response $response): Response
     {
         $role = $this->createRoleAction->execute(
-            CreateRoleDTO::fromRequest($createRoleRequest->validated())
+            CreateRoleDTO::fromRequest($request->validated())
         );
 
-        return ApiResponse::success(RoleResource::make($role), HttpStatusCode::CREATED);
+        return $this->respondCreated($role);
     }
 
     /**
@@ -75,19 +68,19 @@ class RoleController extends Controller
     {
         $role = $this->getRoleAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(RoleResource::make($role));
+        return $this->respondResource($role);
     }
 
     /**
      * @param  array<string, mixed>  $args
      */
-    public function update(UpdateRoleRequest $updateRoleRequest, Response $response, array $args): Response
+    public function update(UpdateRoleRequest $request, Response $response, array $args): Response
     {
         $role = $this->updateRoleAction->execute(
-            UpdateRoleDTO::fromRequest($this->getParamAsInt($args, 'id'), $updateRoleRequest->validated())
+            UpdateRoleDTO::fromRequest($this->getParamAsInt($args, 'id'), $request->validated())
         );
 
-        return ApiResponse::success(RoleResource::make($role));
+        return $this->respondUpdated($role);
     }
 
     /**
@@ -97,6 +90,6 @@ class RoleController extends Controller
     {
         $this->deleteRoleAction->execute($this->getParamAsInt($args, 'id'));
 
-        return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
+        return $this->respondDeleted();
     }
 }

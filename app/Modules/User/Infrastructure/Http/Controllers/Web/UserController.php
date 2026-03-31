@@ -5,25 +5,42 @@ declare(strict_types=1);
 namespace App\Modules\User\Infrastructure\Http\Controllers\Web;
 
 use App\Modules\Core\Infrastructure\Http\Controllers\Controller;
+use App\Modules\Core\Infrastructure\Support\Route;
 use App\Modules\Role\Infrastructure\Models\Role;
+use App\Modules\User\Application\Actions\CreateUserAction;
+use App\Modules\User\Application\Actions\DeleteUserAction;
+use App\Modules\User\Application\Actions\GetUserAction;
+use App\Modules\User\Application\Actions\ListUsersAction;
+use App\Modules\User\Application\Actions\UpdateUserAction;
+use App\Modules\User\Application\DTOs\CreateUserDTO;
+use App\Modules\User\Application\DTOs\UpdateUserDTO;
 use App\Modules\User\Infrastructure\Http\Requests\Web\CreateUserRequest;
 use App\Modules\User\Infrastructure\Http\Requests\Web\UpdatePasswordRequest;
 use App\Modules\User\Infrastructure\Http\Requests\Web\UpdateUserRequest;
-use App\Modules\User\Infrastructure\Models\User;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use RuntimeException;
 
 class UserController extends Controller
 {
+    public function __construct(
+        ContainerInterface $container,
+        private readonly CreateUserAction $createUserAction,
+        private readonly UpdateUserAction $updateUserAction,
+        private readonly DeleteUserAction $deleteUserAction,
+        private readonly GetUserAction $getUserAction,
+        private readonly ListUsersAction $listUsersAction
+    ) {
+        parent::__construct($container);
+    }
+
     /**
      * Display all users.
      */
     public function index(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
-        $users = User::with('roles')->get();
-        /** @phpstan-ignore-next-line */
+        $users = $this->listUsersAction->execute(1, 100)['items'];
         $roles = Role::all();
 
         return view('admin.users.index', $response, [
@@ -37,7 +54,6 @@ class UserController extends Controller
      */
     public function create(Request $request, Response $response): Response
     {
-        /** @phpstan-ignore-next-line */
         $roles = Role::all();
 
         return view('admin.users.create', $response, [
@@ -48,22 +64,13 @@ class UserController extends Controller
     /**
      * Store new user.
      */
-    public function store(CreateUserRequest $createUserRequest, Response $response): Response
+    public function store(CreateUserRequest $request, Response $response): Response
     {
-        $data = $createUserRequest->validated();
+        $this->createUserAction->execute(
+            CreateUserDTO::fromRequest($request->validated())
+        );
 
-        /** @phpstan-ignore-next-line */
-        $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
-            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
-        ]);
-
-        if (! empty($data['roles'])) {
-            $user->roles()->sync($data['roles']);
-        }
-
-        return $this->redirect('/admin/users');
+        return $this->redirect(Route::url('admin.users.index'));
     }
 
     /**
@@ -71,9 +78,7 @@ class UserController extends Controller
      */
     public function edit(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $user = User::with('roles')->findOrFail($id);
-        /** @phpstan-ignore-next-line */
+        $user = $this->getUserAction->execute($id);
         $roles = Role::all();
 
         return view('admin.users.edit', $response, [
@@ -85,39 +90,25 @@ class UserController extends Controller
     /**
      * Update user.
      */
-    public function update(UpdateUserRequest $updateUserRequest, Response $response, int $id): Response
+    public function update(UpdateUserRequest $request, Response $response, int $id): Response
     {
-        $data = $updateUserRequest->validated();
+        $this->updateUserAction->execute(
+            UpdateUserDTO::fromRequest($id, $request->validated())
+        );
 
-        /** @phpstan-ignore-next-line */
-        $user = User::findOrFail($id);
-
-        if (! empty($data['name'])) {
-            $user->name = $data['name'];
-        }
-
-        if (! empty($data['email'])) {
-            $user->email = $data['email'];
-        }
-
-        $user->save();
-
-        $user->roles()->sync($data['roles'] ?? []);
-
-        return $this->redirect('/admin/users');
+        return $this->redirect(Route::url('admin.users.index'));
     }
 
     /**
      * Update user password.
      */
-    public function updatePassword(UpdatePasswordRequest $updatePasswordRequest, Response $response, int $id): Response
+    public function updatePassword(UpdatePasswordRequest $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $user = User::findOrFail($id);
-        $user->password = password_hash($updatePasswordRequest->validated()['password'], PASSWORD_BCRYPT);
-        $user->save();
+        $this->updateUserAction->execute(
+            UpdateUserDTO::fromRequest($id, ['password' => $request->validated()['password']])
+        );
 
-        return $this->redirect('/admin/users');
+        return $this->redirect(Route::url('admin.users.index'));
     }
 
     /**
@@ -125,17 +116,15 @@ class UserController extends Controller
      */
     public function delete(Request $request, Response $response, int $id): Response
     {
-        /** @phpstan-ignore-next-line */
-        $user = User::findOrFail($id);
         $currentUser = $this->getCurrentUser();
 
         if ($currentUser && $currentUser['id'] === $id) {
             throw new RuntimeException('Cannot delete your own account');
         }
 
-        $user->delete();
+        $this->deleteUserAction->execute($id);
 
-        return $this->redirect('/admin/users');
+        return $this->redirect(Route::url('admin.users.index'));
     }
 
     /**
