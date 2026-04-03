@@ -14,9 +14,7 @@ class PermissionPolicy extends \App\Modules\Core\Infrastructure\Policies\Policy
      */
     public function view(User $user, Permission $permission): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('view-permission');
-        return true;
+        return $user->hasPermission('view-permissions');
     }
 
     /**
@@ -24,9 +22,7 @@ class PermissionPolicy extends \App\Modules\Core\Infrastructure\Policies\Policy
      */
     public function create(User $user): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('create-permission');
-        return true;
+        return $user->hasPermission('create-permissions');
     }
 
     /**
@@ -34,9 +30,7 @@ class PermissionPolicy extends \App\Modules\Core\Infrastructure\Policies\Policy
      */
     public function update(User $user, Permission $permission): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('update-permission') || $user->id === $permission->user_id;
-        return true;
+        return $user->hasPermission('edit-permissions');
     }
 
     /**
@@ -44,8 +38,6 @@ class PermissionPolicy extends \App\Modules\Core\Infrastructure\Policies\Policy
      */
     public function delete(User $user, Permission $permission): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('delete-permission');
-        return true;
+        return $user->hasPermission('delete-permissions');
     }
 }

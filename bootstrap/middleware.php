@@ -7,6 +7,7 @@ use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ClearFlashDataMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\CsrfMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\SecurityHeadersMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ValidationExceptionMiddleware;
 use App\Modules\Core\Infrastructure\Support\RequestResolver;
 use Illuminate\Validation\Factory;
@@ -80,6 +81,9 @@ return function ($app, DI\Container $container): void {
     $container->set(AuthMiddleware::class, fn (): AuthMiddleware => new AuthMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class)));
 
     $container->set(AuthWebMiddleware::class, fn (): AuthWebMiddleware => new AuthWebMiddleware($container->get(App\Modules\Core\Infrastructure\Support\Auth::class)));
+
+    // Add security headers to all responses
+    $app->add(new SecurityHeadersMiddleware());
 
     // Add flash data clearing (outermost - executes last)
     $app->add(new ClearFlashDataMiddleware());

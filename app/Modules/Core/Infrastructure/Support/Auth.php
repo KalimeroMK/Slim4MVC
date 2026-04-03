@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Support;
 
 use App\Modules\User\Infrastructure\Models\User;
+use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -55,18 +56,16 @@ class Auth
 
         $this->session->migrate(true);
 
-        // Store user data in session
+        // Store user data in session via Symfony Session
         $userData = [
-            'id' => $user->id,
+            'id'    => $user->id,
             'email' => $user->email,
-            'name' => $user->name,
+            'name'  => $user->name,
         ];
         $this->session->set('user', $userData);
 
-        // Also store in native $_SESSION for AuthHelper compatibility
-        $_SESSION['user_id'] = $user->id;
-        $_SESSION['user_email'] = $user->email;
-        $_SESSION['user_name'] = $user->name;
+        // Sync to AuthHelper (sets $_SESSION keys for Blade template compatibility)
+        AuthHelper::setUser($userData);
 
         $this->session->save();
 
@@ -76,7 +75,7 @@ class Auth
     public function logout(): void
     {
         $this->session->remove('user');
-        unset($_SESSION['user_id'], $_SESSION['user_email'], $_SESSION['user_name']);
+        AuthHelper::logout();
     }
 
     public function user(): ?User

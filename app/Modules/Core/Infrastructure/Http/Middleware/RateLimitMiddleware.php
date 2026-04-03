@@ -15,10 +15,18 @@ class RateLimitMiddleware implements MiddlewareInterface
     /** @var array<string, array{count: int, start: int}> */
     private array $requests = [];
 
+    /** @var list<string> */
+    private readonly array $trustedProxies;
+
     public function __construct(
         private readonly int $maxRequests = 60,
         private readonly int $windowSeconds = 60
-    ) {}
+    ) {
+        $raw = $_ENV['TRUSTED_PROXIES'] ?? '';
+        $this->trustedProxies = $raw !== ''
+            ? array_map('trim', explode(',', $raw))
+            : [];
+    }
 
     public function process(Request $request, Handler $handler): Response
     {
@@ -59,18 +67,22 @@ class RateLimitMiddleware implements MiddlewareInterface
 
     private function getIdentifier(Request $request): string
     {
-        // Use IP address as identifier
         $serverParams = $request->getServerParams();
-        $ip = $serverParams['REMOTE_ADDR'] ?? 'unknown';
+        $remoteAddr = (string) ($serverParams['REMOTE_ADDR'] ?? 'unknown');
 
-        // If behind proxy, check X-Forwarded-For
-        $forwardedFor = $request->getHeaderLine('X-Forwarded-For');
-        if ($forwardedFor !== '' && $forwardedFor !== '0') {
-            $ips = explode(',', $forwardedFor);
-            $ip = mb_trim($ips[0]);
+        // Only trust X-Forwarded-For when the request comes from a known proxy
+        if ($this->trustedProxies !== [] && in_array($remoteAddr, $this->trustedProxies, true)) {
+            $forwardedFor = $request->getHeaderLine('X-Forwarded-For');
+            if ($forwardedFor !== '') {
+                $ips = explode(',', $forwardedFor);
+                $clientIp = mb_trim($ips[0]);
+                if (filter_var($clientIp, FILTER_VALIDATE_IP) !== false) {
+                    return $clientIp;
+                }
+            }
         }
 
-        return $ip;
+        return $remoteAddr;
     }
 
     private function isRateLimited(string $identifier, int $now): bool

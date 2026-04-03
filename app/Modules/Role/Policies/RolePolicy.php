@@ -15,9 +15,7 @@ class RolePolicy extends Policy
      */
     public function view(User $user, Role $role): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('view-role');
-        return true;
+        return $user->hasPermission('view-roles');
     }
 
     /**
@@ -25,9 +23,7 @@ class RolePolicy extends Policy
      */
     public function create(User $user): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('create-role');
-        return true;
+        return $user->hasPermission('create-roles');
     }
 
     /**
@@ -35,9 +31,7 @@ class RolePolicy extends Policy
      */
     public function update(User $user, Role $role): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('update-role') || $user->id === $role->user_id;
-        return true;
+        return $user->hasPermission('edit-roles');
     }
 
     /**
@@ -45,8 +39,6 @@ class RolePolicy extends Policy
      */
     public function delete(User $user, Role $role): bool
     {
-        // Add your authorization logic here
-        // Example: return $user->hasPermission('delete-role');
-        return true;
+        return $user->hasPermission('delete-roles');
     }
 }
