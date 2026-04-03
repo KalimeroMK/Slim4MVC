@@ -10,7 +10,8 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Authentication System** - JWT-based API auth and session-based web auth
 - **Authorization** - Role and permission-based access control with middleware and policies
 - **Form Request Validation** - Laravel-style validation with automatic error handling
-- **Rate Limiting** - Built-in protection against brute force attacks
+- **Rate Limiting** - Built-in protection against brute force attacks with trusted proxy support
+- **Security Headers** - Automatic `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` and more via `SecurityHeadersMiddleware`
 - **CORS Support** - Configurable CORS middleware for API endpoints
 - **Error Logging** - PSR-3 compatible logging with Monolog
 - **API Resources** - Consistent API response formatting with Resource classes
@@ -432,6 +433,14 @@ $app->post('/api/endpoint', [Controller::class, 'method'])
     ->add($rateLimit);
 ```
 
+When running behind a load balancer or reverse proxy, set `TRUSTED_PROXIES` in `.env` so the real client IP is used for rate limiting instead of the proxy IP:
+
+```env
+TRUSTED_PROXIES=10.0.0.1,10.0.0.2
+```
+
+`X-Forwarded-For` is only trusted when `REMOTE_ADDR` matches a listed proxy, and the extracted IP is validated before use.
+
 ## 🌐 CORS Configuration
 
 CORS is configured globally in `bootstrap/middleware.php`. Configure allowed origins in `.env`:
@@ -716,6 +725,9 @@ MAIL_ENCRYPTION=tls
 
 # CORS
 CORS_ORIGINS=*
+
+# Trusted Proxies (comma-separated IPs — set when behind a load balancer/reverse proxy)
+TRUSTED_PROXIES=
 
 # Cache
 CACHE_DRIVER=redis
