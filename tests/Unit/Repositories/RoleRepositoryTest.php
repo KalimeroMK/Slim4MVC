@@ -65,7 +65,10 @@ final class RoleRepositoryTest extends TestCase
         $result = $this->roleRepository->delete($role->id);
 
         $this->assertTrue($result);
-        $this->assertDatabaseMissing('roles', ['id' => $role->id]);
+        // Soft delete: record remains in DB with deleted_at set
+        $this->assertDatabaseHas('roles', ['id' => $role->id]);
+        $this->assertNotNull(Role::withTrashed()->find($role->id)?->deleted_at);
+        $this->assertNull(Role::find($role->id));
     }
 
     public function test_find_by_name_returns_role(): void

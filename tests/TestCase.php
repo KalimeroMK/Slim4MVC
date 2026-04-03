@@ -117,7 +117,8 @@ abstract class TestCase extends BaseTestCase
                 password_reset_token VARCHAR(255) NULL,
                 email_verified_at DATETIME NULL,
                 created_at DATETIME NULL,
-                updated_at DATETIME NULL
+                updated_at DATETIME NULL,
+                deleted_at DATETIME NULL
             )
         ');
 
@@ -127,7 +128,8 @@ abstract class TestCase extends BaseTestCase
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name VARCHAR(255) NOT NULL UNIQUE,
                 created_at DATETIME NULL,
-                updated_at DATETIME NULL
+                updated_at DATETIME NULL,
+                deleted_at DATETIME NULL
             )
         ');
 

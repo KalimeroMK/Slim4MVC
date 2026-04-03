@@ -32,8 +32,11 @@ final class DeleteUserActionTest extends TestCase
         $userId = $user->id;
         $this->deleteUserAction->execute($userId);
 
-        $this->assertDatabaseMissing('users', ['id' => $userId]);
-        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, User::find($userId));
+        // Soft delete: record remains in DB with deleted_at set
+        $this->assertDatabaseHas('users', ['id' => $userId]);
+        $this->assertNotNull(User::withTrashed()->find($userId)?->deleted_at);
+        // Regular find() returns null for soft-deleted records
+        $this->assertNull(User::find($userId));
     }
 
     public function test_execute_throws_exception_when_user_not_found(): void
