@@ -12,11 +12,13 @@ final class AuthHelperTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        AuthHelper::logout();
         $_SESSION = [];
     }
 
     protected function tearDown(): void
     {
+        AuthHelper::logout();
         $_SESSION = [];
         parent::tearDown();
     }
