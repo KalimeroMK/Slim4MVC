@@ -37,14 +37,21 @@ COPY docker/www.conf /usr/local/etc/php-fpm.d/www.conf
 # Set working directory
 WORKDIR /var/www/html
 
-# Create storage directories
+# Create storage directories (build-time; entrypoint re-applies perms at runtime for WSL)
 RUN mkdir -p /var/www/html/storage/cache/view \
+    /var/www/html/storage/cache/data \
     /var/www/html/storage/logs \
     /var/www/html/storage/queue \
     /var/www/html/storage/sessions \
-    && chown -R www-data:www-data /var/www/html/storage
+    && chown -R www-data:www-data /var/www/html/storage \
+    && chmod -R 775 /var/www/html/storage
+
+# Entrypoint fixes storage permissions on WSL where volume mounts override build chown
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose PHP-FPM port
 EXPOSE 9000
 
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
