@@ -40,6 +40,49 @@ A modern, production-ready starter kit for building web applications with Slim F
 
 ## 🛠️ Installation
 
+### Quick Start (Recommended)
+
+Use the **`start-local`** command to automatically setup everything:
+
+```bash
+# Clone the repository
+git clone https://github.com/KalimeroMK/Slim4MVC
+cd Slim4MVC
+
+# Start everything with one command
+./slim start-local
+```
+
+This single command will:
+1. 📋 Copy `.env.example` to `.env`
+2. 🔐 Generate secure JWT secret key
+3. 📦 Run `composer update`
+4. 🐳 Start Docker containers (nginx, php, db, redis)
+5. 🗄️ Run database migrations
+6. 🌱 Seed the database with initial data
+
+The application will be available at [http://localhost](http://localhost)
+
+#### Start-Local Options
+
+```bash
+# Rebuild Docker containers
+./slim start-local -r
+
+# Force regenerate .env (WARNING: overwrites existing .env)
+./slim start-local -f
+
+# Skip database seeding
+./slim start-local --no-seed
+
+# Show help
+./slim start-local --help
+```
+
+### Manual Installation
+
+If you prefer to set up everything manually:
+
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/KalimeroMK/Slim4MVC
@@ -299,6 +342,9 @@ php run_migrations.php refresh
 ### Available Commands
 
 ```bash
+# Quick start - setup entire development environment
+php slim start-local [-f] [-r] [--no-seed]
+
 # Module creation
 php slim make:module <ModuleName> [--model=<ModelName>] [--migration]
 
@@ -310,6 +356,9 @@ php slim make:controller <ControllerName>
 
 # Request creation
 php slim make:request <Namespace/RequestName> [--model=<ModelName>] [--type=<create|update>]
+
+# JWT Key generation
+php slim jwt:key:generate [-f]
 
 # Database seeding
 php slim seed:database

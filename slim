@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 use App\Console\Commands\CacheClearCommand;
 use App\Console\Commands\CreateControllerCommand;
+use App\Console\Commands\JwtKeyGenerateCommand;
 use App\Console\Commands\GenerateSwaggerCommand;
 use App\Console\Commands\ListRoutesCommand;
 use App\Console\Commands\MakeModelCommand;
@@ -16,6 +17,7 @@ use App\Console\Commands\QueueRetryCommand;
 use App\Console\Commands\QueueStatsCommand;
 use App\Console\Commands\QueueWorkCommand;
 use App\Console\Commands\SeedDatabaseCommand;
+use App\Console\Commands\StartLocalCommand;
 use DI\ContainerBuilder;
 use Slim\Factory\AppFactory;
 use Symfony\Component\Console\Application;
@@ -57,6 +59,8 @@ $application->add(new QueueFlushCommand());
 $application->add(new SeedDatabaseCommand());
 $application->add(new GenerateSwaggerCommand());
 $application->add(new CacheClearCommand());
+$application->add(new JwtKeyGenerateCommand());
+$application->add(new StartLocalCommand());
 
 // Run the console application
 $application->run();
