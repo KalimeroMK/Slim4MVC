@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Validation;
 
 use RuntimeException;
+use Throwable;
 
 /**
  * Exception thrown when environment configuration validation fails.
@@ -12,12 +13,12 @@ use RuntimeException;
 class ConfigurationException extends RuntimeException
 {
     /**
-     * @param array<int, string> $errors
+     * @param  array<int, string>  $errors
      */
-    public function __construct(private readonly array $errors, int $code = 0, ?\Throwable $previous = null)
+    public function __construct(private readonly array $errors, int $code = 0, ?Throwable $previous = null)
     {
-        $message = "Configuration validation failed:\n" . implode("\n", array_map(
-            fn (string $error): string => '  - ' . $error,
+        $message = "Configuration validation failed:\n".implode("\n", array_map(
+            fn (string $error): string => '  - '.$error,
             $this->errors
         ));
 
@@ -47,7 +48,7 @@ class ConfigurationException extends RuntimeException
         ];
 
         foreach ($this->errors as $error) {
-            $lines[] = '  ❌ ' . $error;
+            $lines[] = '  ❌ '.$error;
         }
 
         $lines[] = '';

@@ -20,6 +20,11 @@ use Psr\Http\Message\ResponseInterface as Response;
 trait HandlesCrudResponses
 {
     /**
+     * Get the base URL for pagination links.
+     */
+    abstract protected function getPaginationBaseUrl(): string;
+
+    /**
      * Return a paginated response.
      *
      * @param  array{items: array<int, mixed>, total: int, page: int, perPage: int}  $result
@@ -92,9 +97,4 @@ trait HandlesCrudResponses
     {
         return ApiResponse::success(null, HttpStatusCode::NO_CONTENT);
     }
-
-    /**
-     * Get the base URL for pagination links.
-     */
-    abstract protected function getPaginationBaseUrl(): string;
 }

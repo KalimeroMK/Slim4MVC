@@ -10,8 +10,9 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Authentication System** - JWT-based API auth and session-based web auth
 - **Authorization** - Role and permission-based access control with middleware and policies
 - **Form Request Validation** - Laravel-style validation with automatic error handling
-- **Rate Limiting** - Built-in protection against brute force attacks with trusted proxy support
-- **Security Headers** - Automatic `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` and more via `SecurityHeadersMiddleware`
+- **Rate Limiting** - Distributed rate limiting via Redis/File cache (shared across PHP-FPM workers) with trusted proxy support
+- **Security Headers** - Automatic CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` and more via `SecurityHeadersMiddleware`
+- **Request Size Limits** - Automatic 10MB payload limit (configurable) to prevent large-body attacks
 - **CORS Support** - Configurable CORS middleware for API endpoints
 - **Error Logging** - PSR-3 compatible logging with Monolog
 - **API Resources** - Consistent API response formatting with Resource classes
@@ -21,7 +22,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
 - **API Query Builder** - Filter, sort, search with operators and pagination
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (286+ tests, 599+ assertions)
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (572+ tests, 1348+ assertions)
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -472,12 +473,17 @@ public function update(Request $request, Response $response, int $id): Response
 
 ## ⚡ Rate Limiting
 
-Rate limiting is automatically applied to authentication endpoints (5 requests per minute). You can apply it to any route:
+Rate limiting uses a distributed cache backend (Redis recommended, File fallback) so limits are shared across all PHP-FPM workers. Applied automatically to auth endpoints (5 requests per minute). You can apply it to any route:
 
 ```php
 use App\Modules\Core\Infrastructure\Http\Middleware\RateLimitMiddleware;
+use App\Modules\Core\Infrastructure\Cache\CacheInterface;
 
-$rateLimit = new RateLimitMiddleware(10, 60); // 10 requests per 60 seconds
+$rateLimit = new RateLimitMiddleware(
+    $container->get(CacheInterface::class),
+    maxRequests: 10,
+    windowSeconds: 60
+);
 $app->post('/api/endpoint', [Controller::class, 'method'])
     ->add($rateLimit);
 ```
@@ -654,7 +660,7 @@ The project includes a comprehensive test suite covering:
 
 | Suite | Tests | Description |
 |-------|-------|-------------|
-| **Unit** | 404+ | Isolated component tests |
+| **Unit** | 500+ | Isolated component tests |
 | **Integration** | 63+ | Database and service integration |
 | **Feature** | 21+ | End-to-end API tests |
 | **Edge Cases** | 18+ | Boundary and unusual scenarios |
@@ -709,8 +715,8 @@ composer test
 
 ### Test Coverage
 
-- ✅ 475+ tests
-- ✅ 900+ assertions
+- ✅ 572+ tests
+- ✅ 1348+ assertions
 - ✅ All new features tested
 - ✅ Edge cases covered
 - ✅ Integration with real database
@@ -1234,6 +1240,7 @@ class UserController extends GenericCrudController
 **Benefits:**
 - **87% less code**
 - **67% faster development**
+- **Secure by default** — empty `$fillable` rejects all data; permission-based auth guards
 - Automatic pagination, relations, and validation
 - Backwards compatible with existing controllers
 
@@ -1242,14 +1249,18 @@ See [Migration Guide](docs/MIGRATION_GUIDE.md) for detailed migration instructio
 ## 🔒 Security Features
 
 - ✅ Password hashing with bcrypt
-- ✅ JWT token authentication (API)
+- ✅ JWT token authentication (API) with minimum 32-char secret validation
 - ✅ Session-based authentication (Web)
 - ✅ CSRF protection for web routes
-- ✅ Rate limiting on auth endpoints (5 requests/minute)
-- ✅ Rate limiting on all API endpoints (configurable)
+- ✅ Distributed rate limiting via Cache (Redis/File) — shared across all workers
+- ✅ Request body size limiting (10MB default, 413 on exceed)
+- ✅ Content Security Policy (CSP) headers
+- ✅ Secure by default — `GenericCrudController` rejects all data when `$fillable` is empty
+- ✅ Permission-based authorization guards on all CRUD operations
 - ✅ Input validation with FormRequest
 - ✅ SQL injection protection (Eloquent ORM)
-- ✅ XSS protection (Blade templating)
+- ✅ XSS protection (Blade templating with escaped session data)
+- ✅ Sensitive session data filtering (passwords, tokens never exposed to views)
 - ✅ Secure session handling
 - ✅ Cookie encryption (AES-256-CBC) for sensitive data
 - ✅ Centralized exception handling with proper error responses

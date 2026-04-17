@@ -15,6 +15,8 @@ class CreateRoleTable
             $table->id();
             $table->string('name')->unique();
             $table->timestamps();
+
+            $table->index('name');
         });
     }
 

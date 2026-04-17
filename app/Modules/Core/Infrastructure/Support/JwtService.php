@@ -27,14 +27,18 @@ class JwtService
      *
      * @throws RuntimeException If secret is not configured
      */
-    public function __construct(?string $secret = null, private readonly string $algorithm = 'HS256')
+    public function __construct(string $secret, private readonly string $algorithm = 'HS256')
     {
         $this->jwtEncoder = new JwtEncoder();
         $this->jwtDecoder = new JwtDecoder();
-        $this->secret = $secret ?? $_ENV['JWT_SECRET'] ?? '';
+        $this->secret = $secret;
 
         if ($this->secret === '' || $this->secret === '0') {
-            throw new RuntimeException('JWT_SECRET is not configured');
+            throw new RuntimeException('JWT secret cannot be empty');
+        }
+
+        if (mb_strlen($this->secret) < 32) {
+            throw new RuntimeException('JWT secret must be at least 32 characters long for security');
         }
     }
 

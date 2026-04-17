@@ -13,8 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @template TModel of Model
  *
- * @param TModel|Collection<int, TModel> $models
- * @param list<string>|string $relations
+ * @param  TModel|Collection<int, TModel>  $models
+ * @param  list<string>|string  $relations
  * @return TModel|Collection<int, TModel>
  */
 function preload(Model|Collection $models, array|string $relations): Model|Collection
@@ -31,8 +31,8 @@ function preload(Model|Collection $models, array|string $relations): Model|Colle
  *
  * @template TModel of Model
  *
- * @param Collection<int, TModel> $models
- * @param list<string>|string $relations
+ * @param  Collection<int, TModel>  $models
+ * @param  list<string>|string  $relations
  * @return Collection<int, TModel>
  */
 function preload_missing(Collection $models, array|string $relations): Collection
@@ -45,7 +45,7 @@ function preload_missing(Collection $models, array|string $relations): Collectio
  */
 function enable_auto_eager_loading(): void
 {
-    \App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::enableGlobally();
+    App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::enableGlobally();
 }
 
 /**
@@ -53,7 +53,7 @@ function enable_auto_eager_loading(): void
  */
 function disable_auto_eager_loading(): void
 {
-    \App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::disableGlobally();
+    App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::disableGlobally();
 }
 
 /**
@@ -62,15 +62,15 @@ function disable_auto_eager_loading(): void
  */
 function detect_lazy_loading(): void
 {
-    \App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::enableLazyLoadingDetection();
+    App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig::enableLazyLoadingDetection();
 }
 
 /**
  * Clear relation cache for a model or all models.
  *
- * @param class-string<Model>|null $modelClass
+ * @param  class-string<Model>|null  $modelClass
  */
 function clear_relation_cache(?string $modelClass = null): void
 {
-    \App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations::clearRelationCache($modelClass);
+    App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations::clearRelationCache($modelClass);
 }

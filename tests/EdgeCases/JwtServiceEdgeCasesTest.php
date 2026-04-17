@@ -6,10 +6,11 @@ namespace Tests\EdgeCases;
 
 use App\Modules\Core\Infrastructure\Support\AdvancedJwtService;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * Edge case tests for Advanced JWT Service.
- * 
+ *
  * @group edge-case
  */
 final class JwtServiceEdgeCasesTest extends TestCase
@@ -22,8 +23,6 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->validSecret = bin2hex(random_bytes(32));
     }
 
-    /**
-     */
     public function test_it_handles_zero_user_id(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -33,8 +32,6 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->assertEquals('0', $payload->sub);
     }
 
-    /**
-     */
     public function test_it_handles_negative_user_id(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -44,8 +41,6 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->assertEquals('-1', $payload->sub);
     }
 
-    /**
-     */
     public function test_it_handles_empty_claims_array(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -55,14 +50,12 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->assertEquals('1', $payload->sub);
     }
 
-    /**
-     */
     public function test_it_handles_unicode_in_claims(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
             'message' => 'Hello 世界 🌍',
-            'name' => 'José García'
+            'name' => 'José García',
         ]);
 
         $payload = $advancedJwtService->decode($token);
@@ -70,8 +63,6 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->assertEquals('José García', $payload->name);
     }
 
-    /**
-     */
     public function test_it_handles_very_large_ttl(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -81,22 +72,18 @@ final class JwtServiceEdgeCasesTest extends TestCase
         $this->assertGreaterThan(time() + 30000000, $payload->exp);
     }
 
-    /**
-     */
     public function test_it_handles_array_claims(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
             'roles' => ['admin', 'user', 'editor'],
-            'permissions' => ['read', 'write', 'delete']
+            'permissions' => ['read', 'write', 'delete'],
         ]);
 
         $payload = $advancedJwtService->decode($token);
         $this->assertSame(['admin', 'user', 'editor'], (array) $payload->roles);
     }
 
-    /**
-     */
     public function test_it_rejects_base64_garbage(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -108,18 +95,16 @@ final class JwtServiceEdgeCasesTest extends TestCase
         ];
 
         foreach ($garbageTokens as $garbageToken) {
-            $this->assertFalse($advancedJwtService->verify($garbageToken), 'Token should be invalid: ' . $garbageToken);
+            $this->assertFalse($advancedJwtService->verify($garbageToken), 'Token should be invalid: '.$garbageToken);
         }
     }
 
-    /**
-     */
     public function test_it_handles_concurrent_token_generation(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $tokens = [];
 
-        for ($i = 0; $i < 100; ++$i) {
+        for ($i = 0; $i < 100; $i++) {
             $tokens[] = $advancedJwtService->generateAccessToken(userId: $i);
         }
 
@@ -132,33 +117,27 @@ final class JwtServiceEdgeCasesTest extends TestCase
         }
     }
 
-    /**
-     */
     public function test_it_handles_very_long_claim_values(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $longValue = str_repeat('a', 10000);
 
         $token = $advancedJwtService->generateAccessToken(userId: 1, claims: [
-            'long_value' => $longValue
+            'long_value' => $longValue,
         ]);
 
         $payload = $advancedJwtService->decode($token);
         $this->assertEquals($longValue, $payload->long_value);
     }
 
-    /**
-     */
     public function test_it_handles_null_algorithm_gracefully(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unsupported algorithm');
 
         new AdvancedJwtService($this->validSecret, 'NONE');
     }
 
-    /**
-     */
     public function test_it_gets_info_for_malformed_tokens(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
@@ -167,7 +146,7 @@ final class JwtServiceEdgeCasesTest extends TestCase
 
         foreach ($malformedTokens as $malformedToken) {
             $info = $advancedJwtService->getTokenInfo($malformedToken);
-            $this->assertFalse($info['valid'], "Token should be invalid");
+            $this->assertFalse($info['valid'], 'Token should be invalid');
             $this->assertArrayHasKey('error', $info);
         }
     }

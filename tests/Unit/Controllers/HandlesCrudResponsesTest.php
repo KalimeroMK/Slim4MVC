@@ -18,11 +18,6 @@ class TestCrudController
 
     protected ?string $resourceClass = TestResource::class;
 
-    protected function getPaginationBaseUrl(): string
-    {
-        return '/api/test';
-    }
-
     // Expose protected methods for testing
     public function testRespondPaginated(array $result, ?string $resourceClass = null): ResponseInterface
     {
@@ -47,6 +42,11 @@ class TestCrudController
     public function testRespondDeleted(): ResponseInterface
     {
         return $this->respondDeleted();
+    }
+
+    protected function getPaginationBaseUrl(): string
+    {
+        return '/api/test';
     }
 }
 

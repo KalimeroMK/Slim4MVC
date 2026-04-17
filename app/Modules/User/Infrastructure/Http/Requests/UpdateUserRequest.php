@@ -13,9 +13,9 @@ class UpdateUserRequest extends FormRequest
         $id = $this->routeParam('id');
 
         return [
-            'name'                  => 'nullable|string|max:255',
-            'email'                 => 'nullable|email|unique:users,email,' . $id,
-            'password'              => 'nullable|string|min:8|confirmed',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,'.$id,
+            'password' => 'nullable|string|min:8|confirmed',
             'password_confirmation' => 'nullable|string',
         ];
     }

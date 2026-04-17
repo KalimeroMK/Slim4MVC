@@ -8,9 +8,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Feature tests for Environment Validation in HTTP context.
- * 
+ *
  * Tests the actual HTTP responses when validation fails.
- * 
+ *
  * @group feature
  */
 final class EnvironmentValidationFeatureTest extends TestCase
@@ -29,8 +29,6 @@ final class EnvironmentValidationFeatureTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     */
     public function test_it_returns_detailed_message_for_cli(): void
     {
         $_ENV = [
@@ -43,8 +41,6 @@ final class EnvironmentValidationFeatureTest extends TestCase
         \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_shows_production_checks_for_production_environment(): void
     {
         $_ENV = [
@@ -67,8 +63,6 @@ final class EnvironmentValidationFeatureTest extends TestCase
         }
     }
 
-    /**
-     */
     public function test_it_passes_validation_with_complete_configuration(): void
     {
         $_ENV = [
@@ -88,12 +82,10 @@ final class EnvironmentValidationFeatureTest extends TestCase
 
         // Should not throw
         \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
-        
+
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_detects_common_weak_secrets(): void
     {
         $weakSecrets = [
@@ -116,15 +108,13 @@ final class EnvironmentValidationFeatureTest extends TestCase
 
             try {
                 \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
-                $this->fail('Should reject weak secret: ' . $weakSecret);
+                $this->fail('Should reject weak secret: '.$weakSecret);
             } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $e) {
                 $this->assertStringContainsString('weak', strtolower($e->getMessage()));
             }
         }
     }
 
-    /**
-     */
     public function test_it_generates_summary_with_all_fields(): void
     {
         $_ENV = [
@@ -150,8 +140,6 @@ final class EnvironmentValidationFeatureTest extends TestCase
         $this->assertArrayHasKey('warnings', $summary);
     }
 
-    /**
-     */
     public function test_it_returns_warnings_for_improvements(): void
     {
         $_ENV = [

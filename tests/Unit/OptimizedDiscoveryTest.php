@@ -40,7 +40,7 @@ final class OptimizedDiscoveryTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_buildDefinitions_returns_array(): void
+    public function test_build_definitions_returns_array(): void
     {
         $optimizedDiscovery = new OptimizedDiscovery();
         $definitions = $optimizedDiscovery->buildDefinitions();
@@ -48,7 +48,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertIsArray($definitions);
     }
 
-    public function test_buildDefinitions_creates_cache_file(): void
+    public function test_build_definitions_creates_cache_file(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
@@ -58,7 +58,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertFileExists($this->cacheFile);
     }
 
-    public function test_shouldUseCache_returns_false_when_no_cache(): void
+    public function test_should_use_cache_returns_false_when_no_cache(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
@@ -66,7 +66,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
-    public function test_shouldUseCache_returns_true_when_cache_exists_in_production(): void
+    public function test_should_use_cache_returns_true_when_cache_exists_in_production(): void
     {
         $_ENV['APP_ENV'] = 'production';
 
@@ -77,7 +77,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertTrue($optimizedDiscovery->shouldUseCache());
     }
 
-    public function test_shouldUseCache_returns_false_for_expired_cache_in_development(): void
+    public function test_should_use_cache_returns_false_for_expired_cache_in_development(): void
     {
         $_ENV['APP_ENV'] = 'local';
 
@@ -89,7 +89,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
-    public function test_warmCache_returns_stats(): void
+    public function test_warm_cache_returns_stats(): void
     {
         $optimizedDiscovery = new OptimizedDiscovery();
         $result = $optimizedDiscovery->warmCache();
@@ -101,7 +101,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $result['duration']);
     }
 
-    public function test_clearCache_removes_cache_file(): void
+    public function test_clear_cache_removes_cache_file(): void
     {
         // Create cache file
         file_put_contents($this->cacheFile, '<?php return [];');
@@ -114,7 +114,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertFileDoesNotExist($this->cacheFile);
     }
 
-    public function test_clearCache_returns_false_when_no_cache(): void
+    public function test_clear_cache_returns_false_when_no_cache(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
@@ -124,7 +124,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function test_getStats_returns_expected_structure(): void
+    public function test_get_stats_returns_expected_structure(): void
     {
         $optimizedDiscovery = new OptimizedDiscovery();
         $stats = $optimizedDiscovery->getStats();
@@ -158,7 +158,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertIsArray($cachedDefinitions);
     }
 
-    public function test_buildDefinitions_uses_cache_when_valid(): void
+    public function test_build_definitions_uses_cache_when_valid(): void
     {
         $_ENV['APP_ENV'] = 'production';
 
@@ -173,7 +173,7 @@ final class OptimizedDiscoveryTest extends TestCase
         $this->assertTrue($newDiscovery->shouldUseCache());
     }
 
-    public function test_getCacheFile_returns_correct_path(): void
+    public function test_get_cache_file_returns_correct_path(): void
     {
         $path = OptimizedDiscovery::getCacheFile();
 

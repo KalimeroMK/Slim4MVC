@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Edge case tests for Environment Validator.
- * 
+ *
  * @group edge-case
  */
 final class EnvironmentValidatorEdgeCasesTest extends TestCase
@@ -29,8 +29,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     */
     public function test_it_handles_very_long_jwt_secret(): void
     {
         $_ENV = [
@@ -46,8 +44,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_handles_unicode_in_env_values(): void
     {
         $_ENV = [
@@ -63,8 +59,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_handles_exactly_32_char_secret(): void
     {
         $_ENV = [
@@ -80,8 +74,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_rejects_31_char_secret(): void
     {
         $_ENV = [
@@ -99,8 +91,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_handles_special_chars_in_db_password(): void
     {
         $_ENV = [
@@ -116,8 +106,6 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_handles_zero_user_id(): void
     {
         $_ENV = [

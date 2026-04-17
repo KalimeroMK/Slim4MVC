@@ -27,8 +27,8 @@ final readonly class RegisterAction implements RegisterActionInterface
         /** @var User $user */
         $user = Capsule::connection()->transaction(function () use ($registerDTO): User {
             $user = $this->userRepository->create([
-                'name'     => $registerDTO->name,
-                'email'    => $registerDTO->email,
+                'name' => $registerDTO->name,
+                'email' => $registerDTO->email,
                 'password' => password_hash($registerDTO->password, PASSWORD_BCRYPT),
             ]);
 

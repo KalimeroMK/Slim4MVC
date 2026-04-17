@@ -13,14 +13,15 @@ use App\Modules\Core\Application\Actions\Generic\GenericUpdateAction;
 use App\Modules\Core\Infrastructure\Exceptions\NotFoundException;
 use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
+use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for Generic CRUD Actions.
- * 
+ *
  * Tests with real database interactions.
- * 
+ *
  * @covers \App\Modules\Core\Application\Actions\Generic\CrudActionFactory
  * @covers \App\Modules\Core\Application\Actions\Generic\GenericCreateAction
  * @covers \App\Modules\Core\Application\Actions\Generic\GenericUpdateAction
@@ -35,30 +36,28 @@ final class GenericCrudIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Skip if no database available or tables don't exist
         try {
             $this->userRepository = new UserRepository();
             // Try to query to check if table exists
             User::first();
-        } catch (\Exception $exception) {
-            $this->markTestSkipped('Database not available or tables not created: ' . $exception->getMessage());
+        } catch (Exception $exception) {
+            $this->markTestSkipped('Database not available or tables not created: '.$exception->getMessage());
         }
     }
 
-    /**
-     */
     public function test_it_creates_entity_through_generic_action(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericCreateAction = new GenericCreateAction($this->userRepository);
 
         $data = [
             'name' => 'Test User',
-            'email' => 'test_' . uniqid() . '@example.com',
+            'email' => 'test_'.uniqid().'@example.com',
             'password' => 'password123',
         ];
 
@@ -73,19 +72,17 @@ final class GenericCrudIntegrationTest extends TestCase
         $model->delete();
     }
 
-    /**
-     */
     public function test_it_updates_entity_through_generic_action(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         // First create a user
         $genericCreateAction = new GenericCreateAction($this->userRepository);
         $model = $genericCreateAction->execute([
             'name' => 'Original Name',
-            'email' => 'update_' . uniqid() . '@example.com',
+            'email' => 'update_'.uniqid().'@example.com',
             'password' => 'password123',
         ]);
 
@@ -99,19 +96,17 @@ final class GenericCrudIntegrationTest extends TestCase
         $updated->delete();
     }
 
-    /**
-     */
     public function test_it_deletes_entity_through_generic_action(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         // First create a user
         $genericCreateAction = new GenericCreateAction($this->userRepository);
         $model = $genericCreateAction->execute([
             'name' => 'To Delete',
-            'email' => 'delete_' . uniqid() . '@example.com',
+            'email' => 'delete_'.uniqid().'@example.com',
             'password' => 'password123',
         ]);
 
@@ -122,24 +117,22 @@ final class GenericCrudIntegrationTest extends TestCase
 
         // Verify deletion
         $genericGetAction = new GenericGetAction($this->userRepository);
-        
+
         $this->expectException(NotFoundException::class);
         $genericGetAction->execute($userId);
     }
 
-    /**
-     */
     public function test_it_gets_entity_through_generic_action(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         // First create a user
         $genericCreateAction = new GenericCreateAction($this->userRepository);
         $model = $genericCreateAction->execute([
             'name' => 'Get Test',
-            'email' => 'get_' . uniqid() . '@example.com',
+            'email' => 'get_'.uniqid().'@example.com',
             'password' => 'password123',
         ]);
 
@@ -154,14 +147,12 @@ final class GenericCrudIntegrationTest extends TestCase
         $found->delete();
     }
 
-    /**
-     */
     public function test_it_lists_entities_through_generic_action(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericListAction = new GenericListAction($this->userRepository);
         $result = $genericListAction->execute(1, 10);
 
@@ -177,14 +168,12 @@ final class GenericCrudIntegrationTest extends TestCase
         $this->assertEquals(10, $result['perPage']);
     }
 
-    /**
-     */
     public function test_it_throws_when_getting_nonexistent_entity(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericGetAction = new GenericGetAction($this->userRepository);
 
         $this->expectException(NotFoundException::class);
@@ -193,29 +182,25 @@ final class GenericCrudIntegrationTest extends TestCase
         $genericGetAction->execute(999999);
     }
 
-    /**
-     */
     public function test_it_throws_when_updating_nonexistent_entity(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericUpdateAction = new GenericUpdateAction($this->userRepository);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
 
         $genericUpdateAction->execute(999999, ['name' => 'New Name']);
     }
 
-    /**
-     */
     public function test_it_throws_when_deleting_nonexistent_entity(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericDeleteAction = new GenericDeleteAction($this->userRepository);
 
         $this->expectException(NotFoundException::class);
@@ -224,28 +209,24 @@ final class GenericCrudIntegrationTest extends TestCase
         $genericDeleteAction->execute(999999);
     }
 
-    /**
-     */
     public function test_it_gets_all_entities(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericListAction = new GenericListAction($this->userRepository);
         $all = $genericListAction->all();
 
         $this->assertInstanceOf(Collection::class, $all);
     }
 
-    /**
-     */
     public function test_it_throws_when_creating_with_empty_data(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericCreateAction = new GenericCreateAction($this->userRepository);
 
         $this->expectException(\App\Modules\Core\Infrastructure\Exceptions\BadRequestException::class);
@@ -254,19 +235,17 @@ final class GenericCrudIntegrationTest extends TestCase
         $genericCreateAction->execute([]);
     }
 
-    /**
-     */
     public function test_it_returns_existing_model_when_updating_with_empty_data(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         // Create user
         $genericCreateAction = new GenericCreateAction($this->userRepository);
         $model = $genericCreateAction->execute([
             'name' => 'Empty Update Test',
-            'email' => 'empty_' . uniqid() . '@example.com',
+            'email' => 'empty_'.uniqid().'@example.com',
             'password' => 'password123',
         ]);
 
@@ -281,14 +260,12 @@ final class GenericCrudIntegrationTest extends TestCase
         $result->delete();
     }
 
-    /**
-     */
     public function test_it_uses_factory_to_create_actions(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $crudActionFactory = new CrudActionFactory($this->userRepository);
 
         $this->assertInstanceOf(GenericCreateAction::class, $crudActionFactory->create());
@@ -298,14 +275,12 @@ final class GenericCrudIntegrationTest extends TestCase
         $this->assertInstanceOf(GenericListAction::class, $crudActionFactory->list());
     }
 
-    /**
-     */
     public function test_it_returns_all_actions_from_factory(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $crudActionFactory = new CrudActionFactory($this->userRepository);
         $all = $crudActionFactory->all();
 
@@ -317,46 +292,40 @@ final class GenericCrudIntegrationTest extends TestCase
         $this->assertArrayHasKey('repository', $all);
     }
 
-    /**
-     */
     public function test_it_returns_repository_from_factory(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $crudActionFactory = new CrudActionFactory($this->userRepository);
-        
+
         $this->assertSame($this->userRepository, $crudActionFactory->getRepository());
     }
 
-    /**
-     */
     public function test_it_paginates_with_custom_per_page(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericListAction = new GenericListAction($this->userRepository, 5);
         $result = $genericListAction->execute(1);
 
         $this->assertEquals(5, $result['perPage']);
     }
 
-    /**
-     */
     public function test_it_loads_relations_when_executing_get_with(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         // Create user
         $genericCreateAction = new GenericCreateAction($this->userRepository);
         $model = $genericCreateAction->execute([
             'name' => 'Relation Test',
-            'email' => 'relation_' . uniqid() . '@example.com',
+            'email' => 'relation_'.uniqid().'@example.com',
             'password' => 'password123',
         ]);
 
@@ -364,21 +333,19 @@ final class GenericCrudIntegrationTest extends TestCase
         $found = $genericGetAction->executeWith($model->id, ['roles']);
 
         $this->assertInstanceOf(User::class, $found);
-        
+
         // Cleanup
         $found->delete();
     }
 
-    /**
-     */
     public function test_it_ignores_filters_in_execute_with_filters(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericListAction = new GenericListAction($this->userRepository);
-        
+
         // Filters are currently ignored, but method should work
         $result = $genericListAction->executeWithFilters(['status' => 'active'], 1, 10);
 
@@ -386,14 +353,12 @@ final class GenericCrudIntegrationTest extends TestCase
         $this->assertArrayHasKey('items', $result);
     }
 
-    /**
-     */
     public function test_it_loads_relations_in_execute_with_for_list(): void
     {
         if ($this->userRepository === null) {
             $this->markTestSkipped('Repository not available');
         }
-        
+
         $genericListAction = new GenericListAction($this->userRepository);
         $result = $genericListAction->executeWith(['roles'], 1, 5);
 

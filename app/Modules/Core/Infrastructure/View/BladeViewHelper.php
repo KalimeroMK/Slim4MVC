@@ -15,8 +15,8 @@ if (! function_exists('view')) {
     function view(string $template, Response $response, array $with = []): Response
     {
         $app = app();
-        
-        if ($app instanceof \Psr\Container\ContainerInterface && $app->has(Blade::class)) {
+
+        if ($app instanceof ContainerInterface && $app->has(Blade::class)) {
             $blade = $app->get(Blade::class);
         } else {
             $cache = __DIR__.'/../../../../../storage/cache/view';

@@ -43,7 +43,7 @@ abstract class Controller
      */
     protected function getRequest(): Request
     {
-        if ($this->currentRequest instanceof \Psr\Http\Message\ServerRequestInterface) {
+        if ($this->currentRequest instanceof Request) {
             return $this->currentRequest;
         }
 

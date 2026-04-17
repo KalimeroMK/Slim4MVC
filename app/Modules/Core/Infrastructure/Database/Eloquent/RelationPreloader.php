@@ -32,8 +32,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param TModel $model
-     * @param list<string>|string $relations
+     * @param  TModel  $model
+     * @param  list<string>|string  $relations
      * @return TModel
      */
     public static function load(Model $model, array|string $relations): Model
@@ -64,8 +64,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Collection<int, TModel> $models
-     * @param list<string>|string $relations
+     * @param  Collection<int, TModel>  $models
+     * @param  list<string>|string  $relations
      * @return Collection<int, TModel>
      */
     public static function loadMany(Collection $models, array|string $relations): Collection
@@ -103,8 +103,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Builder<TModel> $builder
-     * @param list<string>|string $relations
+     * @param  Builder<TModel>  $builder
+     * @param  list<string>|string  $relations
      * @return Builder<TModel>
      */
     public static function with(Builder $builder, array|string $relations): Builder
@@ -119,8 +119,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Collection<int, TModel> $models
-     * @param list<string>|string $relations
+     * @param  Collection<int, TModel>  $models
+     * @param  list<string>|string  $relations
      * @return Collection<int, TModel>
      */
     public static function loadMissing(Collection $models, array|string $relations): Collection
@@ -141,8 +141,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Collection<int, TModel> $models
-     * @param list<string>|string $relations
+     * @param  Collection<int, TModel>  $models
+     * @param  list<string>|string  $relations
      */
     public static function hasLoaded(Collection $models, array|string $relations): bool
     {
@@ -170,8 +170,8 @@ final class RelationPreloader
      *
      * @template TModel of Model
      *
-     * @param Collection<int, TModel> $models
-     * @param list<string>|string $relations
+     * @param  Collection<int, TModel>  $models
+     * @param  list<string>|string  $relations
      * @return list<string>
      */
     public static function getMissingRelations(Collection $models, array|string $relations): array

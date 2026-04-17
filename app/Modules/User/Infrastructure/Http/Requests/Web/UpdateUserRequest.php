@@ -13,7 +13,7 @@ class UpdateUserRequest extends FormRequest
         $id = $this->routeParam('id');
 
         return [
-            'name'  => 'nullable|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => "nullable|email|unique:users,email,{$id}",
             'roles' => 'nullable|array',
         ];

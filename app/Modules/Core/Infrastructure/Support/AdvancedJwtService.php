@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Support;
 
 use App\Modules\Core\Infrastructure\Support\Token\TokenPair;
-use App\Modules\Core\Infrastructure\Validation\ConfigurationException;
 use App\Modules\Core\Infrastructure\Validation\EnvironmentValidator;
+use JsonException;
 use Predis\Client;
 use RuntimeException;
 use stdClass;
@@ -24,7 +24,8 @@ use stdClass;
 final readonly class AdvancedJwtService
 {
     private const int ACCESS_TOKEN_TTL = 900;
-          // 15 minutes
+
+    // 15 minutes
     private const int REFRESH_TOKEN_TTL = 2592000;  // 30 days
 
     private JwtEncoder $jwtEncoder;
@@ -41,8 +42,8 @@ final readonly class AdvancedJwtService
     ) {
         EnvironmentValidator::assertJwtSecret($secret);
 
-        if (!in_array($algorithm, ['HS256', 'HS384', 'HS512'], true)) {
-            throw new RuntimeException('Unsupported algorithm: ' . $algorithm);
+        if (! in_array($algorithm, ['HS256', 'HS384', 'HS512'], true)) {
+            throw new RuntimeException('Unsupported algorithm: '.$algorithm);
         }
 
         $this->jwtEncoder = new JwtEncoder();
@@ -52,9 +53,9 @@ final readonly class AdvancedJwtService
     /**
      * Generate an access token with security claims.
      *
-     * @param int|string $userId The user identifier
-     * @param array<string, mixed> $claims Additional claims
-     * @param int|null $ttl Custom TTL (null uses default)
+     * @param  int|string  $userId  The user identifier
+     * @param  array<string, mixed>  $claims  Additional claims
+     * @param  int|null  $ttl  Custom TTL (null uses default)
      */
     public function generateAccessToken(int|string $userId, array $claims = [], ?int $ttl = null): string
     {
@@ -82,7 +83,7 @@ final readonly class AdvancedJwtService
     /**
      * Generate a refresh token with rotation support.
      *
-     * @param int|string $userId The user identifier
+     * @param  int|string  $userId  The user identifier
      */
     public function generateRefreshToken(int|string $userId): TokenPair
     {
@@ -142,7 +143,7 @@ final readonly class AdvancedJwtService
         }
 
         // Check fingerprint for potential token theft
-        if (!$this->validateFingerprint($payload->fp ?? '')) {
+        if (! $this->validateFingerprint($payload->fp ?? '')) {
             // Security violation - revoke all tokens for this user
             $this->revokeAllUserTokens($payload->sub);
             throw new RuntimeException('Token reuse detected. All tokens revoked for security.');
@@ -167,10 +168,9 @@ final readonly class AdvancedJwtService
     /**
      * Decode and validate a JWT token.
      *
-     * @param string $token The JWT token
-     * @param bool $validateIssuer Whether to validate the issuer
-     * @param bool $validateAudience Whether to validate the audience
-     *
+     * @param  string  $token  The JWT token
+     * @param  bool  $validateIssuer  Whether to validate the issuer
+     * @param  bool  $validateAudience  Whether to validate the audience
      * @return stdClass The decoded payload
      *
      * @throws RuntimeException If token is invalid
@@ -229,7 +229,7 @@ final readonly class AdvancedJwtService
                 'is_expired' => isset($payload->exp) && $payload->exp < time(),
                 'jwt_id' => $payload->jti ?? null,
             ];
-        } catch (RuntimeException | \JsonException $e) {
+        } catch (RuntimeException|JsonException $e) {
             return [
                 'valid' => false,
                 'error' => $e->getMessage(),
@@ -258,14 +258,14 @@ final readonly class AdvancedJwtService
 
         // This is a simplified implementation
         // In production, you might want to use a set or scan pattern
-        $pattern = "refresh_token:*";
+        $pattern = 'refresh_token:*';
         $keys = $this->client->keys($pattern);
 
         foreach ($keys as $key) {
             $data = $this->client->get($key);
             if ($data !== null) {
                 $tokenData = json_decode($data, true);
-                if (isset($tokenData['user_id']) && $tokenData['user_id'] == $userId) {
+                if (isset($tokenData['user_id']) && $tokenData['user_id'] === $userId) {
                     $this->client->del($key);
                 }
             }
@@ -275,7 +275,7 @@ final readonly class AdvancedJwtService
     /**
      * Encode a payload into a JWT token.
      *
-     * @param array<string, mixed> $payload
+     * @param  array<string, mixed>  $payload
      */
     private function encode(array $payload): string
     {
@@ -331,6 +331,6 @@ final readonly class AdvancedJwtService
      */
     private function getRefreshTokenKey(string $jti): string
     {
-        return 'refresh_token:' . $jti;
+        return 'refresh_token:'.$jti;
     }
 }

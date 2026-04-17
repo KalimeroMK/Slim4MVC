@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Throwable;
 
 /**
  * Command to start the local development environment.
@@ -52,33 +53,33 @@ final class StartLocalCommand extends Command
         $io->title('🚀 Starting Slim4MVC Local Development Environment');
 
         // 1. Setup .env file
-        if (!$this->setupEnvFile($io, $forceEnv)) {
+        if (! $this->setupEnvFile($io, $forceEnv)) {
             return Command::FAILURE;
         }
 
         // 2. Generate JWT Secret
-        if (!$this->generateJwtSecret($io)) {
+        if (! $this->generateJwtSecret($io)) {
             return Command::FAILURE;
         }
 
         // 3. Composer Update
-        if (!$this->runComposerUpdate($io)) {
+        if (! $this->runComposerUpdate($io)) {
             return Command::FAILURE;
         }
 
         // 4. Start Docker Containers
-        if (!$this->startDockerContainers($io, $rebuild)) {
+        if (! $this->startDockerContainers($io, $rebuild)) {
             return Command::FAILURE;
         }
 
         // 5. Run Migrations
-        if (!$this->runMigrations($io)) {
+        if (! $this->runMigrations($io)) {
             return Command::FAILURE;
         }
 
         // 6. Run Seeders (unless --no-seed)
-        if (!$noSeed) {
-            if (!$this->runSeeders($io)) {
+        if (! $noSeed) {
+            if (! $this->runSeeders($io)) {
                 return Command::FAILURE;
             }
         } else {
@@ -95,19 +96,21 @@ final class StartLocalCommand extends Command
     {
         $io->section('📋 Step 1: Setting up .env file');
 
-        $envPath = $this->getProjectRoot() . '/.env';
-        $envExamplePath = $this->getProjectRoot() . '/.env.example';
+        $envPath = $this->getProjectRoot().'/.env';
+        $envExamplePath = $this->getProjectRoot().'/.env.example';
 
-        if (!file_exists($envExamplePath)) {
+        if (! file_exists($envExamplePath)) {
             $io->error('.env.example file not found!');
+
             return false;
         }
 
         if (file_exists($envPath)) {
             if ($force) {
                 $io->warning('Overwriting existing .env file (--force-env option used)');
-                if (!copy($envExamplePath, $envPath)) {
+                if (! copy($envExamplePath, $envPath)) {
                     $io->error('Failed to copy .env.example to .env');
+
                     return false;
                 }
                 $io->success('.env file regenerated from .env.example');
@@ -115,8 +118,9 @@ final class StartLocalCommand extends Command
                 $io->info('.env file already exists (use --force-env to overwrite)');
             }
         } else {
-            if (!copy($envExamplePath, $envPath)) {
+            if (! copy($envExamplePath, $envPath)) {
                 $io->error('Failed to copy .env.example to .env');
+
                 return false;
             }
             $io->success('Created .env file from .env.example');
@@ -129,11 +133,12 @@ final class StartLocalCommand extends Command
     {
         $io->section('🔐 Step 2: Generating JWT Secret');
 
-        $envPath = $this->getProjectRoot() . '/.env';
+        $envPath = $this->getProjectRoot().'/.env';
         $content = file_get_contents($envPath);
 
         if ($content === false) {
             $io->error('Unable to read .env file');
+
             return false;
         }
 
@@ -142,6 +147,7 @@ final class StartLocalCommand extends Command
             $existingSecret = trim($matches[1]);
             if ($existingSecret !== '' && $existingSecret !== 'supersecretkey123') {
                 $io->info('JWT_SECRET already configured in .env');
+
                 return true;
             }
         }
@@ -151,17 +157,19 @@ final class StartLocalCommand extends Command
 
         // Update or add JWT_SECRET
         if (preg_match('/^JWT_SECRET=.*$/m', $content)) {
-            $updated = preg_replace('/^JWT_SECRET=.*$/m', 'JWT_SECRET=' . $key, $content);
+            $updated = preg_replace('/^JWT_SECRET=.*$/m', 'JWT_SECRET='.$key, $content);
         } else {
-            $updated = $content . "\n# JWT Configuration\nJWT_SECRET=" . $key . "\n";
+            $updated = $content."\n# JWT Configuration\nJWT_SECRET=".$key."\n";
         }
 
         if ($updated === null || file_put_contents($envPath, $updated) === false) {
             $io->error('Failed to write JWT_SECRET to .env file');
+
             return false;
         }
 
         $io->success('JWT_SECRET generated and saved to .env');
+
         return true;
     }
 
@@ -175,13 +183,14 @@ final class StartLocalCommand extends Command
         $composerCommand = $this->findComposer();
         if ($composerCommand === null) {
             $io->error('Composer not found! Please install Composer: https://getcomposer.org/download/');
+
             return false;
         }
 
         $io->info('Running: composer update');
 
         $process = proc_open(
-            $composerCommand . ' update --no-interaction --working-dir=' . escapeshellarg($projectRoot),
+            $composerCommand.' update --no-interaction --working-dir='.escapeshellarg($projectRoot),
             [
                 1 => ['pipe', 'w'],
                 2 => ['pipe', 'w'],
@@ -189,13 +198,14 @@ final class StartLocalCommand extends Command
             $pipes
         );
 
-        if (!is_resource($process)) {
+        if (! is_resource($process)) {
             $io->error('Failed to start composer update process');
+
             return false;
         }
 
         // Stream output
-        while (!feof($pipes[1]) || !feof($pipes[2])) {
+        while (! feof($pipes[1]) || ! feof($pipes[2])) {
             $stdout = fread($pipes[1], 1024);
             $stderr = fread($pipes[2], 1024);
 
@@ -212,11 +222,13 @@ final class StartLocalCommand extends Command
         $exitCode = proc_close($process);
 
         if ($exitCode !== 0) {
-            $io->error('Composer update failed with exit code: ' . $exitCode);
+            $io->error('Composer update failed with exit code: '.$exitCode);
+
             return false;
         }
 
         $io->success('Composer dependencies installed/updated successfully');
+
         return true;
     }
 
@@ -227,8 +239,9 @@ final class StartLocalCommand extends Command
         $projectRoot = $this->getProjectRoot();
 
         // Check if docker-compose is available
-        if (!$this->commandExists('docker-compose') && !$this->commandExists('docker')) {
+        if (! $this->commandExists('docker-compose') && ! $this->commandExists('docker')) {
             $io->error('Docker Compose not found! Please install Docker: https://docs.docker.com/get-docker/');
+
             return false;
         }
 
@@ -236,7 +249,7 @@ final class StartLocalCommand extends Command
         $dockerComposeCmd = $this->getDockerComposeCommand();
 
         // Build command
-        $cmd = $dockerComposeCmd . ' -f ' . escapeshellarg($projectRoot . '/docker-compose.yml') . ' up -d';
+        $cmd = $dockerComposeCmd.' -f '.escapeshellarg($projectRoot.'/docker-compose.yml').' up -d';
         if ($rebuild) {
             $cmd .= ' --build';
             $io->info('Rebuilding and starting containers...');
@@ -253,13 +266,14 @@ final class StartLocalCommand extends Command
             $pipes
         );
 
-        if (!is_resource($process)) {
+        if (! is_resource($process)) {
             $io->error('Failed to start docker-compose process');
+
             return false;
         }
 
         // Stream output
-        while (!feof($pipes[1]) || !feof($pipes[2])) {
+        while (! feof($pipes[1]) || ! feof($pipes[2])) {
             $stdout = fread($pipes[1], 1024);
             $stderr = fread($pipes[2], 1024);
 
@@ -276,7 +290,8 @@ final class StartLocalCommand extends Command
         $exitCode = proc_close($process);
 
         if ($exitCode !== 0) {
-            $io->error('Docker Compose failed with exit code: ' . $exitCode);
+            $io->error('Docker Compose failed with exit code: '.$exitCode);
+
             return false;
         }
 
@@ -285,6 +300,7 @@ final class StartLocalCommand extends Command
         sleep(5);
 
         $io->success('Docker containers started successfully');
+
         return true;
     }
 
@@ -293,17 +309,18 @@ final class StartLocalCommand extends Command
         $io->section('🗄️  Step 5: Running database migrations');
 
         $projectRoot = $this->getProjectRoot();
-        $migrateScript = $projectRoot . '/run_migrations.php';
+        $migrateScript = $projectRoot.'/run_migrations.php';
 
-        if (!file_exists($migrateScript)) {
-            $io->error('Migration script not found: ' . $migrateScript);
+        if (! file_exists($migrateScript)) {
+            $io->error('Migration script not found: '.$migrateScript);
+
             return false;
         }
 
         $io->info('Running migrations...');
 
         $process = proc_open(
-            'php ' . escapeshellarg($migrateScript) . ' migrate',
+            'php '.escapeshellarg($migrateScript).' migrate',
             [
                 1 => ['pipe', 'w'],
                 2 => ['pipe', 'w'],
@@ -311,13 +328,14 @@ final class StartLocalCommand extends Command
             $pipes
         );
 
-        if (!is_resource($process)) {
+        if (! is_resource($process)) {
             $io->error('Failed to start migration process');
+
             return false;
         }
 
         // Stream output
-        while (!feof($pipes[1]) || !feof($pipes[2])) {
+        while (! feof($pipes[1]) || ! feof($pipes[2])) {
             $stdout = fread($pipes[1], 1024);
             $stderr = fread($pipes[2], 1024);
 
@@ -334,11 +352,13 @@ final class StartLocalCommand extends Command
         $exitCode = proc_close($process);
 
         if ($exitCode !== 0) {
-            $io->error('Migration failed with exit code: ' . $exitCode);
+            $io->error('Migration failed with exit code: '.$exitCode);
+
             return false;
         }
 
         $io->success('Database migrations completed successfully');
+
         return true;
     }
 
@@ -347,19 +367,21 @@ final class StartLocalCommand extends Command
         $io->section('🌱 Step 6: Running database seeders');
 
         $projectRoot = $this->getProjectRoot();
-        $seedScript = $projectRoot . '/database/seed/seed.php';
+        $seedScript = $projectRoot.'/database/seed/seed.php';
 
-        if (!file_exists($seedScript)) {
+        if (! file_exists($seedScript)) {
             $io->warning('Seed script not found, skipping...');
+
             return true;
         }
 
         $io->info('Running seeders...');
 
         // First load the database bootstrap
-        $bootstrapScript = $projectRoot . '/bootstrap/database.php';
-        if (!file_exists($bootstrapScript)) {
-            $io->error('Database bootstrap not found: ' . $bootstrapScript);
+        $bootstrapScript = $projectRoot.'/bootstrap/database.php';
+        if (! file_exists($bootstrapScript)) {
+            $io->error('Database bootstrap not found: '.$bootstrapScript);
+
             return false;
         }
 
@@ -373,10 +395,11 @@ final class StartLocalCommand extends Command
             require $bootstrapScript;
             require $seedScript;
             $output = ob_get_clean();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $output = ob_get_clean();
-            $io->error('Seeding failed: ' . $e->getMessage());
+            $io->error('Seeding failed: '.$e->getMessage());
             chdir($originalCwd);
+
             return false;
         }
 
@@ -387,6 +410,7 @@ final class StartLocalCommand extends Command
         }
 
         $io->success('Database seeding completed successfully');
+
         return true;
     }
 
@@ -435,12 +459,12 @@ final class StartLocalCommand extends Command
             'composer.phar',
             '/usr/local/bin/composer',
             '/usr/bin/composer',
-            $this->getProjectRoot() . '/composer.phar',
+            $this->getProjectRoot().'/composer.phar',
         ];
 
         foreach ($possiblePaths as $path) {
             if ($path === 'composer' || $path === 'composer.phar') {
-                exec('which ' . $path . ' 2>/dev/null', $output, $returnCode);
+                exec('which '.$path.' 2>/dev/null', $output, $returnCode);
                 if ($returnCode === 0) {
                     return $path;
                 }
@@ -454,7 +478,8 @@ final class StartLocalCommand extends Command
 
     private function commandExists(string $command): bool
     {
-        exec('which ' . $command . ' 2>/dev/null', $output, $returnCode);
+        exec('which '.$command.' 2>/dev/null', $output, $returnCode);
+
         return $returnCode === 0;
     }
 

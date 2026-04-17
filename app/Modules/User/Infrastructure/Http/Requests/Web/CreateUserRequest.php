@@ -11,11 +11,11 @@ class CreateUserRequest extends FormRequest
     protected function rules(): array
     {
         return [
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:users,email',
-            'password'              => 'required|string|min:8|confirmed',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
             'password_confirmation' => 'required|string',
-            'roles'                 => 'nullable|array',
+            'roles' => 'nullable|array',
         ];
     }
 }

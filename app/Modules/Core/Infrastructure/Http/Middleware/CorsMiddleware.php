@@ -22,7 +22,7 @@ class CorsMiddleware implements MiddlewareInterface
     private array $options;
 
     /**
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      */
     public function __construct(private readonly ResponseFactoryInterface $responseFactory, array $options = [])
     {
@@ -41,6 +41,7 @@ class CorsMiddleware implements MiddlewareInterface
         // Handle preflight OPTIONS request
         if ($request->getMethod() === 'OPTIONS') {
             $response = $this->createResponse();
+
             return $this->addCorsHeaders($request, $response);
         }
 
@@ -88,7 +89,7 @@ class CorsMiddleware implements MiddlewareInterface
         );
 
         // Add exposed headers
-        if (!empty($this->options['headers.expose'])) {
+        if (! empty($this->options['headers.expose'])) {
             $response = $response->withHeader(
                 'Access-Control-Expose-Headers',
                 implode(', ', $this->options['headers.expose'])
@@ -109,6 +110,7 @@ class CorsMiddleware implements MiddlewareInterface
     private function getOrigin(ServerRequestInterface $serverRequest): string
     {
         $headers = $serverRequest->getHeader('Origin');
+
         return $headers[0] ?? '';
     }
 

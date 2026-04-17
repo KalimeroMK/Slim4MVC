@@ -19,6 +19,11 @@ class CreateUsersTable
             $table->string('password_reset_token')->nullable();
             $table->string('email_verified_at')->nullable();
             $table->timestamps();
+
+            // Indexes for performance on commonly queried columns
+            $table->index('email');
+            $table->index('password_reset_token');
+            $table->index('created_at');
         });
     }
 

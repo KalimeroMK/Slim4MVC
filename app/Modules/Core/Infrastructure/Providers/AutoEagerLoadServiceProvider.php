@@ -17,7 +17,7 @@ class AutoEagerLoadServiceProvider
     /**
      * Register and configure auto eager loading.
      *
-     * @param array<string, mixed> $config Configuration array
+     * @param  array<string, mixed>  $config  Configuration array
      */
     public static function register(array $config = []): void
     {

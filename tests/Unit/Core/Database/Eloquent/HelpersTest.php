@@ -81,7 +81,7 @@ final class HelpersTest extends TestCase
         parent::tearDown();
     }
 
-    public function testPreloadLoadsRelationsOnModel(): void
+    public function test_preload_loads_relations_on_model(): void
     {
         $parent = HelperTestModel::create(['name' => 'Parent']);
         HelperTestChild::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -95,7 +95,7 @@ final class HelpersTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('children'));
     }
 
-    public function testPreloadLoadsRelationsOnCollection(): void
+    public function test_preload_loads_relations_on_collection(): void
     {
         $parent1 = HelperTestModel::create(['name' => 'Parent 1']);
         $parent2 = HelperTestModel::create(['name' => 'Parent 2']);
@@ -112,7 +112,7 @@ final class HelpersTest extends TestCase
         }
     }
 
-    public function testPreloadWithArrayRelations(): void
+    public function test_preload_with_array_relations(): void
     {
         $parent = HelperTestModel::create(['name' => 'Parent']);
         HelperTestChild::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -123,7 +123,7 @@ final class HelpersTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('children'));
     }
 
-    public function testPreloadMissingLoadsOnlyMissing(): void
+    public function test_preload_missing_loads_only_missing(): void
     {
         $parent = HelperTestModel::create(['name' => 'Parent']);
         HelperTestChild::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -139,7 +139,7 @@ final class HelpersTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('children'));
     }
 
-    public function testEnableAutoEagerLoading(): void
+    public function test_enable_auto_eager_loading(): void
     {
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
 
@@ -148,7 +148,7 @@ final class HelpersTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testDisableAutoEagerLoading(): void
+    public function test_disable_auto_eager_loading(): void
     {
         enable_auto_eager_loading();
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
@@ -158,7 +158,7 @@ final class HelpersTest extends TestCase
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testDetectLazyLoading(): void
+    public function test_detect_lazy_loading(): void
     {
         $this->assertFalse(AutoRelationConfig::isLazyLoadingDetectionEnabled());
 
@@ -167,7 +167,7 @@ final class HelpersTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isLazyLoadingDetectionEnabled());
     }
 
-    public function testClearRelationCache(): void
+    public function test_clear_relation_cache(): void
     {
         // This should not throw an exception
         clear_relation_cache();

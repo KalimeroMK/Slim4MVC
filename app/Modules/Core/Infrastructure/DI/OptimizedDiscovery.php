@@ -25,16 +25,23 @@ final readonly class OptimizedDiscovery
     private const string CACHE_FILE = __DIR__.'/../../../../storage/cache/autowiring.php';
 
     private const int CACHE_TTL_DEV = 3600;
-     // 1 hour in development
+
+    // 1 hour in development
     private const array DEFAULT_SCAN_PATHS = [
         __DIR__.'/../../../../../app/Modules',
     ];
 
     /**
-     * @param array<int, string> $scanPaths
+     * @param  array<int, string>  $scanPaths
      */
-    public function __construct(private array $scanPaths = self::DEFAULT_SCAN_PATHS)
+    public function __construct(private array $scanPaths = self::DEFAULT_SCAN_PATHS) {}
+
+    /**
+     * Get cache file path.
+     */
+    public static function getCacheFile(): string
     {
+        return self::CACHE_FILE;
     }
 
     /**
@@ -95,7 +102,7 @@ final readonly class OptimizedDiscovery
      */
     public function shouldUseCache(): bool
     {
-        if (!file_exists(self::CACHE_FILE)) {
+        if (! file_exists(self::CACHE_FILE)) {
             return false;
         }
 
@@ -122,7 +129,7 @@ final readonly class OptimizedDiscovery
         // Get bindings from scan (not definitions to avoid serialization issues)
         $bindings = [];
         foreach ($this->scanPaths as $scanPath) {
-            if (!is_dir($scanPath)) {
+            if (! is_dir($scanPath)) {
                 continue;
             }
 
@@ -168,14 +175,6 @@ final readonly class OptimizedDiscovery
     }
 
     /**
-     * Get cache file path.
-     */
-    public static function getCacheFile(): string
-    {
-        return self::CACHE_FILE;
-    }
-
-    /**
      * Scan modules for interfaces and their implementations.
      *
      * @return array<string, object>
@@ -188,7 +187,7 @@ final readonly class OptimizedDiscovery
 
         // Step 1: Find all interface files
         foreach ($this->scanPaths as $scanPath) {
-            if (!is_dir($scanPath)) {
+            if (! is_dir($scanPath)) {
                 continue;
             }
 
@@ -260,7 +259,7 @@ final readonly class OptimizedDiscovery
             return null;
         }
 
-        return $namespace !== '' && $namespace !== '0' ? $namespace . '\\' . $class : $class;
+        return $namespace !== '' && $namespace !== '0' ? $namespace.'\\'.$class : $class;
     }
 
     /**
@@ -268,7 +267,7 @@ final readonly class OptimizedDiscovery
      *
      * Naming convention: InterfaceName → InterfaceNameImpl or remove 'Interface' suffix
      *
-     * @param class-string $interfaceName
+     * @param  class-string  $interfaceName
      * @return class-string|null
      */
     private function findImplementation(string $interfaceName): ?string
@@ -299,14 +298,14 @@ final readonly class OptimizedDiscovery
             ? substr($interfaceShortName, 0, -9)
             : $interfaceShortName;
 
-        $possibleClass = $namespace . '\\' . $baseName;
+        $possibleClass = $namespace.'\\'.$baseName;
 
         if (class_exists($possibleClass)) {
             /** @phpstan-ignore-next-line */
             $reflection = new ReflectionClass($possibleClass);
 
             /** @phpstan-ignore-next-line */
-            if ($reflection->implementsInterface($interfaceName) && !$reflection->isAbstract()) {
+            if ($reflection->implementsInterface($interfaceName) && ! $reflection->isAbstract()) {
                 /** @phpstan-ignore-next-line */
                 return $possibleClass;
             }
@@ -336,7 +335,7 @@ final readonly class OptimizedDiscovery
                     $reflection = new ReflectionClass($className);
 
                     /** @phpstan-ignore-next-line */
-                    if ($reflection->implementsInterface($interfaceName) && !$reflection->isAbstract()) {
+                    if ($reflection->implementsInterface($interfaceName) && ! $reflection->isAbstract()) {
                         /** @var class-string $className */
                         return $className;
                     }
@@ -368,13 +367,13 @@ final readonly class OptimizedDiscovery
     /**
      * Write definitions to cache file.
      *
-     * @param array<class-string, object> $definitions
+     * @param  array<class-string, object>  $definitions
      */
     private function writeCache(array $definitions): void
     {
         $cacheDir = dirname(self::CACHE_FILE);
 
-        if (!is_dir($cacheDir)) {
+        if (! is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
         }
 
@@ -382,7 +381,7 @@ final readonly class OptimizedDiscovery
         $serializable = [];
         foreach (array_keys($definitions) as $interface) {
             // Store the class name that implements the interface
-            $reflection = new \ReflectionClass($interface);
+            $reflection = new ReflectionClass($interface);
             $implementation = $this->findImplementation($interface);
 
             if ($implementation !== null) {
@@ -393,8 +392,8 @@ final readonly class OptimizedDiscovery
         // Generate PHP code
         $code = "<?php\n\n";
         $code .= "// Auto-generated by OptimizedDiscovery\n";
-        $code .= "// Generated at: " . date('Y-m-d H:i:s') . "\n";
-        $code .= "// Total bindings: " . count($serializable) . "\n\n";
+        $code .= '// Generated at: '.date('Y-m-d H:i:s')."\n";
+        $code .= '// Total bindings: '.count($serializable)."\n\n";
         $code .= "return [\n";
 
         foreach ($serializable as $interface => $implementation) {

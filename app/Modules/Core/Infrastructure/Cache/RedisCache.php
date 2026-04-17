@@ -182,7 +182,7 @@ final readonly class RedisCache implements CacheInterface
         $pipeline = $this->client->pipeline();
 
         /** @phpstan-ignore-next-line */
-        if (!is_array($pipeline)) {
+        if (! is_array($pipeline)) {
             foreach ($values as $key => $value) {
                 $prefixedKey = $this->getPrefixedKey($key);
                 $serialized = $this->serialize($value);

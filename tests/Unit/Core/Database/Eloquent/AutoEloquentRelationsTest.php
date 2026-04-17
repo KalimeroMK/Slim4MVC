@@ -20,7 +20,7 @@ class TestAutoLoadModel extends Model
 
     /** @var string */
     protected $table = 'test_models';
-    
+
     protected array $autoWith = ['children'];
 
     public function children(): HasMany
@@ -46,7 +46,7 @@ class TestNoAutoModel extends Model
 
     /** @var string */
     protected $table = 'test_no_auto';
-    
+
     protected array $autoWith = [];
 }
 
@@ -56,7 +56,7 @@ class TestExcludeModel extends Model
 
     /** @var string */
     protected $table = 'test_exclude';
-    
+
     protected array $excludeAutoWith = ['secretRelation'];
 
     public function publicRelation(): HasMany
@@ -126,7 +126,7 @@ final class AutoEloquentRelationsTest extends TestCase
 
         // Reset config
         AutoRelationConfig::reset();
-        
+
         // Clear relation cache
         TestAutoLoadModel::clearRelationCache();
         TestExcludeModel::clearRelationCache();
@@ -134,7 +134,7 @@ final class AutoEloquentRelationsTest extends TestCase
         parent::tearDown();
     }
 
-    public function testAutoWithLoadsRelationsAutomatically(): void
+    public function test_auto_with_loads_relations_automatically(): void
     {
         // Create parent and children
         $parent = TestAutoLoadModel::create(['name' => 'Parent']);
@@ -152,7 +152,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertCount(2, $found->children);
     }
 
-    public function testQueryWithoutAutoWithSkipsAutoLoading(): void
+    public function test_query_without_auto_with_skips_auto_loading(): void
     {
         // Create parent and children
         $parent = TestAutoLoadModel::create(['name' => 'Parent']);
@@ -165,7 +165,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertFalse($found->relationLoaded('children'));
     }
 
-    public function testEmptyAutoWithDisablesAutoLoading(): void
+    public function test_empty_auto_with_disables_auto_loading(): void
     {
         // Create model
         $model = TestNoAutoModel::create(['name' => 'Test']);
@@ -177,7 +177,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertEmpty($found->getRelations());
     }
 
-    public function testDetectRelationsReturnsRelationMethods(): void
+    public function test_detect_relations_returns_relation_methods(): void
     {
         $relations = TestAutoLoadModel::detectRelations();
 
@@ -186,7 +186,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertContains('unusedRelation', $relations);
     }
 
-    public function testDetectRelationsExcludesSpecifiedRelations(): void
+    public function test_detect_relations_excludes_specified_relations(): void
     {
         $relations = TestExcludeModel::detectRelations();
 
@@ -197,7 +197,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertNotContains('secretRelation', $relations);
     }
 
-    public function testRelationCacheIsUsed(): void
+    public function test_relation_cache_is_used(): void
     {
         // First call should cache
         $relations1 = TestAutoLoadModel::detectRelations();
@@ -209,7 +209,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertSame($relations1, $relations2);
     }
 
-    public function testClearRelationCacheClearsSpecificModel(): void
+    public function test_clear_relation_cache_clears_specific_model(): void
     {
         // Populate cache
         TestAutoLoadModel::detectRelations();
@@ -223,7 +223,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertNotEmpty($relations);
     }
 
-    public function testClearRelationCacheClearsAllModels(): void
+    public function test_clear_relation_cache_clears_all_models(): void
     {
         // Populate cache
         TestAutoLoadModel::detectRelations();
@@ -236,7 +236,7 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertNotEmpty($relations);
     }
 
-    public function testAutoDetectionGlobalEnable(): void
+    public function test_auto_detection_global_enable(): void
     {
         // Enable global auto-detection
         AutoRelationConfig::enableGlobally();
@@ -246,14 +246,14 @@ final class AutoEloquentRelationsTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testGetAutoLoadableRelationsReturnsExplicitRelations(): void
+    public function test_get_auto_loadable_relations_returns_explicit_relations(): void
     {
         $relations = TestAutoLoadModel::getAutoLoadableRelations();
 
         $this->assertSame(['children'], $relations);
     }
 
-    public function testGetAutoLoadableRelationsReturnsEmptyWhenNoAutoWith(): void
+    public function test_get_auto_loadable_relations_returns_empty_when_no_auto_with(): void
     {
         $relations = TestNoAutoModel::getAutoLoadableRelations();
 

@@ -7,6 +7,7 @@ namespace Tests\Unit;
 use App\Modules\Core\Infrastructure\Support\AdvancedJwtService;
 use App\Modules\Core\Infrastructure\Validation\ConfigurationException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * @covers \App\Modules\Core\Infrastructure\Support\AdvancedJwtService
@@ -32,13 +33,13 @@ final class AdvancedJwtServiceTest extends TestCase
 
     public function test_constructor_throws_on_unsupported_algorithm(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unsupported algorithm');
 
         new AdvancedJwtService($this->validSecret, 'RS256');
     }
 
-    public function test_generateAccessToken_returns_valid_token(): void
+    public function test_generate_access_token_returns_valid_token(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $token = $advancedJwtService->generateAccessToken(123, ['role' => 'admin']);
@@ -47,7 +48,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertCount(3, explode('.', $token)); // header.payload.signature
     }
 
-    public function test_generateAccessToken_includes_claims(): void
+    public function test_generate_access_token_includes_claims(): void
     {
         $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
@@ -68,7 +69,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertNotEmpty($payload->exp);
     }
 
-    public function test_generateAccessToken_custom_ttl(): void
+    public function test_generate_access_token_custom_ttl(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $token = $advancedJwtService->generateAccessToken(123, [], 3600);
@@ -78,7 +79,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertEqualsWithDelta($expectedExp, $payload->exp, 5);
     }
 
-    public function test_generateRefreshToken_returns_token_pair(): void
+    public function test_generate_refresh_token_returns_token_pair(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $tokenPair = $advancedJwtService->generateRefreshToken(123);
@@ -89,7 +90,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertSame(2592000, $tokenPair->getExpiresIn());
     }
 
-    public function test_generateRefreshToken_includes_correct_claims(): void
+    public function test_generate_refresh_token_includes_correct_claims(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $tokenPair = $advancedJwtService->generateRefreshToken(123);
@@ -102,25 +103,25 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertNotEmpty($payload->fp); // fingerprint
     }
 
-    public function test_rotateRefreshToken_throws_without_redis(): void
+    public function test_rotate_refresh_token_throws_without_redis(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $tokenPair = $advancedJwtService->generateRefreshToken(123);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Token rotation requires Redis');
 
         $advancedJwtService->rotateRefreshToken($tokenPair->getRefreshToken());
     }
 
-    public function test_rotateRefreshToken_throws_on_access_token(): void
+    public function test_rotate_refresh_token_throws_on_access_token(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $accessToken = $advancedJwtService->generateAccessToken(123);
 
         // Without Redis, it will throw "Token rotation requires Redis" before checking type
         // With Redis, it would throw "Invalid token type"
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
         $advancedJwtService->rotateRefreshToken($accessToken);
     }
@@ -141,7 +142,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertFalse($advancedJwtService->verify('invalid'));
     }
 
-    public function test_getTokenInfo_returns_expected_structure(): void
+    public function test_get_token_info_returns_expected_structure(): void
     {
         $advancedJwtService = new AdvancedJwtService(
             secret: $this->validSecret,
@@ -172,10 +173,10 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertFalse($info['is_expired']);
     }
 
-    public function test_getTokenInfo_returns_error_for_invalid_token(): void
+    public function test_get_token_info_returns_error_for_invalid_token(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
-        
+
         // Invalid format
         $info = $advancedJwtService->getTokenInfo('invalid');
         $this->assertArrayHasKey('valid', $info);
@@ -211,7 +212,7 @@ final class AdvancedJwtServiceTest extends TestCase
         $this->assertEquals('test-api', $payload->aud);
     }
 
-    public function test_tokenPair_toArray(): void
+    public function test_token_pair_to_array(): void
     {
         $tokenPair = new \App\Modules\Core\Infrastructure\Support\Token\TokenPair(
             accessToken: 'access123',
@@ -239,12 +240,12 @@ final class AdvancedJwtServiceTest extends TestCase
             'iat' => time() - 7200,
         ], $this->validSecret);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
 
         $advancedJwtService->decode($expiredToken);
     }
 
-    public function test_generateAccessToken_with_string_user_id(): void
+    public function test_generate_access_token_with_string_user_id(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret);
         $token = $advancedJwtService->generateAccessToken('user-uuid-123');

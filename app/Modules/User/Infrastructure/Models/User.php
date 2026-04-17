@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Override;
 
 /**
  * Class User
@@ -59,9 +60,9 @@ class User extends Model
     /** @var array<string, string> */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'created_at'        => 'datetime',
-        'updated_at'        => 'datetime',
-        'deleted_at'        => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     protected $hidden = ['password'];
@@ -102,25 +103,26 @@ class User extends Model
     public function permissions(): \Illuminate\Database\Eloquent\Collection
     {
         $permissionIds = [];
-        
-        foreach ($this->roles as $role) {
+
+        // Eager load permissions to avoid N+1 and lazy loading violations
+        foreach ($this->roles()->with('permissions')->get() as $role) {
             foreach ($role->permissions as $permission) {
                 $permissionIds[$permission->id] = $permission;
             }
         }
-        
+
         /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Modules\Permission\Infrastructure\Models\Permission> $collection */
         $collection = \Illuminate\Database\Eloquent\Collection::make(array_values($permissionIds));
-        
+
         return $collection;
     }
 
     /**
      * Override save method to auto-assign user role if no roles assigned.
      *
-     * @param array<string, mixed> $options
+     * @param  array<string, mixed>  $options
      */
-    #[\Override]
+    #[Override]
     public function save(array $options = []): bool
     {
         $isNew = ! $this->exists;
@@ -156,7 +158,7 @@ class User extends Model
     /**
      * Boot the model and register observers.
      */
-    #[\Override]
+    #[Override]
     protected static function booted(): void
     {
         static::observe(UserObserver::class);

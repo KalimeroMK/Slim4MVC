@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\Middleware;
 
+use App\Modules\Core\Infrastructure\Cache\CacheInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
@@ -12,16 +13,17 @@ use Slim\Psr7\Response as Psr7Response;
 
 class RateLimitMiddleware implements MiddlewareInterface
 {
-    /** @var array<string, array{count: int, start: int}> */
-    private array $requests = [];
+    private readonly CacheInterface $cache;
 
     /** @var list<string> */
     private readonly array $trustedProxies;
 
     public function __construct(
+        CacheInterface $cache,
         private readonly int $maxRequests = 60,
         private readonly int $windowSeconds = 60
     ) {
+        $this->cache = $cache;
         $raw = $_ENV['TRUSTED_PROXIES'] ?? '';
         $this->trustedProxies = $raw !== ''
             ? array_map('trim', explode(',', $raw))
@@ -32,12 +34,22 @@ class RateLimitMiddleware implements MiddlewareInterface
     {
         $identifier = $this->getIdentifier($request);
         $now = time();
+        $cacheKey = 'rate_limit:'.$identifier;
 
-        // Clean old entries
-        $this->cleanOldEntries($now);
+        // Get current request count from cache
+        $requestData = $this->cache->get($cacheKey, null);
+
+        if (! is_array($requestData) || ! isset($requestData['count'], $requestData['start'])) {
+            $requestData = ['count' => 0, 'start' => $now];
+        }
+
+        // Reset if window expired
+        if ($now - $requestData['start'] >= $this->windowSeconds) {
+            $requestData = ['count' => 0, 'start' => $now];
+        }
 
         // Check rate limit
-        if ($this->isRateLimited($identifier, $now)) {
+        if ($requestData['count'] >= $this->maxRequests) {
             $response = new Psr7Response();
             $json = json_encode([
                 'error' => 'Too Many Requests',
@@ -54,12 +66,12 @@ class RateLimitMiddleware implements MiddlewareInterface
         }
 
         // Increment request count
-        $this->incrementRequest($identifier, $now);
+        $requestData['count']++;
+        $this->cache->set($cacheKey, $requestData, $this->windowSeconds);
 
         $response = $handler->handle($request);
 
-        // Add rate limit headers
-        $remaining = max(0, $this->maxRequests - ($this->requests[$identifier]['count'] ?? 0));
+        $remaining = max(0, $this->maxRequests - $requestData['count']);
 
         return $response->withHeader('X-RateLimit-Limit', (string) $this->maxRequests)
             ->withHeader('X-RateLimit-Remaining', (string) $remaining);
@@ -83,52 +95,5 @@ class RateLimitMiddleware implements MiddlewareInterface
         }
 
         return $remoteAddr;
-    }
-
-    private function isRateLimited(string $identifier, int $now): bool
-    {
-        if (! isset($this->requests[$identifier])) {
-            return false;
-        }
-
-        $requestData = $this->requests[$identifier];
-
-        // Check if window has expired
-        if ($now - $requestData['start'] >= $this->windowSeconds) {
-            return false;
-        }
-
-        return $requestData['count'] >= $this->maxRequests;
-    }
-
-    private function incrementRequest(string $identifier, int $now): void
-    {
-        if (! isset($this->requests[$identifier])) {
-            $this->requests[$identifier] = [
-                'count' => 0,
-                'start' => $now,
-            ];
-        }
-
-        $requestData = $this->requests[$identifier];
-
-        // Reset if window expired
-        if ($now - $requestData['start'] >= $this->windowSeconds) {
-            $this->requests[$identifier] = [
-                'count' => 1,
-                'start' => $now,
-            ];
-        } else {
-            ++$this->requests[$identifier]['count'];
-        }
-    }
-
-    private function cleanOldEntries(int $now): void
-    {
-        foreach ($this->requests as $identifier => $data) {
-            if ($now - $data['start'] >= $this->windowSeconds) {
-                unset($this->requests[$identifier]);
-            }
-        }
     }
 }

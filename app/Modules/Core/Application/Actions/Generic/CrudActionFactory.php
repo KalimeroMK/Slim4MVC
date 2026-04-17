@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class CrudActionFactory
 {
     /**
-     * @param Repository<TModel> $repository
+     * @param  Repository<TModel>  $repository
      */
     public function __construct(
         private Repository $repository
@@ -25,7 +25,8 @@ final readonly class CrudActionFactory
      * Create a new factory instance for a repository class.
      *
      * @template T of Model
-     * @param class-string<Repository<T>> $repositoryClass
+     *
+     * @param  class-string<Repository<T>>  $repositoryClass
      * @return self<T>
      */
     public static function for(string $repositoryClass): self

@@ -40,7 +40,7 @@ final class PermissionFactoryTest extends TestCase
     public function test_factory_creates_many_permissions(): void
     {
         $permissions = [];
-        for ($i = 0; $i < 4; ++$i) {
+        for ($i = 0; $i < 4; $i++) {
             $factory = new PermissionFactory();
             $permissions[] = $factory->withName('permission-'.uniqid())->create();
         }

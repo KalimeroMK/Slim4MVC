@@ -13,7 +13,7 @@ class UpdateRoleRequest extends FormRequest
         $id = $this->routeParam('id');
 
         return [
-            'name'        => "required|string|unique:roles,name,{$id}|max:20",
+            'name' => "required|string|unique:roles,name,{$id}|max:20",
             'permissions' => 'nullable|array',
         ];
     }

@@ -16,7 +16,7 @@ class UpdateRoleRequest extends FormRequest
         $id = $this->routeParam('id');
 
         return [
-            'name'        => 'required|string|max:20|unique:roles,name,' . $id,
+            'name' => 'required|string|max:20|unique:roles,name,'.$id,
             'permissions' => 'nullable|array',
         ];
     }
@@ -28,7 +28,7 @@ class UpdateRoleRequest extends FormRequest
     {
         return [
             'name.required' => 'Role name is required',
-            'name.unique'   => 'Role name already taken',
+            'name.unique' => 'Role name already taken',
         ];
     }
 }

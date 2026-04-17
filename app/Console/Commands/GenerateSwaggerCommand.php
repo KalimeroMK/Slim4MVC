@@ -61,7 +61,7 @@ class GenerateSwaggerCommand extends Command
             // Generate OpenAPI spec from annotations
             $openapi = $generator->generate([$sourceDir]);
 
-            if (!$openapi instanceof \OpenApi\Annotations\OpenApi) {
+            if (! $openapi instanceof \OpenApi\Annotations\OpenApi) {
                 $output->writeln('<error>No OpenAPI annotations found!</error>');
 
                 return Command::FAILURE;

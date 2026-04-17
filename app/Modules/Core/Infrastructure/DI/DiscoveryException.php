@@ -9,6 +9,4 @@ use RuntimeException;
 /**
  * Exception thrown during dependency discovery.
  */
-class DiscoveryException extends RuntimeException
-{
-}
+class DiscoveryException extends RuntimeException {}

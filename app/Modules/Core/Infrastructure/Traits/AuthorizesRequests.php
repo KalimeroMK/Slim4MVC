@@ -55,26 +55,6 @@ trait AuthorizesRequests
     }
 
     /**
-     * Resolve the policy class for a given model instance.
-     *
-     * Follows the naming convention:
-     *   App\Modules\Foo\Infrastructure\Models\Bar → App\Modules\Foo\Policies\BarPolicy
-     */
-    private function resolvePolicy(object $resource): ?Policy
-    {
-        $modelClass = get_class($resource);
-        $policyClass = str_replace('\\Infrastructure\\Models\\', '\\Policies\\', $modelClass).'Policy';
-
-        if (! class_exists($policyClass)) {
-            return null;
-        }
-
-        $policy = new $policyClass();
-
-        return $policy instanceof Policy ? $policy : null;
-    }
-
-    /**
      * Check if the user has a specific permission.
      */
     protected function can(string $permission): bool
@@ -96,5 +76,25 @@ trait AuthorizesRequests
     protected function unauthorized(?string $message = null): ResponseInterface
     {
         return \App\Modules\Core\Infrastructure\Support\ApiResponse::unauthorized($message ?? 'Unauthorized');
+    }
+
+    /**
+     * Resolve the policy class for a given model instance.
+     *
+     * Follows the naming convention:
+     *   App\Modules\Foo\Infrastructure\Models\Bar → App\Modules\Foo\Policies\BarPolicy
+     */
+    private function resolvePolicy(object $resource): ?Policy
+    {
+        $modelClass = get_class($resource);
+        $policyClass = str_replace('\\Infrastructure\\Models\\', '\\Policies\\', $modelClass).'Policy';
+
+        if (! class_exists($policyClass)) {
+            return null;
+        }
+
+        $policy = new $policyClass();
+
+        return $policy instanceof Policy ? $policy : null;
     }
 }

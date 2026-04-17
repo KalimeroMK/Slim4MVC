@@ -23,8 +23,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class PermissionController extends Controller
 {
-    use RouteParamsTrait;
     use HandlesCrudResponses;
+    use RouteParamsTrait;
 
     protected ?string $resourceClass = PermissionResource::class;
 

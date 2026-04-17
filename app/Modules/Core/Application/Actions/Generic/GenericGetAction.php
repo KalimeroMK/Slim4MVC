@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class GenericGetAction
 {
     /**
-     * @param Repository<TModel> $repository
+     * @param  Repository<TModel>  $repository
      */
     public function __construct(
         private Repository $repository
@@ -26,6 +26,7 @@ final readonly class GenericGetAction
      * Execute the get action.
      *
      * @return TModel
+     *
      * @throws NotFoundException
      */
     public function execute(int|string $id): Model
@@ -46,14 +47,15 @@ final readonly class GenericGetAction
      * Note: This implementation loads relations after finding the model.
      * For better performance, consider implementing findWith() in your repository.
      *
-     * @param array<int, string> $relations
+     * @param  array<int, string>  $relations
      * @return TModel
+     *
      * @throws NotFoundException
      */
     public function executeWith(int|string $id, array $relations): Model
     {
         $model = $this->execute($id);
-        
+
         // Load relations if the model supports it
         /** @phpstan-ignore-next-line */
         $model->load($relations);

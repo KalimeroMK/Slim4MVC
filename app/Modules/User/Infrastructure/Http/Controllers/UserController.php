@@ -31,8 +31,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 )]
 class UserController extends Controller
 {
-    use RouteParamsTrait;
     use HandlesCrudResponses;
+    use RouteParamsTrait;
 
     protected ?string $resourceClass = UserResource::class;
 

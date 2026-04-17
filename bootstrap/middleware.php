@@ -5,19 +5,18 @@ declare(strict_types=1);
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ClearFlashDataMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\CorsMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\CsrfMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\RequestSizeLimitMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\SecurityHeadersMiddleware;
-use App\Modules\Core\Infrastructure\Http\Middleware\ValidationExceptionMiddleware;
 use App\Modules\Core\Infrastructure\Support\RequestResolver;
 use Illuminate\Validation\Factory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
-use App\Modules\Core\Infrastructure\Http\Middleware\CorsMiddleware;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Log\LoggerInterface;
 
 return function ($app, DI\Container $container): void {
 
@@ -46,6 +45,9 @@ return function ($app, DI\Container $container): void {
     // Add middleware
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
+
+    // Limit request body size (10MB default) — prevents large payload attacks
+    $app->add(new RequestSizeLimitMiddleware());
 
     // Add CSRF middleware (generates token for web routes, validates non-GET requests)
     $app->add(new CsrfMiddleware());
@@ -87,9 +89,6 @@ return function ($app, DI\Container $container): void {
 
     // Add flash data clearing (outermost - executes last)
     $app->add(new ClearFlashDataMiddleware());
-
-    // Add validation exception handling
-    $app->add(new ValidationExceptionMiddleware());
 
     // Add exception handler middleware (innermost - executes first to catch all)
     $app->add(new ExceptionHandlerMiddleware());

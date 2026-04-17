@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Support;
 
 use App\Modules\User\Infrastructure\Models\User;
-use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -58,9 +57,9 @@ class Auth
 
         // Store user data in session via Symfony Session
         $userData = [
-            'id'    => $user->id,
+            'id' => $user->id,
             'email' => $user->email,
-            'name'  => $user->name,
+            'name' => $user->name,
         ];
         $this->session->set('user', $userData);
 

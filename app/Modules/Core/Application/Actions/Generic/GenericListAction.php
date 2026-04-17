@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class GenericListAction
 {
     /**
-     * @param Repository<TModel> $repository
+     * @param  Repository<TModel>  $repository
      */
     public function __construct(
         private Repository $repository,
@@ -44,14 +44,14 @@ final readonly class GenericListAction
      * Note: This implementation ignores filters.
      * For filtering support, implement paginateWithFilters() in your repository.
      *
-     * @param array<string, mixed> $filters
+     * @param  array<string, mixed>  $filters
      * @return array{items: Collection<int, TModel>, total: int, page: int, perPage: int}
      */
     public function executeWithFilters(array $filters, int $page = 1, ?int $perPage = null): array
     {
         // Suppress unused variable warning
         unset($filters);
-        
+
         return $this->execute($page, $perPage);
     }
 
@@ -71,7 +71,7 @@ final readonly class GenericListAction
      * Note: This implementation loads relations after pagination.
      * For better performance, implement paginateWithRelations() in your repository.
      *
-     * @param array<int, string> $relations
+     * @param  array<int, string>  $relations
      * @return array{items: Collection<int, TModel>, total: int, page: int, perPage: int}
      */
     public function executeWith(array $relations, int $page = 1, ?int $perPage = null): array

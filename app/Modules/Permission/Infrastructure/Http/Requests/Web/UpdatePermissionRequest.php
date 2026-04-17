@@ -16,7 +16,7 @@ class UpdatePermissionRequest extends FormRequest
         $id = $this->routeParam('id');
 
         return [
-            'name'  => 'required|string|max:50|unique:permissions,name,' . $id,
+            'name' => 'required|string|max:50|unique:permissions,name,'.$id,
             'roles' => 'nullable|array',
         ];
     }
@@ -28,7 +28,7 @@ class UpdatePermissionRequest extends FormRequest
     {
         return [
             'name.required' => 'Permission name is required',
-            'name.unique'   => 'Permission name already taken',
+            'name.unique' => 'Permission name already taken',
         ];
     }
 }

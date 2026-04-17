@@ -23,7 +23,7 @@ final readonly class QueryBuilder
     private array $config;
 
     /**
-     * @param array<string, mixed>|null $config
+     * @param  array<string, mixed>|null  $config
      */
     public function __construct(
         Request $request,
@@ -40,7 +40,7 @@ final readonly class QueryBuilder
     /**
      * Apply query parameters to Eloquent builder.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      * @return Builder<TModel>
      */
     public function apply(Builder $builder): Builder
@@ -145,7 +145,7 @@ final readonly class QueryBuilder
     /**
      * Apply eager loading.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applyIncludes(Builder $builder): void
     {
@@ -159,7 +159,7 @@ final readonly class QueryBuilder
     /**
      * Apply field selection.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applyFields(Builder $builder): void
     {
@@ -173,7 +173,7 @@ final readonly class QueryBuilder
     /**
      * Apply filters.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applyFilters(Builder $builder): void
     {
@@ -192,7 +192,7 @@ final readonly class QueryBuilder
     /**
      * Apply single filter.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applyFilter(Builder $builder, string $field, mixed $value): void
     {
@@ -234,7 +234,7 @@ final readonly class QueryBuilder
     /**
      * Apply range filters.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applyRanges(Builder $builder): void
     {
@@ -254,7 +254,7 @@ final readonly class QueryBuilder
     /**
      * Apply search.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applySearch(Builder $builder): void
     {
@@ -280,7 +280,7 @@ final readonly class QueryBuilder
     /**
      * Apply sorting.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      */
     private function applySorts(Builder $builder): void
     {

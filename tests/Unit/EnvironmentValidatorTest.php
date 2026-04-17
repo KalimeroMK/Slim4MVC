@@ -137,7 +137,7 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_getSummary_returns_expected_structure(): void
+    public function test_get_summary_returns_expected_structure(): void
     {
         $_ENV = [
             'JWT_SECRET' => str_repeat('a', 32),
@@ -164,7 +164,7 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertEquals(32, $summary['jwt_secret_length']);
     }
 
-    public function test_getWarnings_returns_empty_array_when_no_warnings(): void
+    public function test_get_warnings_returns_empty_array_when_no_warnings(): void
     {
         $_ENV = [
             'JWT_SECRET' => str_repeat('aX9!', 16), // Strong secret with numbers and special chars
@@ -182,7 +182,7 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertEmpty($warnings);
     }
 
-    public function test_assertJwtSecret_throws_on_empty_secret(): void
+    public function test_assert_jwt_secret_throws_on_empty_secret(): void
     {
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('JWT_SECRET cannot be empty');
@@ -190,7 +190,7 @@ final class EnvironmentValidatorTest extends TestCase
         EnvironmentValidator::assertJwtSecret('');
     }
 
-    public function test_assertJwtSecret_throws_on_short_secret(): void
+    public function test_assert_jwt_secret_throws_on_short_secret(): void
     {
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('JWT_SECRET must be at least 32 characters');
@@ -198,7 +198,7 @@ final class EnvironmentValidatorTest extends TestCase
         EnvironmentValidator::assertJwtSecret('short_secret');
     }
 
-    public function test_assertJwtSecret_passes_with_valid_secret(): void
+    public function test_assert_jwt_secret_passes_with_valid_secret(): void
     {
         // Should not throw
         EnvironmentValidator::assertJwtSecret(str_repeat('a', 32));
@@ -206,19 +206,19 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_isProduction_returns_true_for_production(): void
+    public function test_is_production_returns_true_for_production(): void
     {
         $_ENV['APP_ENV'] = 'production';
         $this->assertTrue(EnvironmentValidator::isProduction());
     }
 
-    public function test_isProduction_returns_true_for_staging(): void
+    public function test_is_production_returns_true_for_staging(): void
     {
         $_ENV['APP_ENV'] = 'staging';
         $this->assertTrue(EnvironmentValidator::isProduction());
     }
 
-    public function test_isProduction_returns_false_for_local(): void
+    public function test_is_production_returns_false_for_local(): void
     {
         $_ENV['APP_ENV'] = 'local';
         $this->assertFalse(EnvironmentValidator::isProduction());
@@ -244,7 +244,7 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_configuration_exception_getErrors(): void
+    public function test_configuration_exception_get_errors(): void
     {
         $errors = ['Error 1', 'Error 2'];
         $configurationException = new ConfigurationException($errors);
@@ -252,7 +252,7 @@ final class EnvironmentValidatorTest extends TestCase
         $this->assertSame($errors, $configurationException->getErrors());
     }
 
-    public function test_configuration_exception_getSummary(): void
+    public function test_configuration_exception_get_summary(): void
     {
         $errors = ['JWT_SECRET is required'];
         $configurationException = new ConfigurationException($errors);
@@ -269,7 +269,7 @@ final class EnvironmentValidatorTest extends TestCase
         );
     }
 
-    public function test_configuration_exception_getDetailedMessage(): void
+    public function test_configuration_exception_get_detailed_message(): void
     {
         $errors = ['JWT_SECRET is required'];
         $configurationException = new ConfigurationException($errors);

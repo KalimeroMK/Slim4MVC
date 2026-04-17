@@ -34,7 +34,7 @@ final class UserRepositoryTest extends TestCase
 
         $found = $this->userRepository->find($user->id);
 
-        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $found);
+        $this->assertInstanceOf(User::class, $found);
         $this->assertEquals($user->id, $found->id);
         $this->assertEquals('Test User', $found->name);
     }
@@ -43,7 +43,7 @@ final class UserRepositoryTest extends TestCase
     {
         $found = $this->userRepository->find(999);
 
-        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $found);
+        $this->assertNotInstanceOf(User::class, $found);
     }
 
     public function test_find_or_fail_returns_user(): void
@@ -122,7 +122,7 @@ final class UserRepositoryTest extends TestCase
 
         $found = $this->userRepository->findByEmail('find@test.com');
 
-        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $found);
+        $this->assertInstanceOf(User::class, $found);
         $this->assertEquals($user->id, $found->id);
     }
 
@@ -130,7 +130,7 @@ final class UserRepositoryTest extends TestCase
     {
         $found = $this->userRepository->findByEmail('nonexistent@test.com');
 
-        $this->assertNotInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $found);
+        $this->assertNotInstanceOf(User::class, $found);
     }
 
     public function test_find_by_password_reset_token_returns_user(): void
@@ -144,7 +144,7 @@ final class UserRepositoryTest extends TestCase
 
         $found = $this->userRepository->findByPasswordResetToken('test-token-123');
 
-        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $found);
+        $this->assertInstanceOf(User::class, $found);
         $this->assertEquals($user->id, $found->id);
     }
 

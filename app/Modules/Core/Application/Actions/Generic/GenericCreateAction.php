@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class GenericCreateAction
 {
     /**
-     * @param Repository<TModel> $repository
+     * @param  Repository<TModel>  $repository
      */
     public function __construct(
         private Repository $repository
@@ -25,7 +25,7 @@ final readonly class GenericCreateAction
     /**
      * Execute the create action.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return TModel
      *
      * @throws BadRequestException

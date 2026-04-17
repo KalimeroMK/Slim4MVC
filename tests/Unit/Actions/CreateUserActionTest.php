@@ -38,7 +38,7 @@ final class CreateUserActionTest extends TestCase
         $this->createUserAction->execute($createUserDTO);
 
         $user = User::where('email', 'test@example.com')->first();
-        $this->assertInstanceOf(\App\Modules\User\Infrastructure\Models\User::class, $user);
+        $this->assertInstanceOf(User::class, $user);
         $this->assertTrue(password_verify('password123', (string) $user->password));
     }
 

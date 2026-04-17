@@ -78,7 +78,7 @@ final class RelationPreloaderTest extends TestCase
         parent::tearDown();
     }
 
-    public function testLoadLoadsRelationsOnSingleModel(): void
+    public function test_load_loads_relations_on_single_model(): void
     {
         // Create parent and children
         $parent = PreloadParentModel::create(['name' => 'Parent']);
@@ -100,7 +100,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertCount(2, $fresh->children);
     }
 
-    public function testLoadWithArrayRelations(): void
+    public function test_load_with_array_relations(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -114,7 +114,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('otherChildren'));
     }
 
-    public function testLoadSkipsAlreadyLoadedRelations(): void
+    public function test_load_skips_already_loaded_relations(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -129,7 +129,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('children'));
     }
 
-    public function testLoadManyLoadsRelationsOnCollection(): void
+    public function test_load_many_loads_relations_on_collection(): void
     {
         // Create parents and children
         $parent1 = PreloadParentModel::create(['name' => 'Parent 1']);
@@ -158,7 +158,7 @@ final class RelationPreloaderTest extends TestCase
         }
     }
 
-    public function testLoadManySkipsAlreadyLoaded(): void
+    public function test_load_many_skips_already_loaded(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -171,7 +171,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertTrue($parents->first()->relationLoaded('children'));
     }
 
-    public function testLoadMissingOnlyLoadsMissingRelations(): void
+    public function test_load_missing_only_loads_missing_relations(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -189,7 +189,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertTrue($fresh->relationLoaded('otherChildren'));
     }
 
-    public function testHasLoadedReturnsTrueWhenAllLoaded(): void
+    public function test_has_loaded_returns_true_when_all_loaded(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -200,7 +200,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertTrue(RelationPreloader::hasLoaded($parents, ['children', 'otherChildren']));
     }
 
-    public function testHasLoadedReturnsFalseWhenNotAllLoaded(): void
+    public function test_has_loaded_returns_false_when_not_all_loaded(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -210,14 +210,14 @@ final class RelationPreloaderTest extends TestCase
         $this->assertFalse(RelationPreloader::hasLoaded($parents, ['children', 'otherChildren']));
     }
 
-    public function testHasLoadedReturnsTrueForEmptyCollection(): void
+    public function test_has_loaded_returns_true_for_empty_collection(): void
     {
         $empty = new Collection();
 
         $this->assertTrue(RelationPreloader::hasLoaded($empty, 'children'));
     }
 
-    public function testGetMissingRelationsReturnsEmptyWhenAllLoaded(): void
+    public function test_get_missing_relations_returns_empty_when_all_loaded(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -229,7 +229,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertEmpty($missing);
     }
 
-    public function testGetMissingRelationsReturnsMissingRelationNames(): void
+    public function test_get_missing_relations_returns_missing_relation_names(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
@@ -241,19 +241,19 @@ final class RelationPreloaderTest extends TestCase
         $this->assertSame(['otherChildren'], $missing);
     }
 
-    public function testWithAddsRelationsToQuery(): void
+    public function test_with_adds_relations_to_query(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
         PreloadChildModel::create(['parent_id' => $parent->id, 'name' => 'Child']);
 
         $query = PreloadParentModel::query();
         $result = RelationPreloader::with($query, 'children')->first();
-        $this->assertInstanceOf(\Tests\Unit\Core\Database\Eloquent\PreloadParentModel::class, $result);
+        $this->assertInstanceOf(PreloadParentModel::class, $result);
 
         $this->assertTrue($result->relationLoaded('children'));
     }
 
-    public function testLoadManyReturnsEmptyCollectionUnchanged(): void
+    public function test_load_many_returns_empty_collection_unchanged(): void
     {
         $empty = new Collection();
 
@@ -262,7 +262,7 @@ final class RelationPreloaderTest extends TestCase
         $this->assertSame($empty, $result);
     }
 
-    public function testLoadReturnsModelWhenNoRelationsSpecified(): void
+    public function test_load_returns_model_when_no_relations_specified(): void
     {
         $parent = PreloadParentModel::create(['name' => 'Parent']);
 

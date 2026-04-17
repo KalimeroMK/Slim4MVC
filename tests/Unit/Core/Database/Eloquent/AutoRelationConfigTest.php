@@ -24,7 +24,7 @@ final class AutoRelationConfigTest extends TestCase
         parent::tearDown();
     }
 
-    public function testEnableGloballySetsAutoDetectionEnabled(): void
+    public function test_enable_globally_sets_auto_detection_enabled(): void
     {
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
 
@@ -33,7 +33,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testDisableGloballySetsAutoDetectionDisabled(): void
+    public function test_disable_globally_sets_auto_detection_disabled(): void
     {
         AutoRelationConfig::enableGlobally();
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
@@ -43,7 +43,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testEnableForSpecificModel(): void
+    public function test_enable_for_specific_model(): void
     {
         $testClass = 'TestModel';
 
@@ -52,7 +52,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isEnabledFor($testClass));
     }
 
-    public function testEnableForMultipleModels(): void
+    public function test_enable_for_multiple_models(): void
     {
         $classes = ['Model1', 'Model2', 'Model3'];
 
@@ -63,7 +63,7 @@ final class AutoRelationConfigTest extends TestCase
         }
     }
 
-    public function testDisableForSpecificModel(): void
+    public function test_disable_for_specific_model(): void
     {
         $testClass = 'TestModel';
 
@@ -75,7 +75,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertFalse(AutoRelationConfig::isEnabledFor($testClass));
     }
 
-    public function testDisableForMultipleModels(): void
+    public function test_disable_for_multiple_models(): void
     {
         $classes = ['Model1', 'Model2'];
 
@@ -87,7 +87,7 @@ final class AutoRelationConfigTest extends TestCase
         }
     }
 
-    public function testDisabledModelOverridesGlobalEnable(): void
+    public function test_disabled_model_overrides_global_enable(): void
     {
         $testClass = 'TestModel';
 
@@ -98,7 +98,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testEnabledModelOverridesGlobalDisable(): void
+    public function test_enabled_model_overrides_global_disable(): void
     {
         $testClass = 'TestModel';
 
@@ -109,14 +109,14 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertFalse(AutoRelationConfig::isAutoDetectionEnabled());
     }
 
-    public function testSetMaxAutoLoadRelations(): void
+    public function test_set_max_auto_load_relations(): void
     {
         AutoRelationConfig::setMaxAutoLoadRelations(5);
 
         $this->assertSame(5, AutoRelationConfig::getMaxAutoLoadRelations());
     }
 
-    public function testResetRestoresDefaults(): void
+    public function test_reset_restores_defaults(): void
     {
         // Change some settings
         AutoRelationConfig::enableGlobally();
@@ -132,7 +132,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertFalse(AutoRelationConfig::isEnabledFor('TestModel'));
     }
 
-    public function testConfigureFromArray(): void
+    public function test_configure_from_array(): void
     {
         $config = [
             'enabled' => true,
@@ -150,7 +150,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isEnabledFor('Model2'));
     }
 
-    public function testConfigureWithEnableFor(): void
+    public function test_configure_with_enable_for(): void
     {
         $config = [
             'enabled' => true,
@@ -164,7 +164,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isEnabledFor('Model1'));
     }
 
-    public function testEnableLazyLoadingDetection(): void
+    public function test_enable_lazy_loading_detection(): void
     {
         $this->assertFalse(AutoRelationConfig::isLazyLoadingDetectionEnabled());
 
@@ -173,7 +173,7 @@ final class AutoRelationConfigTest extends TestCase
         $this->assertTrue(AutoRelationConfig::isLazyLoadingDetectionEnabled());
     }
 
-    public function testDisableLazyLoadingDetection(): void
+    public function test_disable_lazy_loading_detection(): void
     {
         AutoRelationConfig::enableLazyLoadingDetection();
         $this->assertTrue(AutoRelationConfig::isLazyLoadingDetectionEnabled());

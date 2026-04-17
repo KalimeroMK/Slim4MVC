@@ -23,6 +23,7 @@ if (! function_exists('query_builder')) {
      * Create a new QueryBuilder instance.
      *
      * @param  array<string, mixed>  $config
+     *
      * @phpstan-ignore missingType.generics
      */
     function query_builder(Request $request, ?array $config = null): QueryBuilder

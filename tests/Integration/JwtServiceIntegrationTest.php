@@ -7,12 +7,13 @@ namespace Tests\Integration;
 use App\Modules\Core\Infrastructure\Support\AdvancedJwtService;
 use App\Modules\Core\Infrastructure\Support\Token\TokenPair;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * Integration tests for Advanced JWT Service.
- * 
+ *
  * Tests the complete JWT flow with real token generation and validation.
- * 
+ *
  * @covers \App\Modules\Core\Infrastructure\Support\AdvancedJwtService
  * @covers \App\Modules\Core\Infrastructure\Support\Token\TokenPair
  */
@@ -29,8 +30,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->advancedJwtService = new AdvancedJwtService($this->validSecret);
     }
 
-    /**
-     */
     public function test_it_generates_and_validates_access_token(): void
     {
         $token = $this->advancedJwtService->generateAccessToken(
@@ -52,8 +51,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertEquals('admin', $payload->role);
     }
 
-    /**
-     */
     public function test_it_generates_token_pair_with_refresh_token(): void
     {
         $tokenPair = $this->advancedJwtService->generateRefreshToken(userId: 456);
@@ -70,8 +67,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertTrue($this->advancedJwtService->verify($tokenPair->getRefreshToken()));
     }
 
-    /**
-     */
     public function test_it_encodes_and_decodes_token_with_issuer_and_audience(): void
     {
         $advancedJwtService = new AdvancedJwtService(
@@ -88,8 +83,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertEquals('my-api', $payload->aud);
     }
 
-    /**
-     */
     public function test_it_rejects_token_with_wrong_issuer(): void
     {
         $service1 = new AdvancedJwtService(
@@ -104,14 +97,12 @@ final class JwtServiceIntegrationTest extends TestCase
 
         $token = $service1->generateAccessToken(userId: 1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid token issuer');
 
         $service2->decode($token, validateIssuer: true);
     }
 
-    /**
-     */
     public function test_it_rejects_token_with_wrong_audience(): void
     {
         $service1 = new AdvancedJwtService(
@@ -126,27 +117,23 @@ final class JwtServiceIntegrationTest extends TestCase
 
         $token = $service1->generateAccessToken(userId: 1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid token audience');
 
         $service2->decode($token, validateAudience: true);
     }
 
-    /**
-     */
     public function test_it_rejects_expired_token(): void
     {
         // Create token that expires immediately
         $token = $this->advancedJwtService->generateAccessToken(userId: 1, ttl: -1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('expired');
 
         $this->advancedJwtService->decode($token);
     }
 
-    /**
-     */
     public function test_it_rejects_tampered_token(): void
     {
         $token = $this->advancedJwtService->generateAccessToken(userId: 1);
@@ -156,14 +143,12 @@ final class JwtServiceIntegrationTest extends TestCase
         $parts[1] = base64_encode(json_encode(['sub' => '999']));
         $tamperedToken = implode('.', $parts);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('signature verification failed');
 
         $this->advancedJwtService->decode($tamperedToken);
     }
 
-    /**
-     */
     public function test_it_gets_token_info(): void
     {
         $token = $this->advancedJwtService->generateAccessToken(
@@ -183,8 +168,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertNotNull($info['jwt_id']);
     }
 
-    /**
-     */
     public function test_it_gets_error_info_for_invalid_token(): void
     {
         $info = $this->advancedJwtService->getTokenInfo('invalid.token.here');
@@ -193,33 +176,27 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertArrayHasKey('error', $info);
     }
 
-    /**
-     */
     public function test_it_rejects_refresh_token_as_access_token(): void
     {
         $tokenPair = $this->advancedJwtService->generateRefreshToken(userId: 1);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid token type');
 
         $this->advancedJwtService->rotateRefreshToken($tokenPair->getAccessToken());
     }
 
-    /**
-     */
     public function test_it_detects_refresh_token_reuse(): void
     {
         $tokenPair = $this->advancedJwtService->generateRefreshToken(userId: 1);
 
         // Without Redis, rotation throws immediately
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Token rotation requires Redis');
 
         $this->advancedJwtService->rotateRefreshToken($tokenPair->getRefreshToken());
     }
 
-    /**
-     */
     public function test_it_generates_unique_jwt_ids(): void
     {
         $token1 = $this->advancedJwtService->generateAccessToken(userId: 1);
@@ -231,8 +208,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertNotEquals($payload1->jti, $payload2->jti);
     }
 
-    /**
-     */
     public function test_it_supports_string_user_ids(): void
     {
         $uuid = '550e8400-e29b-41d4-a716-446655440000';
@@ -242,8 +217,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertEquals($uuid, $payload->sub);
     }
 
-    /**
-     */
     public function test_it_rejects_token_with_wrong_signature(): void
     {
         $token = $this->advancedJwtService->generateAccessToken(userId: 1);
@@ -251,14 +224,12 @@ final class JwtServiceIntegrationTest extends TestCase
         // Create new service with different secret
         $advancedJwtService = new AdvancedJwtService(bin2hex(random_bytes(32)));
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('signature verification failed');
 
         $advancedJwtService->decode($token);
     }
 
-    /**
-     */
     public function test_it_supports_hs256_algorithm(): void
     {
         $advancedJwtService = new AdvancedJwtService($this->validSecret, 'HS256');
@@ -266,18 +237,14 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertTrue($advancedJwtService->verify($token256));
     }
 
-    /**
-     */
     public function test_it_rejects_unsupported_algorithms(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Unsupported algorithm');
 
         new AdvancedJwtService($this->validSecret, 'INVALID_ALGORITHM');
     }
 
-    /**
-     */
     public function test_it_converts_token_pair_to_array(): void
     {
         $tokenPair = $this->advancedJwtService->generateRefreshToken(userId: 1);
@@ -290,8 +257,6 @@ final class JwtServiceIntegrationTest extends TestCase
         $this->assertEquals('Bearer', $array['token_type']);
     }
 
-    /**
-     */
     public function test_it_validates_not_before_claim(): void
     {
         // Create a token with nbf in the future (should fail)
@@ -303,27 +268,23 @@ final class JwtServiceIntegrationTest extends TestCase
             'nbf' => time() + 100, // Not valid yet
         ], $this->validSecret);
 
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('not yet valid');
 
         $this->advancedJwtService->decode($token);
     }
 
-    /**
-     */
     public function test_it_rejects_malformed_token(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid JWT token format');
 
         $this->advancedJwtService->decode('invalid-token');
     }
 
-    /**
-     */
     public function test_it_rejects_empty_token(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Invalid JWT token format');
 
         $this->advancedJwtService->decode('');

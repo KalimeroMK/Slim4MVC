@@ -7,6 +7,7 @@ namespace Tests\Unit\Requests\Web;
 use App\Modules\Core\Infrastructure\Http\Requests\FormRequest;
 use App\Modules\Role\Infrastructure\Http\Requests\Web\CreateRoleRequest;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * @covers \App\Modules\Role\Infrastructure\Http\Requests\Web\CreateRoleRequest
@@ -25,7 +26,7 @@ final class CreateRoleRequestTest extends TestCase
 
     public function test_request_has_rules_method(): void
     {
-        $reflection = new \ReflectionClass(CreateRoleRequest::class);
+        $reflection = new ReflectionClass(CreateRoleRequest::class);
         $this->assertTrue($reflection->hasMethod('rules'));
 
         $method = $reflection->getMethod('rules');
@@ -34,7 +35,7 @@ final class CreateRoleRequestTest extends TestCase
 
     public function test_request_has_messages_method(): void
     {
-        $reflection = new \ReflectionClass(CreateRoleRequest::class);
+        $reflection = new ReflectionClass(CreateRoleRequest::class);
         $this->assertTrue($reflection->hasMethod('messages'));
 
         $method = $reflection->getMethod('messages');
@@ -43,7 +44,7 @@ final class CreateRoleRequestTest extends TestCase
 
     public function test_rules_returns_expected_structure_via_reflection(): void
     {
-        $reflection = new \ReflectionClass(CreateRoleRequest::class);
+        $reflection = new ReflectionClass(CreateRoleRequest::class);
         $method = $reflection->getMethod('rules');
         $method->setAccessible(true);
 
@@ -62,7 +63,7 @@ final class CreateRoleRequestTest extends TestCase
 
     public function test_messages_returns_custom_error_messages_via_reflection(): void
     {
-        $reflection = new \ReflectionClass(CreateRoleRequest::class);
+        $reflection = new ReflectionClass(CreateRoleRequest::class);
         $method = $reflection->getMethod('messages');
         $method->setAccessible(true);
 

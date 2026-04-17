@@ -12,9 +12,9 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * Feature tests for Discovery CLI Command.
- * 
+ *
  * Tests the actual CLI command execution.
- * 
+ *
  * @group feature
  */
 final class DiscoveryCommandFeatureTest extends TestCase
@@ -55,8 +55,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     */
     public function test_it_shows_stats_by_default(): void
     {
         $this->commandTester->execute([]);
@@ -69,8 +67,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertStringContainsString('Total Bindings', $output);
     }
 
-    /**
-     */
     public function test_it_validates_environment(): void
     {
         $_ENV = [
@@ -92,8 +88,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertStringContainsString('Environment configuration is valid', $output);
     }
 
-    /**
-     */
     public function test_it_shows_validation_errors_for_invalid_config(): void
     {
         $_ENV = ['APP_ENV' => 'local']; // Missing required vars
@@ -107,8 +101,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertStringContainsString('CONFIGURATION VALIDATION FAILED', $output);
     }
 
-    /**
-     */
     public function test_it_warms_cache(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);
@@ -124,8 +116,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertFileExists($this->cacheFile);
     }
 
-    /**
-     */
     public function test_it_clears_cache(): void
     {
         // First warm the cache
@@ -142,8 +132,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertFileDoesNotExist($this->cacheFile);
     }
 
-    /**
-     */
     public function test_it_refreshes_cache(): void
     {
         // Create old cache
@@ -165,8 +153,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertGreaterThan($mtime1, $mtime2);
     }
 
-    /**
-     */
     public function test_it_shows_discovered_bindings(): void
     {
         $this->commandTester->execute(['--stats' => true]);
@@ -178,8 +164,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertStringContainsString('Implementation', $output);
     }
 
-    /**
-     */
     public function test_it_shows_cache_status(): void
     {
         $this->commandTester->execute(['--stats' => true]);
@@ -191,8 +175,6 @@ final class DiscoveryCommandFeatureTest extends TestCase
         $this->assertStringContainsString('Environment', $output);
     }
 
-    /**
-     */
     public function test_it_handles_clear_when_no_cache_exists(): void
     {
         $this->assertFileDoesNotExist($this->cacheFile);

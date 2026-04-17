@@ -50,7 +50,7 @@ function runTestMigrations(): void
     foreach ($migrations as $migration) {
         try {
             (new $migration)->up();
-        } catch (\Exception) {
+        } catch (Exception) {
             // Table might already exist, continue
         }
     }

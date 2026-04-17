@@ -10,9 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for Environment Validator.
- * 
+ *
  * Tests the validator with real environment scenarios.
- * 
+ *
  * @covers \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator
  * @covers \App\Modules\Core\Infrastructure\Validation\ConfigurationException
  */
@@ -32,8 +32,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         parent::tearDown();
     }
 
-    /**
-     */
     public function test_it_validates_real_production_environment(): void
     {
         $_ENV = [
@@ -59,15 +57,13 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
 
         // Should not throw
         EnvironmentValidator::validate();
-        
+
         $this->assertTrue(EnvironmentValidator::isProduction());
         $summary = EnvironmentValidator::getSummary();
         $this->assertTrue($summary['is_production']);
         $this->assertTrue($summary['jwt_configured']);
     }
 
-    /**
-     */
     public function test_it_validates_real_local_environment(): void
     {
         $_ENV = [
@@ -83,12 +79,10 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        
+
         $this->assertFalse(EnvironmentValidator::isProduction());
     }
 
-    /**
-     */
     public function test_it_detects_missing_critical_variables(): void
     {
         $_ENV = [
@@ -102,8 +96,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_detects_weak_jwt_secret_in_production(): void
     {
         $_ENV = [
@@ -127,8 +119,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_generates_detailed_error_message(): void
     {
         $_ENV = [
@@ -142,15 +132,13 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
             $detailed = $configurationException->getDetailedMessage();
             $this->assertStringContainsString('CONFIGURATION VALIDATION FAILED', $detailed);
             $this->assertStringContainsString('❌', $detailed);
-            
+
             $summary = $configurationException->getSummary();
             $this->assertArrayHasKey('error', $summary);
             $this->assertArrayHasKey('errors', $summary);
         }
     }
 
-    /**
-     */
     public function test_it_validates_staging_environment(): void
     {
         $_ENV = [
@@ -169,13 +157,11 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        
+
         // Staging is treated as production for validation purposes
         $this->assertTrue(EnvironmentValidator::isProduction());
     }
 
-    /**
-     */
     public function test_it_validates_testing_environment(): void
     {
         $_ENV = [
@@ -191,8 +177,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         $this->assertFalse(EnvironmentValidator::isProduction());
     }
 
-    /**
-     */
     public function test_it_detects_jwt_secret_without_numbers_or_special_chars(): void
     {
         $_ENV = [
@@ -205,7 +189,7 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        
+
         $warnings = EnvironmentValidator::getWarnings();
         $this->assertNotEmpty($warnings);
         $this->assertStringContainsString(
@@ -214,8 +198,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         );
     }
 
-    /**
-     */
     public function test_it_asserts_jwt_secret_directly(): void
     {
         // Valid secret
@@ -223,8 +205,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         $this->assertTrue(true); // No exception
     }
 
-    /**
-     */
     public function test_it_throws_when_asserting_empty_jwt_secret(): void
     {
         $this->expectException(ConfigurationException::class);
@@ -233,8 +213,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::assertJwtSecret('');
     }
 
-    /**
-     */
     public function test_it_throws_when_asserting_short_jwt_secret(): void
     {
         $this->expectException(ConfigurationException::class);
@@ -243,8 +221,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::assertJwtSecret('short');
     }
 
-    /**
-     */
     public function test_it_requires_specific_key(): void
     {
         $_ENV = ['SOME_OTHER_KEY' => 'value'];
@@ -255,8 +231,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::required('REQUIRED_KEY');
     }
 
-    /**
-     */
     public function test_it_passes_when_required_key_exists(): void
     {
         $_ENV = ['REQUIRED_KEY' => 'value'];
@@ -266,8 +240,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     */
     public function test_it_handles_null_values_as_empty(): void
     {
         $_ENV = [
@@ -281,8 +253,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_handles_whitespace_only_values_as_empty(): void
     {
         $_ENV = [
@@ -296,8 +266,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         EnvironmentValidator::validate();
     }
 
-    /**
-     */
     public function test_it_validates_development_environment(): void
     {
         $_ENV = [
@@ -313,8 +281,6 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
         $this->assertFalse(EnvironmentValidator::isProduction());
     }
 
-    /**
-     */
     public function test_it_accumulates_multiple_errors(): void
     {
         $_ENV = [

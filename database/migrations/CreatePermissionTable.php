@@ -15,6 +15,8 @@ class CreatePermissionTable
             $table->id();
             $table->string('name')->unique();
             $table->timestamps();
+
+            $table->index('name');
         });
     }
 

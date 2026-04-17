@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class GenericUpdateAction
 {
     /**
-     * @param Repository<TModel> $repository
+     * @param  Repository<TModel>  $repository
      */
     public function __construct(
         private Repository $repository
@@ -24,7 +24,7 @@ final readonly class GenericUpdateAction
     /**
      * Execute the update action.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return TModel
      */
     public function execute(int|string $id, array $data): Model

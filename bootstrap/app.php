@@ -34,7 +34,7 @@ try {
 
     if ($isCli) {
         // CLI output - detailed error message
-        echo "\n" . $configurationException->getDetailedMessage() . "\n\n";
+        echo "\n".$configurationException->getDetailedMessage()."\n\n";
         exit(1);
     }
 
@@ -48,7 +48,7 @@ try {
 // Check for warnings (non-critical issues)
 $warnings = EnvironmentValidator::getWarnings();
 if ($warnings !== [] && ($_ENV['APP_ENV'] ?? 'production') === 'local') {
-    error_log('Environment warnings: ' . implode(', ', $warnings));
+    error_log('Environment warnings: '.implode(', ', $warnings));
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

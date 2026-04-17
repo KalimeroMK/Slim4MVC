@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Modules\Core\Infrastructure\Support\CookieHelper;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 final class CookieHelperTest extends TestCase
 {
@@ -133,7 +134,7 @@ final class CookieHelperTest extends TestCase
 
     public function test_store_object_value(): void
     {
-        $obj = new \stdClass();
+        $obj = new stdClass();
         $obj->name = 'Test';
         $obj->value = 123;
 
@@ -158,7 +159,8 @@ final class CookieHelperTest extends TestCase
         $callCount = 0;
 
         $result1 = cookie_remember('remember_test', 3600, function () use (&$callCount): string {
-            ++$callCount;
+            $callCount++;
+
             return 'computed_value';
         });
 
@@ -167,7 +169,8 @@ final class CookieHelperTest extends TestCase
 
         // Second call should use cached value
         $result2 = cookie_remember('remember_test', 3600, function () use (&$callCount): string {
-            ++$callCount;
+            $callCount++;
+
             return 'new_value';
         });
 
@@ -186,10 +189,10 @@ final class CookieHelperTest extends TestCase
 
         // Test encryption via make() which doesn't use setcookie
         $cookie = $cookieHelper->make('secret', 'my-secret-data', 3600);
-        
+
         // Set the cookie manually in $_COOKIE
         $_COOKIE['secret'] = $cookie['value'];
-        
+
         $value = $cookieHelper->get('secret');
 
         $this->assertEquals('my-secret-data', $value);

@@ -101,7 +101,7 @@ class DatabaseSeeder
         $faker = \Faker\Factory::create();
         for ($i = 0; $i < 10; $i++) {
             $fakeUser = User::firstOrCreate(
-                ['email' => 'fake' . $i . '@demo.com'],
+                ['email' => 'fake'.$i.'@demo.com'],
                 [
                     'name' => $faker->name(),
                     'password' => password_hash('password', PASSWORD_BCRYPT),

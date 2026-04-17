@@ -56,7 +56,7 @@ final class AutoRelationConfig
     /**
      * Enable auto-loading for specific model class(es).
      *
-     * @param class-string|array<class-string> $modelClass
+     * @param  class-string|array<class-string>  $modelClass
      */
     public static function enableFor(string|array $modelClass): void
     {
@@ -78,7 +78,7 @@ final class AutoRelationConfig
     /**
      * Disable auto-loading for specific model class(es).
      *
-     * @param class-string|array<class-string> $modelClass
+     * @param  class-string|array<class-string>  $modelClass
      */
     public static function disableFor(string|array $modelClass): void
     {
@@ -100,7 +100,7 @@ final class AutoRelationConfig
     /**
      * Check if auto-loading is enabled for a specific model.
      *
-     * @param class-string $modelClass
+     * @param  class-string  $modelClass
      */
     public static function isEnabledFor(string $modelClass): bool
     {
@@ -179,7 +179,7 @@ final class AutoRelationConfig
     /**
      * Configure from array (useful for config files).
      *
-     * @param array<string, mixed> $config
+     * @param  array<string, mixed>  $config
      */
     public static function configure(array $config): void
     {

@@ -82,13 +82,17 @@ class Blade
      */
     protected function shareDefaults(): void
     {
-        $this->share('_session', $_SESSION ?? []);
-        $this->share('errors', $_SESSION['errors'] ?? []);
-        $this->share('old', $_SESSION['old'] ?? []);
-        $this->share('_token', $_SESSION['csrf_token'] ?? '');
+        // Share only safe session data — avoid exposing sensitive keys
+        $safeSession = $this->sanitizeSessionData($_SESSION ?? []);
+        $this->share('_session', $safeSession);
+
+        // Escape error messages to prevent XSS from user input
+        $this->share('errors', $this->escapeArrayValues($_SESSION['errors'] ?? []));
+        $this->share('old', $this->escapeArrayValues($_SESSION['old'] ?? []));
+        $this->share('_token', htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'));
 
         // Register CSRF directive
-        $this->directive('csrf', fn (): string => '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES) . \'">\'; ?>');
+        $this->directive('csrf', fn (): string => '<?php echo \'<input type="hidden" name="_token" value="\' . htmlspecialchars($_SESSION[\'csrf_token\'] ?? \'\', ENT_QUOTES, \'UTF-8\') . \'">\'; ?>');
 
         // Register method directive
         $this->directive('method', fn ($method): string => '<?php echo \'<input type="hidden" name="_method" value="\' . '.$method.' . \'">\'; ?>');
@@ -145,5 +149,48 @@ class Blade
 
         // @endrole
         $this->engine->directive('endrole', fn (): string => '<?php endif; ?>');
+    }
+
+    /**
+     * Remove sensitive keys from session data before sharing with views.
+     *
+     * @param  array<string, mixed>  $session
+     * @return array<string, mixed>
+     */
+    private function sanitizeSessionData(array $session): array
+    {
+        $sensitiveKeys = ['password', 'csrf_token', 'user_password', 'secret', 'token', 'jwt'];
+        $safe = [];
+
+        foreach ($session as $key => $value) {
+            if (is_string($key) && ! in_array($key, $sensitiveKeys, true)) {
+                $safe[$key] = is_array($value) ? $this->escapeArrayValues($value) : $value;
+            }
+        }
+
+        return $safe;
+    }
+
+    /**
+     * Recursively escape string values in an array for safe view rendering.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function escapeArrayValues(array $data): array
+    {
+        $escaped = [];
+
+        foreach ($data as $key => $value) {
+            if (is_array($value)) {
+                $escaped[$key] = $this->escapeArrayValues($value);
+            } elseif (is_string($value)) {
+                $escaped[$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+            } else {
+                $escaped[$key] = $value;
+            }
+        }
+
+        return $escaped;
     }
 }

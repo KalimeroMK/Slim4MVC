@@ -102,7 +102,7 @@ abstract class Factory
     {
         $models = [];
 
-        for ($i = 0; $i < $count; ++$i) {
+        for ($i = 0; $i < $count; $i++) {
             $models[] = $this->create($attributes);
         }
 

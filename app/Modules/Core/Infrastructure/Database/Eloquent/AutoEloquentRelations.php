@@ -146,6 +146,29 @@ trait AutoEloquentRelations
     }
 
     /**
+     * Clear the relation cache for this model or all models.
+     */
+    public static function clearRelationCache(?string $modelClass = null): void
+    {
+        if ($modelClass === null) {
+            self::$relationCache = [];
+        } else {
+            unset(self::$relationCache[$modelClass]);
+        }
+    }
+
+    /**
+     * Create a query without auto eager loading.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<static>
+     */
+    public static function queryWithoutAutoWith(): \Illuminate\Database\Eloquent\Builder
+    {
+        /** @phpstan-ignore-next-line */
+        return static::query()->withoutGlobalScope('auto_eager_load');
+    }
+
+    /**
      * Heuristic to check if a method is likely a relation method.
      * Used when return type is not explicitly declared.
      */
@@ -181,29 +204,7 @@ trait AutoEloquentRelations
             '->morphMany(',
             '->morphToMany(',
         ];
-        return array_any($relationPatterns, fn($pattern): bool => str_contains($methodBody, (string) $pattern));
-    }
 
-    /**
-     * Clear the relation cache for this model or all models.
-     */
-    public static function clearRelationCache(?string $modelClass = null): void
-    {
-        if ($modelClass === null) {
-            self::$relationCache = [];
-        } else {
-            unset(self::$relationCache[$modelClass]);
-        }
-    }
-
-    /**
-     * Create a query without auto eager loading.
-     *
-     * @return \Illuminate\Database\Eloquent\Builder<static>
-     */
-    public static function queryWithoutAutoWith(): \Illuminate\Database\Eloquent\Builder
-    {
-        /** @phpstan-ignore-next-line */
-        return static::query()->withoutGlobalScope('auto_eager_load');
+        return array_any($relationPatterns, fn ($pattern): bool => str_contains($methodBody, (string) $pattern));
     }
 }

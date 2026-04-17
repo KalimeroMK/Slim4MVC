@@ -20,7 +20,11 @@ class SecurityHeadersMiddleware implements MiddlewareInterface
             ->withHeader('X-Content-Type-Options', 'nosniff')
             ->withHeader('X-XSS-Protection', '1; mode=block')
             ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
-            ->withHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+            ->withHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+            ->withHeader(
+                'Content-Security-Policy',
+                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+            );
 
         if (($_ENV['APP_ENV'] ?? 'production') === 'production') {
             $response = $response->withHeader(

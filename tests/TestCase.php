@@ -49,6 +49,12 @@ abstract class TestCase extends BaseTestCase
 
         $this->container->set(Session::class, fn (): Session => $session);
         $this->container->set(LoggerInterface::class, $this->createStub(LoggerInterface::class));
+        $this->container->set(
+            \App\Modules\Core\Infrastructure\Support\JwtService::class,
+            fn (): \App\Modules\Core\Infrastructure\Support\JwtService => new \App\Modules\Core\Infrastructure\Support\JwtService(
+                $_ENV['JWT_SECRET'] ?? 'test-secret-key-that-is-at-least-32-chars'
+            )
+        );
 
         // Set container for Logger helper
         AppLogger::setContainer($this->container);

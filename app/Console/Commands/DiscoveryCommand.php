@@ -6,6 +6,7 @@ namespace App\Console\Commands;
 
 use App\Modules\Core\Infrastructure\DI\OptimizedDiscovery;
 use App\Modules\Core\Infrastructure\Validation\EnvironmentValidator;
+use ReflectionClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
@@ -88,7 +89,7 @@ HELP
         try {
             EnvironmentValidator::validate();
         } catch (\App\Modules\Core\Infrastructure\Validation\ConfigurationException $configurationException) {
-            $output->writeln('<error>' . $configurationException->getDetailedMessage() . '</error>');
+            $output->writeln('<error>'.$configurationException->getDetailedMessage().'</error>');
             $output->writeln('');
 
             return Command::FAILURE;
@@ -107,7 +108,7 @@ HELP
             ['Environment', $summary['environment']],
             ['Is Production', $summary['is_production'] ? 'Yes' : 'No'],
             ['JWT Configured', $summary['jwt_configured'] ? 'Yes' : 'No'],
-            ['JWT Secret Length', $summary['jwt_secret_length'] . ' chars'],
+            ['JWT Secret Length', $summary['jwt_secret_length'].' chars'],
             ['DB Connection', $summary['db_connection']],
             ['DB Configured', $summary['db_configured'] ? 'Yes' : 'No'],
             ['Cache Driver', $summary['cache_driver']],
@@ -120,7 +121,7 @@ HELP
             $output->writeln('');
             $output->writeln('⚠️  <comment>Warnings:</comment>');
             foreach ($warnings as $warning) {
-                $output->writeln('   • ' . $warning);
+                $output->writeln('   • '.$warning);
             }
         }
 
@@ -226,7 +227,7 @@ HELP
         $table->render();
 
         // Show sample bindings if any
-        if (!empty($stats['sample_bindings'])) {
+        if (! empty($stats['sample_bindings'])) {
             $output->writeln('');
             $output->writeln('📋 <comment>Discovered Bindings (first 20):</comment>');
             $output->writeln('');
@@ -238,7 +239,7 @@ HELP
                 if (is_string($definition)) {
                     $implementation = $definition;
                 } elseif (is_object($definition)) {
-                    $implementation = $definition instanceof \ReflectionClass
+                    $implementation = $definition instanceof ReflectionClass
                         ? $definition->getName()
                         : $definition::class;
                 } else {

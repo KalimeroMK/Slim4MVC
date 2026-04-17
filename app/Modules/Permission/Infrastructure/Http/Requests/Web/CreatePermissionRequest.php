@@ -14,7 +14,7 @@ class CreatePermissionRequest extends FormRequest
     protected function rules(): array
     {
         return [
-            'name'  => 'required|string|max:50|unique:permissions,name',
+            'name' => 'required|string|max:50|unique:permissions,name',
             'roles' => 'nullable|array',
         ];
     }
@@ -26,7 +26,7 @@ class CreatePermissionRequest extends FormRequest
     {
         return [
             'name.required' => 'Permission name is required',
-            'name.unique'   => 'Permission already exists',
+            'name.unique' => 'Permission already exists',
         ];
     }
 }

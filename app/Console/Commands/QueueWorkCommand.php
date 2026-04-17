@@ -87,7 +87,7 @@ class QueueWorkCommand extends Command
                     $job->handle();
                 }
 
-                ++$processed;
+                $processed++;
                 $output->writeln(sprintf('<info>✓ Processed job #%d</info>', $processed));
 
                 if ($maxJobs > 0 && $processed >= $maxJobs) {
@@ -96,7 +96,7 @@ class QueueWorkCommand extends Command
                     break;
                 }
             } catch (Exception $e) {
-                ++$failed;
+                $failed++;
                 $attempts = $job->attempts();
                 $shouldRetry = $job->shouldRetry();
 

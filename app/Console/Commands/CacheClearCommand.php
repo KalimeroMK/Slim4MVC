@@ -9,6 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 /**
  * Command to clear application cache.
@@ -56,7 +57,7 @@ final class CacheClearCommand extends Command
             }
 
             return Command::SUCCESS;
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             $output->writeln(sprintf('<error>Failed to clear cache: %s</error>', $throwable->getMessage()));
 
             return Command::FAILURE;

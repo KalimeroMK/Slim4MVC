@@ -49,6 +49,7 @@ final class JwtKeyGenerateCommand extends Command
 
         if ($length < 32) {
             $output->writeln('<error>Key length must be at least 32 bytes (256-bit).</error>');
+
             return Command::FAILURE;
         }
 
@@ -56,6 +57,7 @@ final class JwtKeyGenerateCommand extends Command
 
         if ($showOnly) {
             $output->writeln($key);
+
             return Command::SUCCESS;
         }
 
@@ -63,6 +65,7 @@ final class JwtKeyGenerateCommand extends Command
 
         if ($envPath === null) {
             $output->writeln('<error>.env file not found. Copy .env.example to .env first.</error>');
+
             return Command::FAILURE;
         }
 
@@ -70,12 +73,13 @@ final class JwtKeyGenerateCommand extends Command
 
         if ($content === false) {
             $output->writeln('<error>Unable to read .env file.</error>');
+
             return Command::FAILURE;
         }
 
         $hasExisting = (bool) preg_match('/^JWT_SECRET=.+$/m', $content);
 
-        if ($hasExisting && !$force) {
+        if ($hasExisting && ! $force) {
             /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
@@ -83,14 +87,15 @@ final class JwtKeyGenerateCommand extends Command
                 false
             );
 
-            if (!$helper->ask($input, $output, $question)) {
+            if (! $helper->ask($input, $output, $question)) {
                 $output->writeln('<comment>Aborted. JWT_SECRET was not changed.</comment>');
+
                 return Command::SUCCESS;
             }
         }
 
         if ($hasExisting) {
-            $updated = preg_replace('/^JWT_SECRET=.*$/m', 'JWT_SECRET=' . $key, $content);
+            $updated = preg_replace('/^JWT_SECRET=.*$/m', 'JWT_SECRET='.$key, $content);
         } else {
             // Append after [JWT Configuration] section or at end of file
             if (str_contains($content, '# JWT Configuration')) {
@@ -100,12 +105,13 @@ final class JwtKeyGenerateCommand extends Command
                     $content
                 );
             } else {
-                $updated = rtrim($content) . "\n\n# JWT Configuration\nJWT_SECRET={$key}\n";
+                $updated = rtrim($content)."\n\n# JWT Configuration\nJWT_SECRET={$key}\n";
             }
         }
 
         if ($updated === null || file_put_contents($envPath, $updated) === false) {
             $output->writeln('<error>Failed to write to .env file. Check file permissions.</error>');
+
             return Command::FAILURE;
         }
 
@@ -118,8 +124,8 @@ final class JwtKeyGenerateCommand extends Command
     private function findEnvFile(): ?string
     {
         $candidates = [
-            dirname(__DIR__, 3) . '/.env',
-            dirname(__DIR__, 4) . '/.env',
+            dirname(__DIR__, 3).'/.env',
+            dirname(__DIR__, 4).'/.env',
         ];
 
         foreach ($candidates as $path) {

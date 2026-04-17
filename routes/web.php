@@ -85,7 +85,7 @@ return function (App $app): void {
     })->add(AuthWebMiddleware::class);
 
     // API Documentation (Swagger UI)
-    $app->get('/api-docs', fn(Request $request, Response $response) => view('swagger', $response));
+    $app->get('/api-docs', fn (Request $request, Response $response) => view('swagger', $response));
     Route::add('api.docs', '/api-docs');
 
     // Error/Success pages

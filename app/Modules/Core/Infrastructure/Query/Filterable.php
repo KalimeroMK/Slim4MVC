@@ -53,7 +53,7 @@ trait Filterable
     /**
      * Scope to apply API query filters.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      * @return Builder<TModel>
      */
     public function scopeFilter(Builder $builder, Request $request): Builder
@@ -73,7 +73,7 @@ trait Filterable
     /**
      * Scope to get paginated results with filters.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      * @return array{items: mixed, pagination: array<string, mixed>}
      */
     public function scopeFilterPaginate(Builder $builder, Request $request): array
@@ -93,7 +93,7 @@ trait Filterable
     /**
      * Scope to get all results with filters.
      *
-     * @param Builder<TModel> $builder
+     * @param  Builder<TModel>  $builder
      * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
      */
     public function scopeFilterGet(Builder $builder, Request $request): \Illuminate\Database\Eloquent\Collection

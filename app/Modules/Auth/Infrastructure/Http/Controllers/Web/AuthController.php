@@ -77,7 +77,7 @@ class AuthController extends Controller
 
             return $this->redirect(Route::url('dashboard'));
         } catch (RuntimeException) {
-            return $this->redirect(Route::url('login') . '?error=invalid_credentials');
+            return $this->redirect(Route::url('login').'?error=invalid_credentials');
         }
     }
 
@@ -94,7 +94,7 @@ class AuthController extends Controller
             PasswordRecoveryDTO::fromRequest($passwordRecoveryRequest->validated())
         );
 
-        return $this->redirect(Route::url('login') . '?message=password_reset_sent');
+        return $this->redirect(Route::url('login').'?message=password_reset_sent');
     }
 
     public function updatePassword(ResetPasswordRequest $resetPasswordRequest, Response $response): Response
@@ -103,6 +103,6 @@ class AuthController extends Controller
             ResetPasswordDTO::fromRequest($resetPasswordRequest->validated())
         );
 
-        return $this->redirect(Route::url('login') . '?message=password_reset_success');
+        return $this->redirect(Route::url('login').'?message=password_reset_success');
     }
 }
