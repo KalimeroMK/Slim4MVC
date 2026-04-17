@@ -9,6 +9,7 @@ use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\User\Infrastructure\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
 /**
@@ -22,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $password_reset_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property \Illuminate\Database\Eloquent\Collection<int, Role> $roles
  *
  * @method static static|null find(int $id)
@@ -36,6 +38,7 @@ use Illuminate\Support\Carbon;
 class User extends Model
 {
     use AutoEloquentRelations;
+    use SoftDeletes;
 
     /**
      * Relations to auto eager load.
@@ -56,8 +59,9 @@ class User extends Model
     /** @var array<string, string> */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_at'        => 'datetime',
+        'updated_at'        => 'datetime',
+        'deleted_at'        => 'datetime',
     ];
 
     protected $hidden = ['password'];

@@ -10,7 +10,8 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Authentication System** - JWT-based API auth and session-based web auth
 - **Authorization** - Role and permission-based access control with middleware and policies
 - **Form Request Validation** - Laravel-style validation with automatic error handling
-- **Rate Limiting** - Built-in protection against brute force attacks
+- **Rate Limiting** - Built-in protection against brute force attacks with trusted proxy support
+- **Security Headers** - Automatic `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` and more via `SecurityHeadersMiddleware`
 - **CORS Support** - Configurable CORS middleware for API endpoints
 - **Error Logging** - PSR-3 compatible logging with Monolog
 - **API Resources** - Consistent API response formatting with Resource classes
@@ -38,6 +39,49 @@ A modern, production-ready starter kit for building web applications with Slim F
 - MySQL/MariaDB (or SQLite for testing)
 
 ## 🛠️ Installation
+
+### Quick Start (Recommended)
+
+Use the **`start-local`** command to automatically setup everything:
+
+```bash
+# Clone the repository
+git clone https://github.com/KalimeroMK/Slim4MVC
+cd Slim4MVC
+
+# Start everything with one command
+./slim start-local
+```
+
+This single command will:
+1. 📋 Copy `.env.example` to `.env`
+2. 🔐 Generate secure JWT secret key
+3. 📦 Run `composer update`
+4. 🐳 Start Docker containers (nginx, php, db, redis)
+5. 🗄️ Run database migrations
+6. 🌱 Seed the database with initial data
+
+The application will be available at [http://localhost](http://localhost)
+
+#### Start-Local Options
+
+```bash
+# Rebuild Docker containers
+./slim start-local -r
+
+# Force regenerate .env (WARNING: overwrites existing .env)
+./slim start-local -f
+
+# Skip database seeding
+./slim start-local --no-seed
+
+# Show help
+./slim start-local --help
+```
+
+### Manual Installation
+
+If you prefer to set up everything manually:
 
 1. **Clone the repository:**
    ```bash
@@ -298,6 +342,9 @@ php run_migrations.php refresh
 ### Available Commands
 
 ```bash
+# Quick start - setup entire development environment
+php slim start-local [-f] [-r] [--no-seed]
+
 # Module creation
 php slim make:module <ModuleName> [--model=<ModelName>] [--migration]
 
@@ -309,6 +356,9 @@ php slim make:controller <ControllerName>
 
 # Request creation
 php slim make:request <Namespace/RequestName> [--model=<ModelName>] [--type=<create|update>]
+
+# JWT Key generation
+php slim jwt:key:generate [-f]
 
 # Database seeding
 php slim seed:database
@@ -431,6 +481,14 @@ $rateLimit = new RateLimitMiddleware(10, 60); // 10 requests per 60 seconds
 $app->post('/api/endpoint', [Controller::class, 'method'])
     ->add($rateLimit);
 ```
+
+When running behind a load balancer or reverse proxy, set `TRUSTED_PROXIES` in `.env` so the real client IP is used for rate limiting instead of the proxy IP:
+
+```env
+TRUSTED_PROXIES=10.0.0.1,10.0.0.2
+```
+
+`X-Forwarded-For` is only trusted when `REMOTE_ADDR` matches a listed proxy, and the extracted IP is validated before use.
 
 ## 🌐 CORS Configuration
 
@@ -716,6 +774,9 @@ MAIL_ENCRYPTION=tls
 
 # CORS
 CORS_ORIGINS=*
+
+# Trusted Proxies (comma-separated IPs — set when behind a load balancer/reverse proxy)
+TRUSTED_PROXIES=
 
 # Cache
 CACHE_DRIVER=redis

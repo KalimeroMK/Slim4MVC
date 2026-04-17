@@ -93,7 +93,10 @@ final class UserRepositoryTest extends TestCase
         $result = $this->userRepository->delete($user->id);
 
         $this->assertTrue($result);
-        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+        // Soft delete: record remains in DB with deleted_at set
+        $this->assertDatabaseHas('users', ['id' => $user->id]);
+        $this->assertNotNull(User::withTrashed()->find($user->id)?->deleted_at);
+        $this->assertNull(User::find($user->id));
     }
 
     public function test_paginate_returns_paginated_results(): void

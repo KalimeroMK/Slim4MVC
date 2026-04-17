@@ -10,6 +10,7 @@ use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Events\UserRegistered;
 use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
+use Illuminate\Database\Capsule\Manager as Capsule;
 
 final readonly class RegisterAction implements RegisterActionInterface
 {
@@ -23,13 +24,18 @@ final readonly class RegisterAction implements RegisterActionInterface
      */
     public function execute(RegisterDTO $registerDTO): User
     {
-        $user = $this->userRepository->create([
-            'name' => $registerDTO->name,
-            'email' => $registerDTO->email,
-            'password' => password_hash($registerDTO->password, PASSWORD_BCRYPT),
-        ]);
+        /** @var User $user */
+        $user = Capsule::connection()->transaction(function () use ($registerDTO): User {
+            $user = $this->userRepository->create([
+                'name'     => $registerDTO->name,
+                'email'    => $registerDTO->email,
+                'password' => password_hash($registerDTO->password, PASSWORD_BCRYPT),
+            ]);
 
-        $this->dispatcher->dispatch(new UserRegistered($user));
+            $this->dispatcher->dispatch(new UserRegistered($user));
+
+            return $user;
+        });
 
         return $user;
     }

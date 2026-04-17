@@ -74,5 +74,4 @@ return [
     }),
     // Cache system
     CacheManager::class => autowire(CacheManager::class),
-    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),
-];
+    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];

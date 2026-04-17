@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require __DIR__.'/vendor/autoload.php';
 
+use Database\Migrations\AddSoftDeletesToRolesTable;
+use Database\Migrations\AddSoftDeletesToUsersTable;
 use Database\Migrations\CreateFailedJobsTable;
 use Database\Migrations\CreatePermissionRoleTable;
 use Database\Migrations\CreatePermissionTable;
@@ -81,6 +83,8 @@ $migrations = [
     CreatePermissionTable::class,
     CreatePermissionRoleTable::class,
     CreateFailedJobsTable::class,
+    AddSoftDeletesToUsersTable::class,
+    AddSoftDeletesToRolesTable::class,
 ];
 
 // 4. Run Command
