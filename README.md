@@ -22,11 +22,11 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
 - **API Query Builder** - Filter, sort, search with operators and pagination
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (572+ tests, 1348+ assertions)
+- **Testing Suite** - Comprehensive test coverage with PHPUnit (579 tests, 1418 assertions, 0 skipped)
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
-- **PHP 8.4 Ready** - Modern PHP features and Rector automated refactoring
+- **PHP 8.5 Ready** - Modern PHP features, Rector automated refactoring, fully compatible with PHP 8.5 deprecations
 - **Docker Ready** - Complete Docker setup for development
 - **Environment Validation** - Fail-fast configuration validation
 - **Auto-Discovery** - Automatic DI registration with caching
@@ -34,7 +34,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 
 ## 📋 Requirements
 
-- PHP >= 8.4
+- PHP >= 8.4 (8.5 compatible)
 - Composer
 - Docker & Docker Compose (for development)
 - MySQL/MariaDB (or SQLite for testing)
@@ -399,8 +399,11 @@ The Auth module (`app/Modules/Auth/`) provides:
 
 - **API Authentication** - JWT-based authentication for API endpoints
 - **Web Authentication** - Session-based authentication for web routes
-- **Password Recovery** - Token-based password reset functionality
+- **Token Refresh** - Secure refresh token rotation via `RefreshTokenAction`
+- **Logout** - JTI-based token revocation via `LogoutAction`
+- **Password Recovery** - Token-based password reset with expiry enforcement (TTL validation)
 - **Event-driven** - Dispatches events for user registration and password reset
+- **Dependency Inversion** - `AdvancedJwtServiceInterface` allows easy mocking and alternative implementations
 
 ### API Authentication (JWT)
 
@@ -715,12 +718,13 @@ composer test
 
 ### Test Coverage
 
-- ✅ 572+ tests
-- ✅ 1348+ assertions
+- ✅ 579 tests
+- ✅ 1418 assertions
+- ✅ 0 skipped, 0 deprecations, 0 notices
 - ✅ All new features tested
 - ✅ Edge cases covered
 - ✅ Integration with real database
-- ✅ PHP 8.4 optimized with Rector
+- ✅ PHP 8.5 compatible (no deprecated patterns)
 
 ### Code Quality Tools
 
@@ -872,8 +876,10 @@ return ApiResponse::validationError(['email' => ['Invalid email']]);
 
 ### Authentication
 - `POST /api/v1/register` - Register new user
-- `POST /api/v1/login` - Login and get JWT token
-- `POST /api/v1/password-recovery` - Request password reset
+- `POST /api/v1/login` - Login and get JWT token pair (access + refresh)
+- `POST /api/v1/logout` - Revoke token (JTI blacklisting)
+- `POST /api/v1/refresh-token` - Rotate refresh token and get new pair
+- `POST /api/v1/password-recovery` - Request password reset (token expires in 1 hour)
 - `POST /api/v1/reset-password` - Reset password with token
 
 ### Users (requires authentication)
@@ -1250,6 +1256,8 @@ See [Migration Guide](docs/MIGRATION_GUIDE.md) for detailed migration instructio
 
 - ✅ Password hashing with bcrypt
 - ✅ JWT token authentication (API) with minimum 32-char secret validation
+- ✅ Refresh token rotation with JTI-based revocation on logout
+- ✅ Password reset token expiry (1-hour TTL, SHA-256 hashed in DB)
 - ✅ Session-based authentication (Web)
 - ✅ CSRF protection for web routes
 - ✅ Distributed rate limiting via Cache (Redis/File) — shared across all workers
