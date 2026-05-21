@@ -16,6 +16,7 @@ use App\Modules\Core\Infrastructure\Repositories\Repository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,14 +29,13 @@ use PHPUnit\Framework\TestCase;
  */
 final class GenericCrudActionsTest extends TestCase
 {
-    private \PHPUnit\Framework\MockObject\MockObject $repository;
+    private Stub $repository;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Create mock repository
-        $this->repository = $this->createMock(Repository::class);
+        $this->repository = $this->createStub(Repository::class);
     }
 
     public function test_crud_action_factory_for_returns_instance(): void
@@ -104,15 +104,13 @@ final class GenericCrudActionsTest extends TestCase
     public function test_create_action_executes_create_on_repository(): void
     {
         $data = ['name' => 'Test', 'email' => 'test@example.com'];
-
-        $this->repository
-            ->expects($this->once())
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())
             ->method('create')
             ->with($data)
             ->willReturn($this->createStub(Model::class));
 
-        $genericCreateAction = new GenericCreateAction($this->repository);
-        $model = $genericCreateAction->execute($data);
+        $model = (new GenericCreateAction($repository))->execute($data);
 
         $this->assertInstanceOf(Model::class, $model);
     }
@@ -122,23 +120,18 @@ final class GenericCrudActionsTest extends TestCase
         $this->expectException(BadRequestException::class);
         $this->expectExceptionMessage('Cannot create entity with empty data');
 
-        $genericCreateAction = new GenericCreateAction($this->repository);
-        $genericCreateAction->execute([]);
+        (new GenericCreateAction($this->repository))->execute([]);
     }
 
     public function test_update_action_updates_and_returns_model(): void
     {
-        $data = ['name' => 'Updated'];
-        $id = 1;
-
-        $this->repository
-            ->expects($this->once())
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())
             ->method('update')
-            ->with($id, $data)
+            ->with(1, ['name' => 'Updated'])
             ->willReturn($this->createStub(Model::class));
 
-        $genericUpdateAction = new GenericUpdateAction($this->repository);
-        $model = $genericUpdateAction->execute($id, $data);
+        $model = (new GenericUpdateAction($repository))->execute(1, ['name' => 'Updated']);
 
         $this->assertInstanceOf(Model::class, $model);
     }
@@ -146,64 +139,41 @@ final class GenericCrudActionsTest extends TestCase
     public function test_update_action_throws_when_update_fails(): void
     {
         $this->expectException(Exception::class);
-
-        $this->repository
-            ->expects($this->once())
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())
             ->method('update')
             ->with(999, ['name' => 'Test'])
             ->willThrowException(new Exception('Not found'));
 
-        $genericUpdateAction = new GenericUpdateAction($this->repository);
-        $genericUpdateAction->execute(999, ['name' => 'Test']);
+        (new GenericUpdateAction($repository))->execute(999, ['name' => 'Test']);
     }
 
     public function test_delete_action_deletes_when_found(): void
     {
-        $id = 1;
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('find')->with(1)->willReturn($this->createStub(Model::class));
+        $repository->expects($this->once())->method('delete')->with(1);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with($id)
-            ->willReturn($this->createStub(Model::class));
+        (new GenericDeleteAction($repository))->execute(1);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('delete')
-            ->with($id);
-
-        $genericDeleteAction = new GenericDeleteAction($this->repository);
-        $genericDeleteAction->execute($id);
-
-        $this->assertTrue(true); // If we get here, no exception was thrown
+        $this->assertTrue(true);
     }
 
     public function test_delete_action_throws_when_not_found(): void
     {
         $this->expectException(NotFoundException::class);
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('find')->with(999)->willReturn(null);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with(999)
-            ->willReturn(null);
-
-        $genericDeleteAction = new GenericDeleteAction($this->repository);
-        $genericDeleteAction->execute(999);
+        (new GenericDeleteAction($repository))->execute(999);
     }
 
     public function test_get_action_returns_model_when_found(): void
     {
-        $id = 1;
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('find')->with(1)->willReturn($this->createStub(Model::class));
 
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with($id)
-            ->willReturn($this->createStub(Model::class));
-
-        $genericGetAction = new GenericGetAction($this->repository);
-        $model = $genericGetAction->execute($id);
+        $model = (new GenericGetAction($repository))->execute(1);
 
         $this->assertInstanceOf(Model::class, $model);
     }
@@ -211,74 +181,40 @@ final class GenericCrudActionsTest extends TestCase
     public function test_get_action_throws_when_not_found(): void
     {
         $this->expectException(NotFoundException::class);
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('find')->with(999)->willReturn(null);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with(999)
-            ->willReturn(null);
-
-        $genericGetAction = new GenericGetAction($this->repository);
-        $genericGetAction->execute(999);
+        (new GenericGetAction($repository))->execute(999);
     }
 
     public function test_get_action_execute_with_uses_find_and_loads_relations(): void
     {
-        $id = 1;
-        $relations = ['roles', 'permissions'];
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('find')->with(1)->willReturn($this->createStub(Model::class));
 
-        $this->repository
-            ->expects($this->once())
-            ->method('find')
-            ->with($id)
-            ->willReturn($this->createStub(Model::class));
-
-        $genericGetAction = new GenericGetAction($this->repository);
-        $model = $genericGetAction->executeWith($id, $relations);
+        $model = (new GenericGetAction($repository))->executeWith(1, ['roles', 'permissions']);
 
         $this->assertInstanceOf(Model::class, $model);
     }
 
     public function test_list_action_executes_paginate(): void
     {
-        $expected = [
-            'items' => new Collection(),
-            'total' => 100,
-            'page' => 1,
-            'perPage' => 15,
-            'totalPages' => 7,
-        ];
+        $expected = ['items' => new Collection(), 'total' => 100, 'page' => 1, 'perPage' => 15, 'totalPages' => 7];
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('paginate')->with(1, 15)->willReturn($expected);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('paginate')
-            ->with(1, 15)
-            ->willReturn($expected);
-
-        $genericListAction = new GenericListAction($this->repository);
-        $result = $genericListAction->execute(1, 15);
+        $result = (new GenericListAction($repository))->execute(1, 15);
 
         $this->assertEquals($expected, $result);
     }
 
     public function test_list_action_uses_default_per_page(): void
     {
-        $expected = [
-            'items' => new Collection(),
-            'total' => 100,
-            'page' => 1,
-            'perPage' => 25,
-            'totalPages' => 4,
-        ];
+        $expected = ['items' => new Collection(), 'total' => 100, 'page' => 1, 'perPage' => 25, 'totalPages' => 4];
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('paginate')->with(1, 25)->willReturn($expected);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('paginate')
-            ->with(1, 25)
-            ->willReturn($expected);
-
-        $genericListAction = new GenericListAction($this->repository, 25);
-        $result = $genericListAction->execute();
+        $result = (new GenericListAction($repository, 25))->execute();
 
         $this->assertEquals($expected, $result);
     }
@@ -286,58 +222,32 @@ final class GenericCrudActionsTest extends TestCase
     public function test_list_action_all_returns_collection(): void
     {
         $collection = new Collection();
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('all')->willReturn($collection);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('all')
-            ->willReturn($collection);
-
-        $genericListAction = new GenericListAction($this->repository);
-        $result = $genericListAction->all();
+        $result = (new GenericListAction($repository))->all();
 
         $this->assertSame($collection, $result);
     }
 
     public function test_list_action_execute_with_filters(): void
     {
-        $filters = ['status' => 'active'];
-        $expected = [
-            'items' => new Collection(),
-            'total' => 50,
-            'page' => 1,
-            'perPage' => 15,
-        ];
+        $expected = ['items' => new Collection(), 'total' => 50, 'page' => 1, 'perPage' => 15];
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('paginate')->with(1, 15)->willReturn($expected);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('paginate')
-            ->with(1, 15)
-            ->willReturn($expected);
-
-        $genericListAction = new GenericListAction($this->repository);
-        $result = $genericListAction->executeWithFilters($filters, 1, 15);
+        $result = (new GenericListAction($repository))->executeWithFilters(['status' => 'active'], 1, 15);
 
         $this->assertEquals($expected, $result);
     }
 
     public function test_list_action_execute_with_uses_paginate(): void
     {
-        $relations = ['category'];
-        $expected = [
-            'items' => new Collection(),
-            'total' => 100,
-            'page' => 1,
-            'perPage' => 15,
-        ];
+        $expected = ['items' => new Collection(), 'total' => 100, 'page' => 1, 'perPage' => 15];
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->once())->method('paginate')->with(1, 15)->willReturn($expected);
 
-        $this->repository
-            ->expects($this->once())
-            ->method('paginate')
-            ->with(1, 15)
-            ->willReturn($expected);
-
-        $genericListAction = new GenericListAction($this->repository);
-        $result = $genericListAction->executeWith($relations, 1, 15);
+        $result = (new GenericListAction($repository))->executeWith(['category'], 1, 15);
 
         $this->assertEquals($expected, $result);
     }

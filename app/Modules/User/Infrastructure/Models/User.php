@@ -22,6 +22,7 @@ use Override;
  * @property Carbon|null $email_verified_at
  * @property string|null $password
  * @property string|null $password_reset_token
+ * @property Carbon|null $password_reset_token_expires_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
@@ -54,12 +55,14 @@ class User extends Model
         'email',
         'password',
         'password_reset_token',
+        'password_reset_token_expires_at',
         'email_verified_at',
     ];
 
     /** @var array<string, string> */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password_reset_token_expires_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',

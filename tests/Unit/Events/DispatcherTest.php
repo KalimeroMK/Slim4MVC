@@ -8,7 +8,7 @@ use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
 use App\Modules\Core\Infrastructure\Events\UserRegistered;
 use App\Modules\User\Infrastructure\Models\User;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -16,13 +16,13 @@ final class DispatcherTest extends TestCase
 {
     private Dispatcher $dispatcher;
 
-    private MockObject $container;
+    private Stub $container;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->container = $this->createMock(ContainerInterface::class);
+        $this->container = $this->createStub(ContainerInterface::class);
         $this->dispatcher = new Dispatcher($this->container);
     }
 
@@ -74,16 +74,19 @@ final class DispatcherTest extends TestCase
             ->method('handle')
             ->with($this->isInstanceOf(UserRegistered::class));
 
-        $this->container->method('get')
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects($this->once())
+            ->method('get')
             ->with(\App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class)
             ->willReturn($listener);
 
-        $this->dispatcher->listen(UserRegistered::class, \App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class);
+        $dispatcher = new Dispatcher($container);
+        $dispatcher->listen(UserRegistered::class, \App\Modules\Core\Infrastructure\Listeners\SendWelcomeEmail::class);
 
         $user = new User(['name' => 'Test', 'email' => 'test@example.com']);
         $userRegistered = new UserRegistered($user);
 
-        $this->dispatcher->dispatch($userRegistered);
+        $dispatcher->dispatch($userRegistered);
     }
 
     public function test_dispatch_does_nothing_when_no_listeners(): void

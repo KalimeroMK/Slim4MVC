@@ -30,6 +30,7 @@ final readonly class ResetPasswordAction implements ResetPasswordActionInterface
 
         $user->password = password_hash($resetPasswordDTO->password, PASSWORD_BCRYPT);
         $user->password_reset_token = null;
+        $user->password_reset_token_expires_at = null;
         $user->save();
     }
 }

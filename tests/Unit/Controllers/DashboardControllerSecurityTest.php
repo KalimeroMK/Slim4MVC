@@ -7,7 +7,6 @@ namespace Tests\Unit\Controllers;
 use App\Modules\Core\Infrastructure\Http\Controllers\Admin\DashboardController;
 use App\Modules\Core\Infrastructure\Support\Auth;
 use App\Modules\User\Infrastructure\Models\User;
-use PHPUnit\Framework\MockObject\MockObject;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
 use Tests\TestCase;
@@ -18,9 +17,6 @@ use Tests\TestCase;
 final class DashboardControllerSecurityTest extends TestCase
 {
     private ServerRequestFactory $requestFactory;
-
-    /** @var MockObject & Auth */
-    private MockObject $auth;
 
     protected function setUp(): void
     {
@@ -34,10 +30,10 @@ final class DashboardControllerSecurityTest extends TestCase
         $user = $this->createUser(['name' => 'Regular', 'email' => 'regular@example.com']);
         $this->simulateLogin($user, ['user']);
 
-        $this->auth = $this->createMock(Auth::class);
-        $this->auth->method('check')->willReturn(true);
-        $this->auth->method('user')->willReturn($user);
-        $this->container->set(Auth::class, $this->auth);
+        $auth = $this->createStub(Auth::class);
+        $auth->method('check')->willReturn(true);
+        $auth->method('user')->willReturn($user);
+        $this->container->set(Auth::class, $auth);
 
         $controller = new DashboardController($this->container);
         $request = $this->requestFactory->createServerRequest('GET', '/dashboard');
@@ -52,9 +48,9 @@ final class DashboardControllerSecurityTest extends TestCase
 
     public function test_dashboard_rejects_unauthenticated_users(): void
     {
-        $this->auth = $this->createMock(Auth::class);
-        $this->auth->method('check')->willReturn(false);
-        $this->container->set(Auth::class, $this->auth);
+        $auth = $this->createStub(Auth::class);
+        $auth->method('check')->willReturn(false);
+        $this->container->set(Auth::class, $auth);
 
         $controller = new DashboardController($this->container);
         $request = $this->requestFactory->createServerRequest('GET', '/dashboard');
@@ -79,10 +75,10 @@ final class DashboardControllerSecurityTest extends TestCase
             $this->createUser(['name' => "User {$i}", 'email' => "user{$i}@example.com"]);
         }
 
-        $this->auth = $this->createMock(Auth::class);
-        $this->auth->method('check')->willReturn(true);
-        $this->auth->method('user')->willReturn($admin);
-        $this->container->set(Auth::class, $this->auth);
+        $auth = $this->createStub(Auth::class);
+        $auth->method('check')->willReturn(true);
+        $auth->method('user')->willReturn($admin);
+        $this->container->set(Auth::class, $auth);
 
         $controller = new DashboardController($this->container);
         $request = $this->requestFactory->createServerRequest('GET', '/dashboard');

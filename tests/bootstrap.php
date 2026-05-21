@@ -11,6 +11,7 @@ if (file_exists(__DIR__.'/../.env.testing')) {
 }
 
 // Set up test database
+use Database\Migrations\AddPasswordResetExpiresAtToUsersTable;
 use Database\Migrations\CreateFailedJobsTable;
 use Database\Migrations\CreatePermissionRoleTable;
 use Database\Migrations\CreatePermissionTable;
@@ -45,6 +46,7 @@ function runTestMigrations(): void
         CreatePermissionTable::class,
         CreatePermissionRoleTable::class,
         CreateFailedJobsTable::class,
+        AddPasswordResetExpiresAtToUsersTable::class,
     ];
 
     foreach ($migrations as $migration) {

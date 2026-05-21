@@ -121,6 +121,7 @@ abstract class TestCase extends BaseTestCase
                 email VARCHAR(255) UNIQUE,
                 password VARCHAR(255),
                 password_reset_token VARCHAR(255) NULL,
+                password_reset_token_expires_at DATETIME NULL,
                 email_verified_at DATETIME NULL,
                 created_at DATETIME NULL,
                 updated_at DATETIME NULL,

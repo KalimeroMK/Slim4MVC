@@ -41,7 +41,7 @@ class CsrfMiddleware implements MiddlewareInterface
 
             $token = $data['_token'] ?? null;
 
-            if (! $token || $token !== $_SESSION['csrf_token']) {
+            if (! is_string($token) || ! isset($_SESSION['csrf_token']) || ! hash_equals($_SESSION['csrf_token'], $token)) {
                 throw new RuntimeException('CSRF token mismatch', 419);
             }
         }

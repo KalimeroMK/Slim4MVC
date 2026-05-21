@@ -135,14 +135,16 @@ final class UserRepositoryTest extends TestCase
 
     public function test_find_by_password_reset_token_returns_user(): void
     {
+        $rawToken = 'test-token-123';
         $user = User::create([
             'name' => 'Test',
             'email' => 'token@test.com',
             'password' => 'password',
-            'password_reset_token' => 'test-token-123',
+            'password_reset_token' => hash('sha256', $rawToken),
+            'password_reset_token_expires_at' => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
-        $found = $this->userRepository->findByPasswordResetToken('test-token-123');
+        $found = $this->userRepository->findByPasswordResetToken($rawToken);
 
         $this->assertInstanceOf(User::class, $found);
         $this->assertEquals($user->id, $found->id);

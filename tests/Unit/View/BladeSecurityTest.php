@@ -131,7 +131,6 @@ final class BladeSecurityTest extends TestCase
     {
         $reflection = new ReflectionClass($blade);
         $property = $reflection->getProperty('sharedData');
-        $property->setAccessible(true);
         $data = $property->getValue($blade);
 
         return $data[$key] ?? null;

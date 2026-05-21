@@ -30,9 +30,12 @@ final readonly class PasswordRecoveryAction implements PasswordRecoveryActionInt
         }
 
         $token = bin2hex(random_bytes(32));
-        $user->password_reset_token = $token;
+        $user->password_reset_token = hash('sha256', $token);
+        $user->password_reset_token_expires_at = date('Y-m-d H:i:s', time() + 3600);
         $user->save();
 
+        // Dispatch with raw token so the email link contains the unhashed value.
+        // Only the hash is persisted — a DB leak cannot be used directly.
         $this->dispatcher->dispatch(new PasswordResetRequested($user, $token));
     }
 }

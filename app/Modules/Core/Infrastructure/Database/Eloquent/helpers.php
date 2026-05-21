@@ -72,5 +72,5 @@ function detect_lazy_loading(): void
  */
 function clear_relation_cache(?string $modelClass = null): void
 {
-    App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations::clearRelationCache($modelClass);
+    App\Modules\Core\Infrastructure\Database\Eloquent\RelationCache::clear($modelClass);
 }

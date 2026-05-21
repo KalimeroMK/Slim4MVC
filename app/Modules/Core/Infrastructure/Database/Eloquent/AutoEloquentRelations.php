@@ -28,8 +28,6 @@ use ReflectionMethod;
  */
 trait AutoEloquentRelations
 {
-    /** @var array<class-string<Model>, list<string>> Cached relation methods per model */
-    private static array $relationCache = [];
 
     /**
      * Boot the auto eager loading functionality.
@@ -81,8 +79,8 @@ trait AutoEloquentRelations
         $class = static::class;
 
         // Return cached result if available
-        if (isset(self::$relationCache[$class])) {
-            return self::$relationCache[$class];
+        if (RelationCache::has($class)) {
+            return RelationCache::get($class) ?? [];
         }
 
         $relations = [];
@@ -140,21 +138,14 @@ trait AutoEloquentRelations
         }
 
         // Cache the result
-        self::$relationCache[$class] = $relations;
+        RelationCache::set($class, $relations);
 
         return $relations;
     }
 
-    /**
-     * Clear the relation cache for this model or all models.
-     */
     public static function clearRelationCache(?string $modelClass = null): void
     {
-        if ($modelClass === null) {
-            self::$relationCache = [];
-        } else {
-            unset(self::$relationCache[$modelClass]);
-        }
+        RelationCache::clear($modelClass);
     }
 
     /**

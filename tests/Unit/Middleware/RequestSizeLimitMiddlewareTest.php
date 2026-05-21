@@ -118,7 +118,7 @@ final class RequestSizeLimitMiddlewareTest extends TestCase
     {
         $middleware = new RequestSizeLimitMiddleware(1024);
 
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')
             ->willReturnCallback(function ($request) {
                 // Verify body is still readable
@@ -138,7 +138,7 @@ final class RequestSizeLimitMiddlewareTest extends TestCase
 
     private function createHandler(): RequestHandlerInterface
     {
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')->willReturn(new Response(200));
 
         return $handler;

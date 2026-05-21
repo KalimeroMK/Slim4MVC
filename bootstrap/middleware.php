@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Modules\Core\Infrastructure\Cache\CacheInterface;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthWebMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ClearFlashDataMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\CorsMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\CsrfMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\ExceptionHandlerMiddleware;
+use App\Modules\Core\Infrastructure\Http\Middleware\RateLimitMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\RequestSizeLimitMiddleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\SecurityHeadersMiddleware;
 use App\Modules\Core\Infrastructure\Support\RequestResolver;
@@ -16,6 +18,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseFactoryInterface;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Psr\Log\LoggerInterface;
 
 return function ($app, DI\Container $container): void {
@@ -45,6 +49,16 @@ return function ($app, DI\Container $container): void {
     // Add middleware
     $app->addBodyParsingMiddleware();
     $app->addRoutingMiddleware();
+
+    // Global rate limiting for all /api/ routes (60 req/min per IP).
+    // Auth endpoints apply an additional stricter limiter (5 req/min) on top.
+    $app->add(function (Request $request, Handler $handler) use ($container): \Psr\Http\Message\ResponseInterface {
+        if (str_starts_with($request->getUri()->getPath(), '/api/')) {
+            $cache = $container->get(CacheInterface::class);
+            return (new RateLimitMiddleware($cache, 60, 60))->process($request, $handler);
+        }
+        return $handler->handle($request);
+    });
 
     // Limit request body size (10MB default) — prevents large payload attacks
     $app->add(new RequestSizeLimitMiddleware());

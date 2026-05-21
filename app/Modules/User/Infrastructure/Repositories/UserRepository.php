@@ -72,11 +72,17 @@ class UserRepository extends EloquentRepository
 
     /**
      * Find user by password reset token.
+     *
+     * Accepts the raw (unhashed) token from the reset link; hashes it before
+     * querying so the DB stores only the sha256 digest. Returns null when the
+     * token has expired.
      */
     public function findByPasswordResetToken(string $token): ?User
     {
         /** @var User|null $user */
-        $user = User::where('password_reset_token', $token)->first();
+        $user = User::where('password_reset_token', hash('sha256', $token))
+            ->where('password_reset_token_expires_at', '>', date('Y-m-d H:i:s'))
+            ->first();
 
         return $user;
     }

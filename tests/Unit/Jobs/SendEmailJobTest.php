@@ -38,7 +38,7 @@ final class SendEmailJobTest extends TestCase
         );
 
         // Mock Blade to return rendered content
-        $blade = $this->createMock(Blade::class);
+        $blade = $this->createStub(Blade::class);
         $blade->method('make')->willReturn('<html>Test</html>');
 
         // Create a real Mailer instance but we'll test the job structure

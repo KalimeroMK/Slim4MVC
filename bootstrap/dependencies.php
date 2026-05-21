@@ -18,6 +18,8 @@ use App\Modules\Core\Infrastructure\Cache\CacheManager;
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Queue\Queue;
 use App\Modules\Core\Infrastructure\Queue\QueueManager;
+use App\Modules\Core\Infrastructure\Support\AdvancedJwtService;
+use App\Modules\Core\Infrastructure\Support\AdvancedJwtServiceInterface;
 use App\Modules\Core\Infrastructure\Support\JwtService;
 use App\Modules\Permission\Application\Actions\CreatePermissionAction;
 use App\Modules\Permission\Application\Actions\UpdatePermissionAction;
@@ -67,12 +69,45 @@ return [
     // Queue system
     QueueManager::class => autowire(QueueManager::class),
     Queue::class => factory(fn (QueueManager $queueManager): Queue => $queueManager->queue()),
-    // JWT Service
+    // JWT Service (simple access-token encoding/decoding)
     JwtService::class => factory(function (): JwtService {
         $secret = $_ENV['JWT_SECRET'] ?? '';
 
         return new JwtService($secret);
     }),
+
+    // Advanced JWT Service (access + refresh token pairs, rotation, revocation)
+    AdvancedJwtService::class => factory(function (): AdvancedJwtService {
+        $secret    = $_ENV['JWT_SECRET'] ?? '';
+        $algorithm = $_ENV['JWT_ALGORITHM'] ?? 'HS256';
+        $issuer    = $_ENV['JWT_ISSUER'] ?? null;
+        $audience  = $_ENV['JWT_AUDIENCE'] ?? null;
+
+        // Redis client is optional — refresh token rotation requires it
+        $redisClient = null;
+        if (($_ENV['REDIS_HOST'] ?? '') !== '') {
+            try {
+                $redisClient = new \Predis\Client([
+                    'host'     => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
+                    'port'     => (int) ($_ENV['REDIS_PORT'] ?? 6379),
+                    'password' => $_ENV['REDIS_PASSWORD'] ?? null,
+                    'database' => (int) ($_ENV['REDIS_DATABASE'] ?? 0),
+                ]);
+            } catch (\Throwable) {
+                // Redis unavailable — run without token rotation
+            }
+        }
+
+        return new AdvancedJwtService(
+            secret: $secret,
+            algorithm: $algorithm,
+            issuer: $issuer !== '' ? $issuer : null,
+            audience: $audience !== '' ? $audience : null,
+            client: $redisClient,
+        );
+    }),
+    // Bind interface to the concrete factory so autowired actions get the same instance
+    AdvancedJwtServiceInterface::class => factory(fn (AdvancedJwtService $svc): AdvancedJwtServiceInterface => $svc),
     // Cache system
     CacheManager::class => autowire(CacheManager::class),
-    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),    CreateItemActionInterface::class => \DI\autowire(CreateItemAction::class), ];
+    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];

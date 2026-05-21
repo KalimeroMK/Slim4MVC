@@ -8,19 +8,25 @@ use App\Modules\User\Infrastructure\Models\User;
 use DI\Container;
 use DI\DependencyException;
 use DI\NotFoundException;
-use Exception;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 
+/**
+ * Unified auth facade that delegates to SessionAuth (web) and JwtAuth (API).
+ *
+ * Call setRequest() once per request cycle (e.g. in AuthMiddleware) so that
+ * JWT resolution uses the PSR-7 object instead of $_SERVER superglobals.
+ */
 class Auth
 {
-    protected Session $session;
-
     protected ?User $user = null;
 
-    protected ?LoggerInterface $logger = null;
+    protected ?ServerRequestInterface $request = null;
 
-    protected JwtService $jwtService;
+    private readonly SessionAuth $sessionAuth;
+
+    private readonly JwtAuth $jwtAuth;
 
     /**
      * @throws DependencyException
@@ -28,104 +34,96 @@ class Auth
      */
     public function __construct(Container $container)
     {
-        $this->session = $container->get(Session::class);
+        $session = $container->get(Session::class);
+        $jwtService = $container->get(JwtService::class);
 
+        $logger = null;
         try {
-            $this->logger = $container->get(LoggerInterface::class);
+            $logger = $container->get(LoggerInterface::class);
         } catch (DependencyException|NotFoundException) {
-            // Logger not available, continue without it
+            // Logger is optional
         }
 
-        try {
-            $this->jwtService = $container->get(JwtService::class);
-        } catch (DependencyException|NotFoundException) {
-            // JwtService will be created on demand if not in container
-            $this->jwtService = new JwtService();
-        }
+        $this->sessionAuth = new SessionAuth($session);
+        $this->jwtAuth = new JwtAuth($jwtService, $logger);
     }
 
+    /**
+     * Bind the current PSR-7 request so JWT auth reads from it instead of $_SERVER.
+     */
+    public function setRequest(ServerRequestInterface $request): void
+    {
+        $this->request = $request;
+        $this->user = null; // reset cached user when request changes
+    }
+
+    /**
+     * Attempt session-based login (web).
+     */
     public function attempt(string $email, string $password): bool
     {
-        /** @var User|null $user */
-        $user = User::where('email', $email)->first();
-
-        if (! $user instanceof User || ! password_verify($password, (string) $user->password)) {
-            return false;
-        }
-
-        $this->session->migrate(true);
-
-        // Store user data in session via Symfony Session
-        $userData = [
-            'id' => $user->id,
-            'email' => $user->email,
-            'name' => $user->name,
-        ];
-        $this->session->set('user', $userData);
-
-        // Sync to AuthHelper (sets $_SESSION keys for Blade template compatibility)
-        AuthHelper::setUser($userData);
-
-        $this->session->save();
-
-        return true;
+        return $this->sessionAuth->attempt($email, $password);
     }
 
+    /**
+     * Destroy the session (web logout).
+     */
     public function logout(): void
     {
-        $this->session->remove('user');
-        AuthHelper::logout();
+        $this->sessionAuth->logout();
     }
 
+    /**
+     * Return the currently authenticated user, checking session first then JWT.
+     */
     public function user(): ?User
     {
         if ($this->user instanceof User) {
             return $this->user;
         }
 
-        // First check session (for web authentication)
-        $sessionUser = $this->session->get('user');
-        if (is_array($sessionUser) && isset($sessionUser['id'])) {
-            /** @var User|null $user */
-            $user = User::find($sessionUser['id']);
-            if ($user instanceof User) {
-                $this->user = $user;
-
-                return $this->user;
-            }
-        }
-
-        // Then check JWT (for API authentication)
-        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-
-        if (! str_starts_with((string) $authHeader, 'Bearer ')) {
-            return null;
-        }
-
-        $token = mb_trim(str_replace('Bearer', '', $authHeader));
-
-        try {
-            $decoded = $this->jwtService->decode($token);
-            /** @var User|null $user */
-            $user = User::find($decoded->id);
+        // 1. Session (web)
+        $user = $this->sessionAuth->user();
+        if ($user instanceof User) {
             $this->user = $user;
-
             return $this->user;
-        } catch (Exception $exception) {
-            // Log authentication failures for security monitoring
-            if ($this->logger instanceof LoggerInterface) {
-                $this->logger->warning('JWT authentication failed', [
-                    'error' => $exception->getMessage(),
-                    'token_preview' => mb_substr($token, 0, 20).'...',
-                ]);
-            }
-
-            return null;
         }
+
+        // 2. JWT via PSR-7 request (API)
+        if ($this->request instanceof ServerRequestInterface) {
+            $user = $this->jwtAuth->userFromRequest($this->request);
+        } else {
+            // Fallback: read Authorization header from $_SERVER when no request is bound
+            $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (str_starts_with($header, 'Bearer ')) {
+                $token = trim(substr($header, 7));
+                $user = $this->jwtAuth->userFromToken($token);
+            }
+        }
+
+        $this->user = $user;
+
+        return $this->user;
     }
 
     public function check(): bool
     {
         return $this->user() instanceof User;
+    }
+
+    /**
+     * Expose the underlying JWT authenticator (e.g. for refresh token flows).
+     */
+    public function jwt(): JwtAuth
+    {
+        return $this->jwtAuth;
+    }
+
+    /**
+     * Expose the underlying session authenticator (e.g. for web controllers).
+     */
+    public function session(): SessionAuth
+    {
+        return $this->sessionAuth;
     }
 }

@@ -202,7 +202,7 @@ final class QueryBuilderTest extends TestCase
 
     private function createRequest(array $queryParams): ServerRequestInterface
     {
-        $request = $this->createMock(ServerRequestInterface::class);
+        $request = $this->createStub(ServerRequestInterface::class);
         $request->method('getQueryParams')->willReturn($queryParams);
 
         return $request;

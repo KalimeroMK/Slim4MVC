@@ -57,7 +57,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
 
     public function test_store_rejects_request_when_not_authenticated(): void
     {
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(false);
         $this->container->set(Auth::class, $auth);
 
@@ -77,7 +77,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
         $user = $this->createUser(['name' => 'Test', 'email' => 'test@example.com']);
         $this->simulateLogin($user);
 
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(true);
         $auth->method('user')->willReturn($user);
         $this->container->set(Auth::class, $auth);
@@ -100,7 +100,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
         $user->roles()->attach($adminRole->id);
         $this->simulateLogin($user, ['admin'], ['users.create']);
 
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(true);
         $auth->method('user')->willReturn($user);
         $this->container->set(Auth::class, $auth);
@@ -130,7 +130,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
         $user = $this->createUser(['name' => 'Admin', 'email' => 'admin@example.com']);
         $this->simulateLogin($user);
 
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(true);
         $auth->method('user')->willReturn($user);
         $this->container->set(Auth::class, $auth);
@@ -149,7 +149,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
 
     public function test_update_requires_authentication(): void
     {
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(false);
         $this->container->set(Auth::class, $auth);
 
@@ -164,7 +164,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
 
     public function test_destroy_requires_authentication(): void
     {
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(false);
         $this->container->set(Auth::class, $auth);
 
@@ -179,7 +179,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
 
     public function test_index_requires_authentication(): void
     {
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(false);
         $this->container->set(Auth::class, $auth);
 
@@ -194,7 +194,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
 
     public function test_show_requires_authentication(): void
     {
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(false);
         $this->container->set(Auth::class, $auth);
 
@@ -212,7 +212,7 @@ final class GenericCrudControllerSecurityTest extends TestCase
         $user = $this->createUser(['name' => 'Admin', 'email' => 'admin@example.com']);
         $this->simulateLogin($user, ['admin'], ['users.create']);
 
-        $auth = $this->createMock(Auth::class);
+        $auth = $this->createStub(Auth::class);
         $auth->method('check')->willReturn(true);
         $auth->method('user')->willReturn($user);
         $this->container->set(Auth::class, $auth);

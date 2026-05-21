@@ -21,7 +21,7 @@ use stdClass;
  * - Redis-backed token whitelist
  * - Comprehensive claims support
  */
-final readonly class AdvancedJwtService
+final readonly class AdvancedJwtService implements AdvancedJwtServiceInterface
 {
     private const int ACCESS_TOKEN_TTL = 900;
 
@@ -101,17 +101,21 @@ final readonly class AdvancedJwtService
 
         $refreshToken = $this->encode($payload);
 
-        // Store in Redis for rotation tracking
+        // Store in Redis for rotation tracking and index by user for efficient revocation
         if ($this->client !== null) {
             $this->client->setex(
                 $this->getRefreshTokenKey($jti),
                 self::REFRESH_TOKEN_TTL,
-                json_encode([
+                (string) json_encode([
                     'user_id' => $userId,
                     'fingerprint' => $fingerprint,
                     'created_at' => time(),
                 ])
             );
+            // Track per-user JTIs so revokeAllUserTokens doesn't need KEYS *
+            $userTokensKey = $this->getUserTokensKey($userId);
+            $this->client->sadd($userTokensKey, [$jti]);
+            $this->client->expire($userTokensKey, self::REFRESH_TOKEN_TTL);
         }
 
         return new TokenPair(
@@ -158,8 +162,8 @@ final readonly class AdvancedJwtService
             throw new RuntimeException('Refresh token has been revoked or already used');
         }
 
-        // Delete old token (rotation)
-        $this->client->del($this->getRefreshTokenKey($payload->jti));
+        // Delete old token (rotation) and remove from user index
+        $this->revokeRefreshToken((string) ($payload->jti ?? ''), $payload->sub ?? null);
 
         // Generate new token pair
         return $this->generateRefreshToken($payload->sub);
@@ -240,15 +244,22 @@ final readonly class AdvancedJwtService
     /**
      * Revoke a specific refresh token.
      */
-    public function revokeRefreshToken(string $jti): void
+    public function revokeRefreshToken(string $jti, int|string|null $userId = null): void
     {
-        if ($this->client !== null) {
-            $this->client->del($this->getRefreshTokenKey($jti));
+        if ($this->client === null) {
+            return;
+        }
+
+        $this->client->del($this->getRefreshTokenKey($jti));
+
+        if ($userId !== null) {
+            $this->client->srem($this->getUserTokensKey($userId), [$jti]);
         }
     }
 
     /**
-     * Revoke all refresh tokens for a user.
+     * Revoke all refresh tokens for a user using the per-user index set.
+     * Avoids the blocking KEYS * command.
      */
     public function revokeAllUserTokens(int|string $userId): void
     {
@@ -256,20 +267,14 @@ final readonly class AdvancedJwtService
             return;
         }
 
-        // This is a simplified implementation
-        // In production, you might want to use a set or scan pattern
-        $pattern = 'refresh_token:*';
-        $keys = $this->client->keys($pattern);
+        $userTokensKey = $this->getUserTokensKey($userId);
+        $jtis = $this->client->smembers($userTokensKey);
 
-        foreach ($keys as $key) {
-            $data = $this->client->get($key);
-            if ($data !== null) {
-                $tokenData = json_decode($data, true);
-                if (isset($tokenData['user_id']) && $tokenData['user_id'] === $userId) {
-                    $this->client->del($key);
-                }
-            }
+        foreach ($jtis as $jti) {
+            $this->client->del($this->getRefreshTokenKey((string) $jti));
         }
+
+        $this->client->del($userTokensKey);
     }
 
     /**
@@ -296,17 +301,15 @@ final readonly class AdvancedJwtService
     }
 
     /**
-     * Generate a browser/device fingerprint.
+     * Generate a browser/device fingerprint from stable request attributes.
+     * IP is intentionally excluded — it changes on mobile networks and would
+     * trigger spurious revocations for legitimate users.
      */
     private function generateFingerprint(): string
     {
-        // Combine multiple factors for fingerprint
         $data = [
             $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-            $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-            $_SERVER['HTTP_ACCEPT'] ?? 'unknown',
             $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'unknown',
-            time(), // Add timestamp to make it unique per session
         ];
 
         return hash('sha256', implode('|', $data));
@@ -332,5 +335,13 @@ final readonly class AdvancedJwtService
     private function getRefreshTokenKey(string $jti): string
     {
         return 'refresh_token:'.$jti;
+    }
+
+    /**
+     * Get Redis key for the per-user token index set.
+     */
+    private function getUserTokensKey(int|string $userId): string
+    {
+        return 'user_tokens:'.(string) $userId;
     }
 }

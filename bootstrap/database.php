@@ -21,8 +21,8 @@ $capsule->addConnection([
     'database' => $_ENV['DB_DATABASE'] ?? 'forge',
     'username' => $_ENV['DB_USERNAME'] ?? 'forge',
     'password' => $_ENV['DB_PASSWORD'] ?? '',
-    'charset' => 'utf8',
-    'collation' => 'utf8_unicode_ci',
+    'charset' => 'utf8mb4',
+    'collation' => 'utf8mb4_unicode_ci',
     'prefix' => '',
 ]);
 

@@ -46,7 +46,6 @@ final class CreateRoleRequestTest extends TestCase
     {
         $reflection = new ReflectionClass(CreateRoleRequest::class);
         $method = $reflection->getMethod('rules');
-        $method->setAccessible(true);
 
         // Create a minimal instance with mocked dependencies
         $request = $reflection->newInstanceWithoutConstructor();
@@ -65,7 +64,6 @@ final class CreateRoleRequestTest extends TestCase
     {
         $reflection = new ReflectionClass(CreateRoleRequest::class);
         $method = $reflection->getMethod('messages');
-        $method->setAccessible(true);
 
         $request = $reflection->newInstanceWithoutConstructor();
         $messages = $method->invoke($request);

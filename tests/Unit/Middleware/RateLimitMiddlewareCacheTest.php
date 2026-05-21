@@ -6,7 +6,7 @@ namespace Tests\Unit\Middleware;
 
 use App\Modules\Core\Infrastructure\Cache\CacheInterface;
 use App\Modules\Core\Infrastructure\Http\Middleware\RateLimitMiddleware;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
@@ -19,14 +19,13 @@ final class RateLimitMiddlewareCacheTest extends TestCase
 {
     private ServerRequestFactory $serverRequestFactory;
 
-    /** @var MockObject & CacheInterface */
-    private MockObject $cache;
+    private Stub $cache;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->serverRequestFactory = new ServerRequestFactory();
-        $this->cache = $this->createMock(CacheInterface::class);
+        $this->cache = $this->createStub(CacheInterface::class);
     }
 
     public function test_allows_requests_within_limit(): void
@@ -165,7 +164,7 @@ final class RateLimitMiddlewareCacheTest extends TestCase
 
     private function createHandler(): RequestHandlerInterface
     {
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')
             ->willReturn(new Response(200));
 

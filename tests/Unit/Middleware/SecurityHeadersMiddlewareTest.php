@@ -85,7 +85,7 @@ final class SecurityHeadersMiddlewareTest extends TestCase
 
     private function createHandler(): RequestHandlerInterface
     {
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')->willReturn(new Response(200));
 
         return $handler;

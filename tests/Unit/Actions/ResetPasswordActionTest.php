@@ -18,51 +18,65 @@ final class ResetPasswordActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $userRepository = new UserRepository();
-        $this->resetPasswordAction = new ResetPasswordAction($userRepository);
+        $this->resetPasswordAction = new ResetPasswordAction(new UserRepository());
     }
 
     public function test_execute_with_valid_token_resets_password(): void
     {
+        $rawToken = 'valid-token-123';
         $user = User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => password_hash('oldpassword', PASSWORD_BCRYPT),
-            'password_reset_token' => 'valid-token-123',
+            'name'                             => 'Test User',
+            'email'                            => 'test@example.com',
+            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token'             => hash('sha256', $rawToken),
+            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
-        $resetPasswordDTO = new ResetPasswordDTO('valid-token-123', 'newpassword123');
-        $this->resetPasswordAction->execute($resetPasswordDTO);
+        $this->resetPasswordAction->execute(new ResetPasswordDTO($rawToken, 'newpassword123'));
 
-        $user = User::find($user->id); // Reload from database
+        $user->refresh();
         $this->assertTrue(password_verify('newpassword123', (string) $user->password));
         $this->assertNull($user->password_reset_token);
+        $this->assertNull($user->password_reset_token_expires_at);
+    }
+
+    public function test_execute_with_expired_token_throws_exception(): void
+    {
+        $rawToken = 'expired-token-456';
+        User::create([
+            'name'                             => 'Test User',
+            'email'                            => 'test@example.com',
+            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token'             => hash('sha256', $rawToken),
+            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() - 1),
+        ]);
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('Invalid or expired reset token');
+
+        $this->resetPasswordAction->execute(new ResetPasswordDTO($rawToken, 'newpassword123'));
     }
 
     public function test_execute_with_invalid_token_throws_exception(): void
     {
-        $resetPasswordDTO = new ResetPasswordDTO('invalid-token', 'newpassword123');
-
         $this->expectException(NotFoundException::class);
         $this->expectExceptionMessage('Invalid or expired reset token');
 
-        $this->resetPasswordAction->execute($resetPasswordDTO);
+        $this->resetPasswordAction->execute(new ResetPasswordDTO('invalid-token', 'newpassword123'));
     }
 
-    public function test_execute_with_nonexistent_token_throws_exception(): void
+    public function test_execute_with_wrong_token_throws_exception(): void
     {
         User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => password_hash('oldpassword', PASSWORD_BCRYPT),
-            'password_reset_token' => 'different-token',
+            'name'                             => 'Test User',
+            'email'                            => 'test@example.com',
+            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token'             => hash('sha256', 'correct-token'),
+            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
-        $resetPasswordDTO = new ResetPasswordDTO('nonexistent-token', 'newpassword123');
-
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage('Invalid or expired reset token');
 
-        $this->resetPasswordAction->execute($resetPasswordDTO);
+        $this->resetPasswordAction->execute(new ResetPasswordDTO('wrong-token', 'newpassword123'));
     }
 }

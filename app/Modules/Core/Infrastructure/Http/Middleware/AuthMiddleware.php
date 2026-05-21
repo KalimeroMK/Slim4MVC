@@ -17,6 +17,8 @@ class AuthMiddleware implements MiddlewareInterface
 
     public function process(Request $request, Handler $handler): Response
     {
+        $this->auth->setRequest($request);
+
         if (! $this->auth->check()) {
             return ApiResponse::unauthorized();
         }

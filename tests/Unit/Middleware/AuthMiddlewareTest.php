@@ -7,7 +7,7 @@ namespace Tests\Unit\Middleware;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Modules\Core\Infrastructure\Support\Auth;
 use App\Modules\User\Infrastructure\Models\User;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Response;
@@ -17,7 +17,7 @@ final class AuthMiddlewareTest extends TestCase
 {
     private AuthMiddleware $authMiddleware;
 
-    private MockObject $auth;
+    private Stub $auth;
 
     private ServerRequestFactory $serverRequestFactory;
 
@@ -26,7 +26,7 @@ final class AuthMiddlewareTest extends TestCase
         parent::setUp();
 
         $this->serverRequestFactory = new ServerRequestFactory();
-        $this->auth = $this->createMock(Auth::class);
+        $this->auth = $this->createStub(Auth::class);
         $this->authMiddleware = new AuthMiddleware($this->auth);
         $_ENV['JWT_SECRET'] = 'test-secret-key';
     }
@@ -84,7 +84,7 @@ final class AuthMiddlewareTest extends TestCase
 
     private function createHandler(): RequestHandlerInterface
     {
-        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler = $this->createStub(RequestHandlerInterface::class);
         $handler->method('handle')
             ->willReturn(new Response(200));
 
