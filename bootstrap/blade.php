@@ -13,11 +13,6 @@ return function (Container $container): void {
     $viewsPath = __DIR__.'/../resources/views';
     $cachePath = __DIR__.'/../storage/cache/view';
 
-    // Ensure cache directory exists
-    if (! is_dir($cachePath)) {
-        mkdir($cachePath, 0755, true);
-    }
-
     try {
         // Initialize Blade with custom CSRF handling
         $blade = new Blade($viewsPath, $cachePath);

@@ -24,6 +24,7 @@ class Blade
         protected string $cachePath,
         protected array $sharedData = []
     ) {
+        $this->ensureCacheDirectory();
         $this->setupEngine();
         $this->shareDefaults();
     }
@@ -101,6 +102,23 @@ class Blade
     /**
      * Initialize BladeOne engine.
      */
+    /**
+     * BladeOne compiles templates to disk and silently renders nothing when it cannot
+     * write, so a missing cache directory shows up as an empty view rather than an error.
+     *
+     * @throws RuntimeException if the directory cannot be created or written to
+     */
+    protected function ensureCacheDirectory(): void
+    {
+        if (! is_dir($this->cachePath) && ! mkdir($this->cachePath, 0o755, true) && ! is_dir($this->cachePath)) {
+            throw new RuntimeException(sprintf('Unable to create the view cache directory: %s', $this->cachePath));
+        }
+
+        if (! is_writable($this->cachePath)) {
+            throw new RuntimeException(sprintf('View cache directory is not writable: %s', $this->cachePath));
+        }
+    }
+
     protected function setupEngine(): void
     {
         $mode = ($_ENV['APP_ENV'] ?? 'local') === 'production'
