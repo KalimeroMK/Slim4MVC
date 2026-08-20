@@ -24,7 +24,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
 - **API Query Builder** - Filter, sort, search with operators and pagination
-- **Testing Suite** - 648 PHPUnit tests, 0 skipped; PHPStan level 8 clean and Pint-formatted
+- **Testing Suite** - 695 PHPUnit tests, 0 skipped; PHPStan level 8 clean and Pint-formatted
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -709,7 +709,7 @@ The project includes a comprehensive test suite covering:
 
 | Suite | Tests | Description |
 |-------|-------|-------------|
-| **Unit** | 541 | Isolated component tests |
+| **Unit** | 588 | Isolated component tests |
 | **Integration** | 75 | Database and service integration |
 | **Feature** | 15 | End-to-end API tests |
 | **Edge Cases** | 17 | Boundary and unusual scenarios |
@@ -760,16 +760,17 @@ composer test
 
 ### Test Coverage
 
-- ✅ 648 tests, 1552 assertions
+- ✅ 695 tests, 1661 assertions
 - ✅ 0 skipped, 0 deprecations, 0 notices
 - ✅ PHPStan level 8: 0 errors
 - ✅ PHP 8.5 compatible (no deprecated patterns)
 
-Measured line coverage is **~51%** (`composer test:coverage`). The security-critical
+Measured line coverage is **~54%** (`composer test:coverage`). The security-critical
 paths are the well-covered ones — CORS, rate limiting, JWT decoding, the query
-allowlists, auth guards and the repository layer are all 85–100%. Controllers,
-mailers and console commands are largely uncovered; treat those as the next target
-rather than assuming the whole codebase is exercised.
+allowlists, auth guards, the authorization layer and the CRUD controller are all
+85–100%. Mailers, console commands and the module HTTP controllers are largely
+uncovered; treat those as the next target rather than assuming the whole codebase
+is exercised.
 
 ### Code Quality Tools
 

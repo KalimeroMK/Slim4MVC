@@ -34,7 +34,7 @@ final readonly class GenericListAction
         $perPage ??= $this->defaultPerPage;
 
         /** @var array{items: Collection<int, TModel>, total: int, page: int, perPage: int, totalPages: int} $result */
-        $result = $this->repository->paginate($page, $perPage);
+        $result = $this->withItemsAsCollection($this->repository->paginate($page, $perPage));
 
         return $result;
     }
@@ -66,7 +66,9 @@ final readonly class GenericListAction
         }
 
         /** @var array{items: Collection<int, TModel>, total: int, page: int, perPage: int} $result */
-        $result = $this->repository->paginateBy($filters, $page, $perPage ?? $this->defaultPerPage);
+        $result = $this->withItemsAsCollection(
+            $this->repository->paginateBy($filters, $page, $perPage ?? $this->defaultPerPage)
+        );
 
         return $result;
     }
@@ -93,17 +95,27 @@ final readonly class GenericListAction
     public function executeWith(array $relations, int $page = 1, ?int $perPage = null): array
     {
         $result = $this->execute($page, $perPage);
+        $result['items']->load($relations);
 
-        // Load relations on the items
-        /** @var Collection<int, TModel>|list<TModel> $items */
-        $items = $result['items'];
-        if (is_array($items)) {
-            $items = new Collection($items);
-        }
+        return $result;
+    }
 
-        /** @phpstan-ignore-next-line */
-        $items->load($relations);
-        $result['items'] = $items;
+    /**
+     * Normalise a repository page so `items` is always a Collection.
+     *
+     * Repository::paginate() returns a plain list, but every method here documents a
+     * Collection and callers rely on it — GenericCrudController::index() calls
+     * ->toArray() on it, which used to fatal for any controller without a
+     * $resourceClass.
+     *
+     * @param  array<string, mixed>  $result
+     * @return array<string, mixed>
+     */
+    private function withItemsAsCollection(array $result): array
+    {
+        $items = $result['items'] ?? [];
+
+        $result['items'] = $items instanceof Collection ? $items : new Collection($items);
 
         return $result;
     }

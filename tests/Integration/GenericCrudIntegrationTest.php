@@ -314,7 +314,7 @@ final class GenericCrudIntegrationTest extends TestCase
         $this->assertSame(2, $result['total']);
         $this->assertEqualsCanonicalizing(
             [$first->id, $second->id],
-            array_map(static fn ($user): int => $user->id, $result['items'])
+            $result['items']->pluck('id')->all()
         );
     }
 
