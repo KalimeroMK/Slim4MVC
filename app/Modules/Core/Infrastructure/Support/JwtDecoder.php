@@ -12,6 +12,8 @@ use stdClass;
  *
  * Decodes and validates JWT tokens using HMAC-SHA256 algorithm.
  * Implements RFC 7519 JSON Web Token standard.
+ *
+ * An `exp` claim is required: a token without one is valid forever.
  */
 class JwtDecoder
 {
@@ -23,7 +25,7 @@ class JwtDecoder
      * @param  string  $algorithm  The algorithm to use (default: HS256)
      * @return stdClass The decoded payload
      *
-     * @throws RuntimeException If token is invalid, expired, or verification fails
+     * @throws RuntimeException If the token is invalid, expired, missing `exp`, or fails verification
      */
     public function decode(string $token, string $secret, string $algorithm = 'HS256'): stdClass
     {
@@ -61,8 +63,21 @@ class JwtDecoder
         // Decode payload
         $payload = json_decode($this->base64UrlDecode($payloadEncoded), false, 512, JSON_THROW_ON_ERROR);
 
-        // Validate expiration (exp claim)
-        if (isset($payload->exp) && $payload->exp < time()) {
+        if (! $payload instanceof stdClass) {
+            throw new RuntimeException('JWT payload must be a JSON object');
+        }
+
+        // Validate expiration (exp claim). A token without one would never expire,
+        // so its absence is rejected rather than treated as "no expiry".
+        if (! isset($payload->exp)) {
+            throw new RuntimeException('JWT token is missing the exp claim');
+        }
+
+        if (! is_numeric($payload->exp)) {
+            throw new RuntimeException('JWT exp claim must be a timestamp');
+        }
+
+        if ((int) $payload->exp < time()) {
             throw new RuntimeException('JWT token has expired');
         }
 

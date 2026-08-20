@@ -161,7 +161,11 @@ final readonly class FileCache implements CacheInterface
         return $this->remember($key, null, $callback);
     }
 
-    public function increment(string $key, int $value = 1): int|false
+    /**
+     * Note: file-based counters are read-modify-write and therefore not atomic.
+     * Use the Redis driver where concurrent accuracy matters.
+     */
+    public function increment(string $key, int $value = 1, ?int $ttl = null): int|false
     {
         $current = $this->get($key, 0);
 
@@ -170,14 +174,14 @@ final readonly class FileCache implements CacheInterface
         }
 
         $newValue = $current + $value;
-        $this->set($key, $newValue);
+        $this->set($key, $newValue, $ttl);
 
         return $newValue;
     }
 
-    public function decrement(string $key, int $value = 1): int|false
+    public function decrement(string $key, int $value = 1, ?int $ttl = null): int|false
     {
-        return $this->increment($key, -$value);
+        return $this->increment($key, -$value, $ttl);
     }
 
     public function many(array $keys): array

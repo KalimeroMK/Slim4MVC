@@ -9,6 +9,7 @@ use App\Modules\Core\Infrastructure\Mail\WelcomeEmail;
 use App\Modules\Core\Infrastructure\Support\Mailer;
 use App\Modules\Core\Infrastructure\View\Blade;
 use ReflectionClass;
+use ReflectionProperty;
 use Tests\TestCase;
 
 final class MailableTest extends TestCase
@@ -107,10 +108,13 @@ final class MailableTest extends TestCase
     {
         $user = $this->createUser();
         $welcomeEmail = new WelcomeEmail($this->mailer, $this->blade, $user);
-        $welcomeEmail->subject('Custom Subject');
 
-        // Test that custom subject is used
-        $this->assertTrue(true); // Subject is tested through send/queue methods
+        $returned = $welcomeEmail->subject('Custom Subject');
+
+        $property = new ReflectionProperty($welcomeEmail, 'subject');
+
+        $this->assertSame('Custom Subject', $property->getValue($welcomeEmail));
+        $this->assertSame($welcomeEmail, $returned, 'subject() should be chainable.');
     }
 
     public function test_mailable_with_additional_data(): void

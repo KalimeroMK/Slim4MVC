@@ -109,7 +109,7 @@ class AuthController extends Controller
         );
 
         return ApiResponse::success([
-            'user'  => $result['user'],
+            'user' => $result['user'],
             ...$result['token_pair']->toArray(),
         ]);
     }

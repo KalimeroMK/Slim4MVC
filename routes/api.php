@@ -15,7 +15,7 @@ return function (App $app): void {
 
         try {
             Capsule::connection()->getPdo();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             $dbStatus = 'error';
             $status = 'degraded';
             $httpCode = 503;

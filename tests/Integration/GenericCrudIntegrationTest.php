@@ -15,6 +15,7 @@ use App\Modules\User\Infrastructure\Models\User;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 /**
@@ -282,16 +283,48 @@ final class GenericCrudIntegrationTest extends TestCase
         $found->delete();
     }
 
-    public function test_it_ignores_filters_in_execute_with_filters(): void
+    public function test_it_actually_applies_filters_in_execute_with_filters(): void
     {
+        $match = $this->createUser(['email' => 'filter-match@example.com']);
+        $this->createUser(['email' => 'filter-other@example.com']);
 
         $genericListAction = new GenericListAction($this->userRepository);
 
-        // Filters are currently ignored, but method should work
-        $result = $genericListAction->executeWithFilters(['status' => 'active'], 1, 10);
+        $result = $genericListAction->executeWithFilters(['email' => 'filter-match@example.com'], 1, 10);
 
-        $this->assertIsArray($result);
-        $this->assertArrayHasKey('items', $result);
+        $this->assertSame(1, $result['total']);
+        $this->assertCount(1, $result['items']);
+        $this->assertSame($match->id, $result['items'][0]->id);
+    }
+
+    public function test_it_filters_on_a_list_of_values(): void
+    {
+        $first = $this->createUser(['email' => 'in-one@example.com']);
+        $second = $this->createUser(['email' => 'in-two@example.com']);
+        $this->createUser(['email' => 'in-three@example.com']);
+
+        $genericListAction = new GenericListAction($this->userRepository);
+
+        $result = $genericListAction->executeWithFilters(
+            ['email' => ['in-one@example.com', 'in-two@example.com']],
+            1,
+            10
+        );
+
+        $this->assertSame(2, $result['total']);
+        $this->assertEqualsCanonicalizing(
+            [$first->id, $second->id],
+            array_map(static fn ($user): int => $user->id, $result['items'])
+        );
+    }
+
+    public function test_it_rejects_a_filter_key_that_is_not_a_column_name(): void
+    {
+        $genericListAction = new GenericListAction($this->userRepository);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $genericListAction->executeWithFilters(['email) or 1=1 --' => 'x'], 1, 10);
     }
 
     public function test_it_loads_relations_in_execute_with_for_list(): void

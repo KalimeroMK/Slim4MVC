@@ -13,7 +13,10 @@ class FileQueue implements Queue
 
     public function __construct(?string $queuePath = null)
     {
-        $queuePath ??= dirname(__DIR__, 2).'/storage/queue/jobs.json';
+        // Five levels up from app/Modules/Core/Infrastructure/Queue is the project root.
+        // This used to resolve to app/Modules/Core/storage, writing queue state into the
+        // source tree where it escaped .gitignore and got committed.
+        $queuePath ??= $_ENV['QUEUE_PATH'] ?? dirname(__DIR__, 5).'/storage/queue/jobs.json';
         $this->queueFile = $queuePath;
 
         // Ensure directory exists

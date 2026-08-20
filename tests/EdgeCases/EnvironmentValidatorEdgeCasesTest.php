@@ -41,7 +41,9 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        $this->assertTrue(true);
+
+        $this->assertSame(2048, EnvironmentValidator::getSummary()['jwt_secret_length']);
+        $this->assertSame([], EnvironmentValidator::getWarnings());
     }
 
     public function test_it_handles_unicode_in_env_values(): void
@@ -56,7 +58,12 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        $this->assertTrue(true);
+
+        $summary = EnvironmentValidator::getSummary();
+
+        $this->assertTrue($summary['jwt_configured']);
+        // Length is measured in bytes, so multi-byte characters count for more than one.
+        $this->assertGreaterThanOrEqual(32, $summary['jwt_secret_length']);
     }
 
     public function test_it_handles_exactly_32_char_secret(): void
@@ -71,7 +78,12 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        $this->assertTrue(true);
+
+        $this->assertSame(32, EnvironmentValidator::getSummary()['jwt_secret_length']);
+        $this->assertContains(
+            'JWT_SECRET should contain numbers and special characters for better security',
+            EnvironmentValidator::getWarnings()
+        );
     }
 
     public function test_it_rejects_31_char_secret(): void
@@ -103,7 +115,9 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        $this->assertTrue(true);
+
+        // A password full of shell/regex metacharacters must not break validation.
+        $this->assertTrue(EnvironmentValidator::getSummary()['db_configured']);
     }
 
     public function test_it_handles_zero_user_id(): void
@@ -118,6 +132,8 @@ final class EnvironmentValidatorEdgeCasesTest extends TestCase
         ];
 
         EnvironmentValidator::validate();
-        $this->assertTrue(true);
+
+        $this->assertSame('local', EnvironmentValidator::getSummary()['environment']);
+        $this->assertFalse(EnvironmentValidator::getSummary()['is_production']);
     }
 }

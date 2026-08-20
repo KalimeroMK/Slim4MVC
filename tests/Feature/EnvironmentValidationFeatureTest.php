@@ -80,10 +80,13 @@ final class EnvironmentValidationFeatureTest extends TestCase
             'MAIL_PASSWORD' => 'pass',
         ];
 
-        // Should not throw
         \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::validate();
 
-        $this->assertTrue(true);
+        $summary = \App\Modules\Core\Infrastructure\Validation\EnvironmentValidator::getSummary();
+
+        // A 64-char hex secret trips neither the length nor the character-class warning.
+        $this->assertSame([], $summary['warnings']);
+        $this->assertTrue($summary['is_production']);
     }
 
     public function test_it_detects_common_weak_secrets(): void

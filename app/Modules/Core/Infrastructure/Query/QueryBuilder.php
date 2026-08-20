@@ -5,16 +5,52 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Query;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 /**
  * Build Eloquent queries from API query parameters.
  *
+ * Security model — allowlists are fail-closed. Column and relation names arriving
+ * from the query string are never passed to the query builder unless they appear in
+ * the matching config key, and they must also look like a plain SQL identifier.
+ * A missing or empty allowlist means "nothing is allowed", not "everything".
+ *
+ * Recognised config keys, each a list of names:
+ *   - `filterable`  → `?filter[field]=` and `?range[field]=`
+ *   - `sortable`    → `?sort=field,-other`
+ *   - `searchable`  → columns scanned by `?search=`
+ *   - `includable`  → relations loadable via `?include=`
+ *   - `selectable`  → columns selectable via `?fields=`
+ *   - `default_sort` → `['field' => 'asc']` applied when no `?sort=` is given
+ *
+ * Example:
+ * ```php
+ * $result = query_paginate(User::class, $request, [
+ *     'filterable' => ['name', 'email', 'created_at'],
+ *     'sortable'   => ['name', 'created_at'],
+ *     'searchable' => ['name', 'email'],
+ *     'includable' => ['roles'],
+ * ]);
+ * ```
+ *
  * @template TModel of Model
  */
 final readonly class QueryBuilder
 {
+    /**
+     * A bare column reference, optionally table-qualified: `name`, `users.name`.
+     */
+    private const string COLUMN_PATTERN = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?$/';
+
+    /**
+     * A relation path, possibly nested: `roles`, `roles.permissions`.
+     */
+    private const string RELATION_PATTERN = '/^[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$/';
+
+    private const array SORT_DIRECTIONS = ['asc', 'desc'];
+
     private QueryParser $queryParser;
 
     /**
@@ -30,11 +66,7 @@ final readonly class QueryBuilder
         ?array $config = null
     ) {
         $this->queryParser = new QueryParser($request);
-        $this->config = $config ?? [
-            'searchable' => [],
-            'filterable' => [],
-            'sortable' => [],
-        ];
+        $this->config = $config ?? [];
     }
 
     /**
@@ -79,7 +111,7 @@ final readonly class QueryBuilder
         $this->apply($query);
 
         $perPage = $this->queryParser->perPage();
-        $page = max(1, (int) ($this->queryParser->raw()['page'] ?? 1));
+        $page = $this->queryParser->pagination()['page'];
 
         $lengthAwarePaginator = $query->paginate($perPage, ['*'], 'page', $page);
 
@@ -100,9 +132,9 @@ final readonly class QueryBuilder
      * Get all results without pagination.
      *
      * @param  class-string<TModel>|Builder<TModel>  $model
-     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
+     * @return Collection<int, TModel>
      */
-    public function get(string|Builder $model): \Illuminate\Database\Eloquent\Collection
+    public function get(string|Builder $model): Collection
     {
         $query = is_string($model) ? $model::query() : $model;
 
@@ -143,13 +175,46 @@ final readonly class QueryBuilder
     }
 
     /**
-     * Apply eager loading.
+     * Read an allowlist from the config.
+     *
+     * @return list<string>
+     */
+    private function allowList(string $key): array
+    {
+        $allowed = $this->config[$key] ?? [];
+
+        if (! is_array($allowed)) {
+            return [];
+        }
+
+        return array_values(array_filter($allowed, 'is_string'));
+    }
+
+    /**
+     * Whether a user-supplied name is in the given allowlist and is a safe identifier.
+     *
+     * Fail-closed: an empty allowlist permits nothing.
+     */
+    private function isAllowed(string $key, string $name, string $pattern = self::COLUMN_PATTERN): bool
+    {
+        return in_array($name, $this->allowList($key), true)
+            && preg_match($pattern, $name) === 1;
+    }
+
+    /**
+     * Apply eager loading. Relations must be listed in `includable`.
      *
      * @param  Builder<TModel>  $builder
      */
     private function applyIncludes(Builder $builder): void
     {
-        $includes = $this->queryParser->includes();
+        $includes = [];
+
+        foreach ($this->queryParser->includes() as $relation) {
+            if ($this->isAllowed('includable', $relation, self::RELATION_PATTERN)) {
+                $includes[] = $relation;
+            }
+        }
 
         if ($includes !== []) {
             $builder->with($includes);
@@ -157,31 +222,41 @@ final readonly class QueryBuilder
     }
 
     /**
-     * Apply field selection.
+     * Apply field selection. Columns must be listed in `selectable`.
      *
      * @param  Builder<TModel>  $builder
      */
     private function applyFields(Builder $builder): void
     {
-        $fields = $this->queryParser->fields();
+        $requested = $this->queryParser->fields();
 
-        if ($fields !== null && $fields !== []) {
+        if ($requested === null) {
+            return;
+        }
+
+        $fields = [];
+        foreach ($requested as $field) {
+            if ($this->isAllowed('selectable', $field)) {
+                $fields[] = $field;
+            }
+        }
+
+        if ($fields !== []) {
             $builder->select($fields);
         }
     }
 
     /**
-     * Apply filters.
+     * Apply filters. Columns must be listed in `filterable`.
      *
      * @param  Builder<TModel>  $builder
      */
     private function applyFilters(Builder $builder): void
     {
-        $filters = $this->queryParser->filters();
+        foreach ($this->queryParser->filters() as $field => $value) {
+            $field = (string) $field;
 
-        foreach ($filters as $field => $value) {
-            // Skip if field is not in allowed filterable list (when configured)
-            if ($this->config['filterable'] !== [] && ! in_array($field, $this->config['filterable'], true)) {
+            if (! $this->isAllowed('filterable', $field)) {
                 continue;
             }
 
@@ -232,15 +307,19 @@ final readonly class QueryBuilder
     }
 
     /**
-     * Apply range filters.
+     * Apply range filters. Columns must be listed in `filterable`.
      *
      * @param  Builder<TModel>  $builder
      */
     private function applyRanges(Builder $builder): void
     {
-        $ranges = $this->queryParser->ranges();
+        foreach ($this->queryParser->ranges() as $field => $range) {
+            $field = (string) $field;
 
-        foreach ($ranges as $field => $range) {
+            if (! $this->isAllowed('filterable', $field)) {
+                continue;
+            }
+
             if ($range['min'] !== null && $range['min'] !== '') {
                 $builder->where($field, '>=', $range['min']);
             }
@@ -252,7 +331,7 @@ final readonly class QueryBuilder
     }
 
     /**
-     * Apply search.
+     * Apply search across the `searchable` columns.
      *
      * @param  Builder<TModel>  $builder
      */
@@ -264,7 +343,12 @@ final readonly class QueryBuilder
             return;
         }
 
-        $searchable = $this->config['searchable'] ?? [];
+        $searchable = [];
+        foreach ($this->allowList('searchable') as $field) {
+            if (preg_match(self::COLUMN_PATTERN, $field) === 1) {
+                $searchable[] = $field;
+            }
+        }
 
         if ($searchable === []) {
             return;
@@ -278,27 +362,66 @@ final readonly class QueryBuilder
     }
 
     /**
-     * Apply sorting.
+     * Apply sorting. Requested columns must be listed in `sortable`.
+     *
+     * `default_sort` is developer-supplied rather than user-supplied, so it is not
+     * subject to the `sortable` allowlist — but it is still validated as an
+     * identifier. It applies whenever no requested sort survived filtering, which
+     * keeps pagination ordering deterministic.
      *
      * @param  Builder<TModel>  $builder
      */
     private function applySorts(Builder $builder): void
     {
-        $sorts = $this->queryParser->sorts();
+        $applied = 0;
 
-        // Default sort if none provided
-        if ($sorts === [] && isset($this->config['default_sort'])) {
-            $sorts = $this->config['default_sort'];
-        }
+        foreach ($this->queryParser->sorts() as $field => $direction) {
+            $field = (string) $field;
 
-        foreach ($sorts as $field => $direction) {
-            // Skip if field is not in allowed sortable list (when configured)
-            if ($this->config['sortable'] !== [] && ! in_array($field, $this->config['sortable'], true)) {
+            if (! $this->isAllowed('sortable', $field)) {
                 continue;
             }
 
-            $builder->orderBy($field, $direction);
+            $applied += $this->orderBy($builder, $field, $direction);
         }
+
+        if ($applied > 0) {
+            return;
+        }
+
+        $default = $this->config['default_sort'] ?? [];
+
+        if (! is_array($default)) {
+            return;
+        }
+
+        foreach ($default as $field => $direction) {
+            $field = (string) $field;
+
+            if (preg_match(self::COLUMN_PATTERN, $field) !== 1) {
+                continue;
+            }
+
+            $this->orderBy($builder, $field, $direction);
+        }
+    }
+
+    /**
+     * Apply a validated `order by`. Returns 1 when applied, 0 when rejected.
+     *
+     * @param  Builder<TModel>  $builder
+     */
+    private function orderBy(Builder $builder, string $field, mixed $direction): int
+    {
+        $direction = is_string($direction) ? strtolower($direction) : '';
+
+        if (! in_array($direction, self::SORT_DIRECTIONS, true)) {
+            return 0;
+        }
+
+        $builder->orderBy($field, $direction);
+
+        return 1;
     }
 
     /**

@@ -23,5 +23,7 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 // Run seeder
-$seeder = new DatabaseSeeder();
+$seeder = new DatabaseSeeder(static function (string $message): void {
+    echo $message.PHP_EOL;
+});
 $seeder->run();

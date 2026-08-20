@@ -29,8 +29,8 @@ final class LoginActionTest extends TestCase
     public function test_execute_with_valid_credentials_returns_user_and_token_pair(): void
     {
         $user = User::create([
-            'name'     => 'Test User',
-            'email'    => 'test@example.com',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
             'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
 
@@ -55,8 +55,8 @@ final class LoginActionTest extends TestCase
     public function test_execute_with_invalid_password_throws_exception(): void
     {
         User::create([
-            'name'     => 'Test User',
-            'email'    => 'test@example.com',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
             'password' => password_hash('password123', PASSWORD_BCRYPT),
         ]);
 

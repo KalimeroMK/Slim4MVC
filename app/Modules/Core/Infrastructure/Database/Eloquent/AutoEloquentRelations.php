@@ -28,7 +28,6 @@ use ReflectionMethod;
  */
 trait AutoEloquentRelations
 {
-
     /**
      * Boot the auto eager loading functionality.
      */
@@ -57,7 +56,7 @@ trait AutoEloquentRelations
             /** @phpstan-ignore-next-line */
             $static = new static;
 
-            return $static->autoWith ?? [];
+            return $static->autoWith;
         }
 
         // Auto-detect all relations if enabled globally
@@ -93,6 +92,9 @@ trait AutoEloquentRelations
             ? ($static->excludeAutoWith ?? [])
             : [];
 
+        /** @var array<string, list<string>> $sourceLines file path => lines, read at most once */
+        $sourceLines = [];
+
         foreach ($reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
             $methodName = $reflectionMethod->getName();
 
@@ -113,9 +115,10 @@ trait AutoEloquentRelations
 
             // Check if method returns a Relation
             if (! $reflectionMethod->hasReturnType()) {
-                // Try to infer from method body (heuristic)
+                // Try to infer from method body (heuristic). This reads source from disk,
+                // so the lines are memoised per file for the rest of this scan.
                 /** @phpstan-ignore-next-line */
-                if (static::isLikelyRelationMethod($reflectionMethod)) {
+                if (static::isLikelyRelationMethod($reflectionMethod, $sourceLines)) {
                     $relations[] = $methodName;
                 }
 
@@ -143,6 +146,9 @@ trait AutoEloquentRelations
         return $relations;
     }
 
+    /**
+     * @param  class-string|null  $modelClass  null clears every cached model
+     */
     public static function clearRelationCache(?string $modelClass = null): void
     {
         RelationCache::clear($modelClass);
@@ -162,8 +168,12 @@ trait AutoEloquentRelations
     /**
      * Heuristic to check if a method is likely a relation method.
      * Used when return type is not explicitly declared.
+     *
+     * Declaring a `: Relation` return type on the model avoids this path entirely.
+     *
+     * @param  array<string, list<string>>  $sourceLines  memo of already-read files, updated in place
      */
-    private static function isLikelyRelationMethod(ReflectionMethod $reflectionMethod): bool
+    private static function isLikelyRelationMethod(ReflectionMethod $reflectionMethod, array &$sourceLines): bool
     {
         $filename = $reflectionMethod->getFileName();
         if ($filename === false) {
@@ -177,10 +187,17 @@ trait AutoEloquentRelations
             return false;
         }
 
-        $lines = file($filename);
-        if ($lines === false) {
-            return false;
+        if (! isset($sourceLines[$filename])) {
+            $read = file($filename);
+
+            if ($read === false) {
+                return false;
+            }
+
+            $sourceLines[$filename] = $read;
         }
+
+        $lines = $sourceLines[$filename];
 
         $methodBody = implode('', array_slice($lines, $startLine - 1, $endLine - $startLine + 1));
 

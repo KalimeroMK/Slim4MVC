@@ -9,6 +9,7 @@ use App\Modules\Auth\Application\Interfaces\Auth\PasswordRecoveryActionInterface
 use App\Modules\Core\Infrastructure\Events\Dispatcher;
 use App\Modules\Core\Infrastructure\Events\PasswordResetRequested;
 use App\Modules\User\Infrastructure\Repositories\UserRepository;
+use Illuminate\Support\Carbon;
 
 final readonly class PasswordRecoveryAction implements PasswordRecoveryActionInterface
 {
@@ -31,7 +32,7 @@ final readonly class PasswordRecoveryAction implements PasswordRecoveryActionInt
 
         $token = bin2hex(random_bytes(32));
         $user->password_reset_token = hash('sha256', $token);
-        $user->password_reset_token_expires_at = date('Y-m-d H:i:s', time() + 3600);
+        $user->password_reset_token_expires_at = Carbon::now()->addHour();
         $user->save();
 
         // Dispatch with raw token so the email link contains the unhashed value.

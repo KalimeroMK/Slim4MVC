@@ -11,13 +11,20 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 
+/**
+ * Token-only guard for API routes.
+ *
+ * Session cookies are deliberately rejected here: CSRF validation is skipped for
+ * /api/ paths, so accepting the session cookie would leave every API endpoint
+ * reachable from any other site. Use AuthWebMiddleware for cookie-based routes.
+ */
 class AuthMiddleware implements MiddlewareInterface
 {
     public function __construct(protected Auth $auth) {}
 
     public function process(Request $request, Handler $handler): Response
     {
-        $this->auth->setRequest($request);
+        $this->auth->setRequest($request, allowSession: false);
 
         if (! $this->auth->check()) {
             return ApiResponse::unauthorized();

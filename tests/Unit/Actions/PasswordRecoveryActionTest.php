@@ -30,8 +30,8 @@ final class PasswordRecoveryActionTest extends TestCase
     public function test_stores_hashed_token_and_dispatches_event_with_raw_token(): void
     {
         $user = User::create([
-            'name'     => 'Test User',
-            'email'    => 'recovery@example.com',
+            'name' => 'Test User',
+            'email' => 'recovery@example.com',
             'password' => password_hash('pass', PASSWORD_BCRYPT),
         ]);
 
@@ -41,6 +41,7 @@ final class PasswordRecoveryActionTest extends TestCase
                 // Raw token must NOT be the same as the hash stored in the DB
                 $this->assertNotEquals(hash('sha256', $event->token), $event->token);
                 $this->assertSame($user->id, $event->user->id);
+
                 return true;
             }));
 

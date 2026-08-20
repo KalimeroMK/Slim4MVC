@@ -39,10 +39,14 @@ final class EnvironmentValidatorTest extends TestCase
             'APP_ENV' => 'local',
         ];
 
-        // Should not throw
         EnvironmentValidator::validate();
 
-        $this->assertTrue(true);
+        // An all-letters secret is accepted but flagged.
+        $this->assertContains(
+            'JWT_SECRET should contain numbers and special characters for better security',
+            EnvironmentValidator::getWarnings()
+        );
+        $this->assertSame(32, EnvironmentValidator::getSummary()['jwt_secret_length']);
     }
 
     public function test_validate_throws_on_missing_jwt_secret(): void
@@ -131,10 +135,14 @@ final class EnvironmentValidatorTest extends TestCase
             'MAIL_PASSWORD' => 'password',
         ];
 
-        // Should not throw
         EnvironmentValidator::validate();
 
-        $this->assertTrue(true);
+        $summary = EnvironmentValidator::getSummary();
+
+        $this->assertTrue($summary['is_production']);
+        $this->assertTrue($summary['jwt_configured']);
+        $this->assertSame('redis', $summary['cache_driver']);
+        $this->assertSame('redis', $summary['session_driver']);
     }
 
     public function test_get_summary_returns_expected_structure(): void
@@ -200,10 +208,10 @@ final class EnvironmentValidatorTest extends TestCase
 
     public function test_assert_jwt_secret_passes_with_valid_secret(): void
     {
-        // Should not throw
-        EnvironmentValidator::assertJwtSecret(str_repeat('a', 32));
+        // The contract is "throws or returns void", so there is no state to assert.
+        $this->expectNotToPerformAssertions();
 
-        $this->assertTrue(true);
+        EnvironmentValidator::assertJwtSecret(str_repeat('a', 32));
     }
 
     public function test_is_production_returns_true_for_production(): void
@@ -238,10 +246,9 @@ final class EnvironmentValidatorTest extends TestCase
     {
         $_ENV['TEST_KEY'] = 'value';
 
-        // Should not throw
-        EnvironmentValidator::required('TEST_KEY');
+        $this->expectNotToPerformAssertions();
 
-        $this->assertTrue(true);
+        EnvironmentValidator::required('TEST_KEY');
     }
 
     public function test_configuration_exception_get_errors(): void

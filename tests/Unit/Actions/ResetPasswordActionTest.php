@@ -25,11 +25,11 @@ final class ResetPasswordActionTest extends TestCase
     {
         $rawToken = 'valid-token-123';
         $user = User::create([
-            'name'                             => 'Test User',
-            'email'                            => 'test@example.com',
-            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
-            'password_reset_token'             => hash('sha256', $rawToken),
-            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() + 3600),
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token' => hash('sha256', $rawToken),
+            'password_reset_token_expires_at' => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
         $this->resetPasswordAction->execute(new ResetPasswordDTO($rawToken, 'newpassword123'));
@@ -44,11 +44,11 @@ final class ResetPasswordActionTest extends TestCase
     {
         $rawToken = 'expired-token-456';
         User::create([
-            'name'                             => 'Test User',
-            'email'                            => 'test@example.com',
-            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
-            'password_reset_token'             => hash('sha256', $rawToken),
-            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() - 1),
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token' => hash('sha256', $rawToken),
+            'password_reset_token_expires_at' => date('Y-m-d H:i:s', time() - 1),
         ]);
 
         $this->expectException(NotFoundException::class);
@@ -68,11 +68,11 @@ final class ResetPasswordActionTest extends TestCase
     public function test_execute_with_wrong_token_throws_exception(): void
     {
         User::create([
-            'name'                             => 'Test User',
-            'email'                            => 'test@example.com',
-            'password'                         => password_hash('oldpassword', PASSWORD_BCRYPT),
-            'password_reset_token'             => hash('sha256', 'correct-token'),
-            'password_reset_token_expires_at'  => date('Y-m-d H:i:s', time() + 3600),
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => password_hash('oldpassword', PASSWORD_BCRYPT),
+            'password_reset_token' => hash('sha256', 'correct-token'),
+            'password_reset_token_expires_at' => date('Y-m-d H:i:s', time() + 3600),
         ]);
 
         $this->expectException(NotFoundException::class);

@@ -15,6 +15,11 @@ use stdClass;
  */
 class JwtService
 {
+    /**
+     * Fallback lifetime, in seconds, when neither the caller nor JWT_TTL says otherwise.
+     */
+    private const int DEFAULT_TTL = 3600;
+
     private readonly JwtEncoder $jwtEncoder;
 
     private readonly JwtDecoder $jwtDecoder;
@@ -22,7 +27,7 @@ class JwtService
     private readonly string $secret;
 
     /**
-     * @param  string|null  $secret  The JWT secret key (defaults to JWT_SECRET env var)
+     * @param  string  $secret  The JWT secret key (at least 32 characters)
      * @param  string  $algorithm  The algorithm to use (default: HS256)
      *
      * @throws RuntimeException If secret is not configured
@@ -45,16 +50,20 @@ class JwtService
     /**
      * Encode a payload into a JWT token.
      *
+     * Every token gets an `exp` claim. Omitting the lifetime falls back to JWT_TTL,
+     * then to one hour — a token without an expiry would be valid forever, and
+     * JwtDecoder rejects such tokens anyway.
+     *
      * @param  array<string, mixed>  $payload  The payload data to encode
-     * @param  int|null  $expirationTime  Expiration time in seconds from now (optional)
+     * @param  int|null  $expirationTime  Lifetime in seconds from now
      * @return string The encoded JWT token
      *
      * @throws RuntimeException If encoding fails
      */
     public function encode(array $payload, ?int $expirationTime = null): string
     {
-        if ($expirationTime !== null && ! isset($payload['exp'])) {
-            $payload['exp'] = time() + $expirationTime;
+        if (! isset($payload['exp'])) {
+            $payload['exp'] = time() + ($expirationTime ?? $this->defaultTtl());
         }
 
         return $this->jwtEncoder->encode($payload, $this->secret, $this->algorithm);
@@ -91,5 +100,15 @@ class JwtService
     public function getAlgorithm(): string
     {
         return $this->algorithm;
+    }
+
+    /**
+     * Default token lifetime in seconds.
+     */
+    private function defaultTtl(): int
+    {
+        $ttl = (int) ($_ENV['JWT_TTL'] ?? self::DEFAULT_TTL);
+
+        return $ttl > 0 ? $ttl : self::DEFAULT_TTL;
     }
 }

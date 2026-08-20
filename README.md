@@ -22,7 +22,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
 - **API Query Builder** - Filter, sort, search with operators and pagination
-- **Testing Suite** - Comprehensive test coverage with PHPUnit (579 tests, 1418 assertions, 0 skipped)
+- **Testing Suite** - 648 PHPUnit tests, 0 skipped; PHPStan level 8 clean and Pint-formatted
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -31,6 +31,12 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Environment Validation** - Fail-fast configuration validation
 - **Auto-Discovery** - Automatic DI registration with caching
 - **Generic CRUD** - Reusable CRUD with 87% less code
+
+## ⚠️ Upgrading
+
+Coming from an earlier version? See [UPGRADING.md](UPGRADING.md) — this release changes
+several defaults from permissive to restrictive (CORS, API auth, query allowlists) and
+raises the minimum PHP version to 8.4.
 
 ## 📋 Requirements
 
@@ -504,10 +510,23 @@ TRUSTED_PROXIES=10.0.0.1,10.0.0.2
 CORS is configured globally in `bootstrap/middleware.php`. Configure allowed origins in `.env`:
 
 ```env
-CORS_ORIGINS=*
-# or specific origins
+# Explicit allowlist (recommended)
 CORS_ORIGINS=http://localhost:3000,https://example.com
+CORS_ALLOW_CREDENTIALS=true
+
+# Or open to everyone — this forces credentials off
+CORS_ORIGINS=*
+CORS_ALLOW_CREDENTIALS=false
 ```
+
+**An origin is only ever echoed back when it matches the allowlist exactly.** An
+unknown origin gets no `Access-Control-Allow-Origin` header at all, so the browser
+blocks the response.
+
+`CORS_ORIGINS=*` and `CORS_ALLOW_CREDENTIALS=true` cannot be combined: browsers
+reject the wildcard alongside credentials, and reflecting whatever origin asked
+would let any site read authenticated responses. When both are set, credentials
+are dropped and a warning is logged.
 
 ## 📝 Logging
 
@@ -718,13 +737,16 @@ composer test
 
 ### Test Coverage
 
-- ✅ 579 tests
-- ✅ 1418 assertions
+- ✅ 648 tests, 1552 assertions
 - ✅ 0 skipped, 0 deprecations, 0 notices
-- ✅ All new features tested
-- ✅ Edge cases covered
-- ✅ Integration with real database
+- ✅ PHPStan level 8: 0 errors
 - ✅ PHP 8.5 compatible (no deprecated patterns)
+
+Measured line coverage is **~51%** (`composer test:coverage`). The security-critical
+paths are the well-covered ones — CORS, rate limiting, JWT decoding, the query
+allowlists, auth guards and the repository layer are all 85–100%. Controllers,
+mailers and console commands are largely uncovered; treat those as the next target
+rather than assuming the whole codebase is exercised.
 
 ### Code Quality Tools
 
@@ -1601,6 +1623,11 @@ Powerful query parameter parsing for REST API filtering, sorting, and searching.
 - **Ranges** - Filter by numeric ranges (price, dates, etc.)
 - **Pagination** - Automatic pagination with configurable limits
 
+> **Allowlists are fail-closed.** A field is usable only if it is listed in the
+> matching config key, and only if it looks like a plain column name. An empty or
+> missing allowlist permits nothing — it does not mean "allow everything". Query
+> parameters naming anything else are ignored rather than passed to the database.
+
 ### Usage
 
 #### Basic Filtering
@@ -1693,10 +1720,19 @@ class User extends Model
     // Fields allowed for searching
     protected array $searchable = ['name', 'email'];
     
-    // Default sort order
+    // Relations loadable via ?include=
+    protected array $allowableIncludes = ['roles'];
+    
+    // Fields selectable via ?fields=
+    protected array $selectable = ['id', 'name', 'email', 'created_at'];
+    
+    // Default sort order — developer-supplied, so it does not need to be in $sortable
     protected array $defaultSort = ['created_at' => 'desc'];
 }
 ```
+
+Anything you leave empty is closed off. With no `$allowableIncludes`, `?include=roles`
+is ignored; with no `$selectable`, `?fields=` is ignored and all columns are returned.
 
 ### Using QueryBuilder Directly
 
@@ -1849,7 +1885,7 @@ server {
     }
     
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;

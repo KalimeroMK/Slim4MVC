@@ -7,19 +7,26 @@ namespace Database\Seed;
 use App\Modules\Permission\Infrastructure\Models\Permission;
 use App\Modules\Role\Infrastructure\Models\Role;
 use App\Modules\User\Infrastructure\Models\User;
+use Closure;
 
 class DatabaseSeeder
 {
+    /**
+     * @param  Closure(string):void|null  $output  Where progress is reported. Silent when
+     *                                             omitted, so tests do not write to stdout.
+     */
+    public function __construct(private readonly ?Closure $output = null) {}
+
     public function run(): void
     {
-        echo "Seeding database...\n";
+        $this->write('Seeding database...');
 
         // Create roles (firstOrCreate for idempotency)
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $userRole = Role::firstOrCreate(['name' => 'user']);
         $managerRole = Role::firstOrCreate(['name' => 'manager']);
         $clientRole = Role::firstOrCreate(['name' => 'client']);
-        echo "✅ Roles created\n";
+        $this->write('✅ Roles created');
 
         // Create permissions (firstOrCreate for idempotency)
         $permissions = [
@@ -44,7 +51,7 @@ class DatabaseSeeder
         foreach ($permissions as $permName) {
             Permission::firstOrCreate(['name' => $permName]);
         }
-        echo "✅ Permissions created\n";
+        $this->write('✅ Permissions created');
 
         // Assign all permissions to admin
         $adminRole->permissions()->sync(Permission::all()->pluck('id'));
@@ -65,7 +72,7 @@ class DatabaseSeeder
         $clientRole->permissions()->sync(
             Permission::where('name', 'like', 'view-%')->pluck('id')
         );
-        echo "✅ Permissions assigned to roles\n";
+        $this->write('✅ Permissions assigned to roles');
 
         // Create admin user (firstOrCreate for idempotency)
         $admin = User::firstOrCreate(
@@ -110,10 +117,18 @@ class DatabaseSeeder
             $fakeUser->roles()->sync([$userRole->id]);
         }
 
-        echo "✅ Users created with roles\n";
-        echo "\nLogin credentials:\n";
-        echo "Admin: admin@demo.com / password\n";
-        echo "Manager: manager@demo.com / password\n";
-        echo "User: user@demo.com / password\n";
+        $this->write('✅ Users created with roles');
+        $this->write('');
+        $this->write('Login credentials:');
+        $this->write('Admin: admin@demo.com / password');
+        $this->write('Manager: manager@demo.com / password');
+        $this->write('User: user@demo.com / password');
+    }
+
+    private function write(string $message): void
+    {
+        if ($this->output instanceof Closure) {
+            ($this->output)($message);
+        }
     }
 }

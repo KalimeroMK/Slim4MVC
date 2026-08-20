@@ -84,15 +84,11 @@ final class DashboardControllerSecurityTest extends TestCase
         $request = $this->requestFactory->createServerRequest('GET', '/dashboard');
         $response = new Response();
 
-        // We can't easily test view() output here, but we can verify it doesn't fail
-        // and that the controller reaches the view call (no exception / early return)
-        // The main security test is the 403 for non-admins.
-        // For the pagination test, we just verify no error and data is paginated.
         $result = $controller->dashboard($request, $response);
 
-        // Since view() requires Blade setup, it may throw; if it does, that's fine
-        // The critical thing is that we passed the auth check.
-        $this->assertTrue(true);
+        // An admin must get past the role check rather than the 403 a non-admin gets.
+        $this->assertSame(200, $result->getStatusCode());
+        $this->assertNotSame(403, $result->getStatusCode());
     }
 
     private function simulateLogin(User $user, array $roles = []): void

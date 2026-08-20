@@ -387,6 +387,12 @@ final class StartLocalCommand extends Command
 
         // Change to project root for proper path resolution
         $originalCwd = getcwd();
+
+        if ($originalCwd === false) {
+            $io->error('Unable to determine the current working directory.');
+
+            return false;
+        }
         chdir($projectRoot);
 
         // Capture output

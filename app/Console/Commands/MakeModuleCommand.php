@@ -414,21 +414,25 @@ class MakeModuleCommand extends Command
         }
 
         if ($newEntries !== []) {
-            // Find the return array and add entries before the closing bracket
-            if (preg_match('/return\s*\[(.*?)\];/s', $content, $matches)) {
-                $arrayContent = $matches[1];
-                $indent = '    ';
+            // Insert before the array's closing bracket. Done by string position
+            // rather than preg_replace: the existing array body would otherwise be
+            // interpolated into a replacement string, where `$` and `\` carry meaning.
+            $closingPos = mb_strrpos($content, '];');
 
-                // Add new entries before closing bracket
-                $newContent = preg_replace(
-                    '/return\s*\[(.*?)\];/s',
-                    'return ['.$arrayContent."\n".implode("\n", $newEntries)."\n];",
-                    $content
-                );
+            if ($closingPos === false) {
+                $output->writeln('<error>Could not locate the dependency array in bootstrap/dependencies.php</error>');
 
-                file_put_contents($depsFile, $newContent);
-                $output->writeln('<info>Action Interfaces registered in bootstrap/dependencies.php</info>');
+                return;
             }
+
+            // rtrim + newline guarantees the closing bracket keeps its own line even
+            // if a previous edit left the last entry glued to it.
+            $newContent = rtrim(mb_substr($content, 0, $closingPos))."\n"
+                .implode("\n", $newEntries)."\n"
+                .mb_substr($content, $closingPos);
+
+            file_put_contents($depsFile, $newContent);
+            $output->writeln('<info>Action Interfaces registered in bootstrap/dependencies.php</info>');
         } else {
             $output->writeln('<comment>Action Interfaces already registered in bootstrap/dependencies.php</comment>');
         }

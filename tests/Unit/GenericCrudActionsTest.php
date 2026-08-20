@@ -16,6 +16,7 @@ use App\Modules\Core\Infrastructure\Repositories\Repository;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use LogicException;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
@@ -154,9 +155,8 @@ final class GenericCrudActionsTest extends TestCase
         $repository->expects($this->once())->method('find')->with(1)->willReturn($this->createStub(Model::class));
         $repository->expects($this->once())->method('delete')->with(1);
 
+        // The expects(once()) constraints above are verified on teardown.
         (new GenericDeleteAction($repository))->execute(1);
-
-        $this->assertTrue(true);
     }
 
     public function test_delete_action_throws_when_not_found(): void
@@ -230,15 +230,27 @@ final class GenericCrudActionsTest extends TestCase
         $this->assertSame($collection, $result);
     }
 
-    public function test_list_action_execute_with_filters(): void
+    public function test_list_action_with_empty_filters_uses_plain_pagination(): void
     {
         $expected = ['items' => new Collection(), 'total' => 50, 'page' => 1, 'perPage' => 15];
         $repository = $this->createMock(Repository::class);
         $repository->expects($this->once())->method('paginate')->with(1, 15)->willReturn($expected);
 
-        $result = (new GenericListAction($repository))->executeWithFilters(['status' => 'active'], 1, 15);
+        $result = (new GenericListAction($repository))->executeWithFilters([], 1, 15);
 
         $this->assertEquals($expected, $result);
+    }
+
+    public function test_list_action_refuses_filters_a_repository_cannot_apply(): void
+    {
+        // Silently returning an unfiltered page would look like a successful filter.
+        $repository = $this->createMock(Repository::class);
+        $repository->expects($this->never())->method('paginate');
+
+        $this->expectException(LogicException::class);
+        $this->expectExceptionMessageMatches('/cannot apply filters/');
+
+        (new GenericListAction($repository))->executeWithFilters(['status' => 'active'], 1, 15);
     }
 
     public function test_list_action_execute_with_uses_paginate(): void

@@ -13,95 +13,146 @@ use Psr\Http\Server\RequestHandlerInterface;
 /**
  * CORS Middleware - PSR-15 compatible
  *
- * Simple CORS implementation using PSR-17 factories.
- * Supports psr/http-message ^2.0
+ * Security model:
+ *  - An origin is echoed back only when it matches the configured allowlist exactly.
+ *    An unknown origin gets no `Access-Control-Allow-Origin` header at all, so the
+ *    browser blocks the response.
+ *  - Wildcard (`*`) and credentials are mutually exclusive. Browsers reject
+ *    `Access-Control-Allow-Origin: *` together with credentials, and the alternative
+ *    (reflecting whatever origin asked) would let any site read authenticated
+ *    responses. When both are configured, credentials are dropped.
  */
 class CorsMiddleware implements MiddlewareInterface
 {
-    /** @var array<string, mixed> */
-    private array $options;
+    /** @var list<string> */
+    private readonly array $allowedOrigins;
+
+    private readonly bool $allowAllOrigins;
+
+    private readonly bool $allowCredentials;
+
+    private readonly bool $credentialsDowngraded;
+
+    /** @var list<string> */
+    private readonly array $methods;
+
+    /** @var list<string> */
+    private readonly array $allowHeaders;
+
+    /** @var list<string> */
+    private readonly array $exposeHeaders;
+
+    private readonly int $maxAge;
 
     /**
      * @param  array<string, mixed>  $options
      */
     public function __construct(private readonly ResponseFactoryInterface $responseFactory, array $options = [])
     {
-        $this->options = array_merge([
-            'origin' => ['*'],
-            'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            'headers.allow' => ['Content-Type', 'Authorization', 'X-Requested-With'],
-            'headers.expose' => [],
-            'credentials' => false,
-            'cache' => 86400,
-        ], $options);
+        $origins = self::normalizeList($options['origin'] ?? ['*']);
+
+        $this->allowAllOrigins = in_array('*', $origins, true);
+        $this->allowedOrigins = $this->allowAllOrigins
+            ? []
+            : array_values(array_filter($origins, static fn (string $o): bool => $o !== '*'));
+
+        $credentialsRequested = (bool) ($options['credentials'] ?? false);
+        $this->allowCredentials = $credentialsRequested && ! $this->allowAllOrigins;
+        $this->credentialsDowngraded = $credentialsRequested && $this->allowAllOrigins;
+
+        $this->methods = self::normalizeList(
+            $options['methods'] ?? ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
+        );
+        $this->allowHeaders = self::normalizeList(
+            $options['headers.allow'] ?? ['Content-Type', 'Authorization', 'X-Requested-With']
+        );
+        $this->exposeHeaders = self::normalizeList($options['headers.expose'] ?? []);
+        $this->maxAge = (int) ($options['cache'] ?? 86400);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Handle preflight OPTIONS request
         if ($request->getMethod() === 'OPTIONS') {
-            $response = $this->createResponse();
-
-            return $this->addCorsHeaders($request, $response);
+            return $this->addCorsHeaders($request, $this->responseFactory->createResponse(200));
         }
 
-        // Process the request
-        $response = $handler->handle($request);
-
-        // Add CORS headers to response
-        return $this->addCorsHeaders($request, $response);
+        return $this->addCorsHeaders($request, $handler->handle($request));
     }
 
-    private function createResponse(): ResponseInterface
+    /**
+     * Whether credentials are actually advertised. False when the wildcard origin
+     * forced them off, regardless of what was configured.
+     */
+    public function allowsCredentials(): bool
     {
-        return $this->responseFactory->createResponse(200);
+        return $this->allowCredentials;
+    }
+
+    /**
+     * True when `credentials` was requested but disabled because origin is `*`.
+     * Useful for surfacing the misconfiguration at boot.
+     */
+    public function credentialsWereDowngraded(): bool
+    {
+        return $this->credentialsDowngraded;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function normalizeList(mixed $value): array
+    {
+        if (is_string($value)) {
+            $value = explode(',', $value);
+        }
+
+        if (! is_array($value)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($value as $item) {
+            if (! is_string($item)) {
+                continue;
+            }
+
+            $item = trim($item);
+            if ($item !== '') {
+                $normalized[] = $item;
+            }
+        }
+
+        return array_values(array_unique($normalized));
     }
 
     private function addCorsHeaders(ServerRequestInterface $serverRequest, ResponseInterface $response): ResponseInterface
     {
         $origin = $this->getOrigin($serverRequest);
 
-        // Add Origin header
-        if ($this->isOriginAllowed($origin)) {
-            $response = $response->withHeader('Access-Control-Allow-Origin', $origin);
-        } elseif ($this->options['origin'] === ['*']) {
+        // Origin header. Only ever `*` (no credentials) or an exact allowlist match.
+        if ($this->allowAllOrigins) {
             $response = $response->withHeader('Access-Control-Allow-Origin', '*');
+        } elseif ($origin !== '' && in_array($origin, $this->allowedOrigins, true)) {
+            $response = $response->withHeader('Access-Control-Allow-Origin', $origin);
         }
 
-        // Add Vary header
+        // Vary on Origin so caches never serve one origin's response to another.
         $response = $response->withHeader('Vary', 'Origin');
 
-        // Add credentials header
-        if ($this->options['credentials']) {
+        if ($this->allowCredentials) {
             $response = $response->withHeader('Access-Control-Allow-Credentials', 'true');
         }
 
-        // Add allowed methods
-        $response = $response->withHeader(
-            'Access-Control-Allow-Methods',
-            implode(', ', $this->options['methods'])
-        );
+        $response = $response->withHeader('Access-Control-Allow-Methods', implode(', ', $this->methods));
+        $response = $response->withHeader('Access-Control-Allow-Headers', implode(', ', $this->allowHeaders));
 
-        // Add allowed headers
-        $response = $response->withHeader(
-            'Access-Control-Allow-Headers',
-            implode(', ', $this->options['headers.allow'])
-        );
-
-        // Add exposed headers
-        if (! empty($this->options['headers.expose'])) {
-            $response = $response->withHeader(
-                'Access-Control-Expose-Headers',
-                implode(', ', $this->options['headers.expose'])
-            );
+        if ($this->exposeHeaders !== []) {
+            $response = $response->withHeader('Access-Control-Expose-Headers', implode(', ', $this->exposeHeaders));
         }
 
-        // Add cache header
-        if ($this->options['cache'] > 0) {
-            return $response->withHeader(
-                'Access-Control-Max-Age',
-                (string) $this->options['cache']
-            );
+        if ($this->maxAge > 0) {
+            return $response->withHeader('Access-Control-Max-Age', (string) $this->maxAge);
         }
 
         return $response;
@@ -109,17 +160,6 @@ class CorsMiddleware implements MiddlewareInterface
 
     private function getOrigin(ServerRequestInterface $serverRequest): string
     {
-        $headers = $serverRequest->getHeader('Origin');
-
-        return $headers[0] ?? '';
-    }
-
-    private function isOriginAllowed(string $origin): bool
-    {
-        if ($this->options['origin'] === ['*']) {
-            return true;
-        }
-
-        return in_array($origin, $this->options['origin'], true);
+        return $serverRequest->getHeaderLine('Origin');
     }
 }

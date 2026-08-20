@@ -18,7 +18,8 @@ class SecurityHeadersMiddleware implements MiddlewareInterface
         $response = $response
             ->withHeader('X-Frame-Options', 'DENY')
             ->withHeader('X-Content-Type-Options', 'nosniff')
-            ->withHeader('X-XSS-Protection', '1; mode=block')
+            // X-XSS-Protection is deliberately absent: the legacy auditor it enabled is
+            // gone from current browsers and could itself be abused. CSP covers this.
             ->withHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
             ->withHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
             ->withHeader(

@@ -200,9 +200,10 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
 
     public function test_it_asserts_jwt_secret_directly(): void
     {
-        // Valid secret
+        // The contract is "throws or returns void", so there is no state to assert.
+        $this->expectNotToPerformAssertions();
+
         EnvironmentValidator::assertJwtSecret(bin2hex(random_bytes(32)));
-        $this->assertTrue(true); // No exception
     }
 
     public function test_it_throws_when_asserting_empty_jwt_secret(): void
@@ -235,9 +236,9 @@ final class EnvironmentValidatorIntegrationTest extends TestCase
     {
         $_ENV = ['REQUIRED_KEY' => 'value'];
 
-        // Should not throw
+        $this->expectNotToPerformAssertions();
+
         EnvironmentValidator::required('REQUIRED_KEY');
-        $this->assertTrue(true);
     }
 
     public function test_it_handles_null_values_as_empty(): void

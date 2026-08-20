@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Core\Database\Eloquent;
 
 use App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig;
+use App\Modules\Core\Infrastructure\Database\Eloquent\RelationCache;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -169,11 +170,17 @@ final class HelpersTest extends TestCase
 
     public function test_clear_relation_cache(): void
     {
-        // This should not throw an exception
-        clear_relation_cache();
-        clear_relation_cache(HelperTestModel::class);
+        RelationCache::set(HelperTestModel::class, ['children']);
+        RelationCache::set(HelperTestChild::class, ['parent']);
+        $this->assertTrue(RelationCache::has(HelperTestModel::class));
 
-        // If we get here, the test passed
-        $this->assertTrue(true);
+        // Clearing one class leaves the others alone.
+        clear_relation_cache(HelperTestModel::class);
+        $this->assertFalse(RelationCache::has(HelperTestModel::class));
+        $this->assertTrue(RelationCache::has(HelperTestChild::class));
+
+        // Clearing without an argument empties the whole cache.
+        clear_relation_cache();
+        $this->assertFalse(RelationCache::has(HelperTestChild::class));
     }
 }

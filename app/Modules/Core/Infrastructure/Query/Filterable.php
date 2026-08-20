@@ -44,11 +44,18 @@ trait Filterable
     protected array $defaultSort = ['id' => 'desc'];
 
     /**
-     * Allowed relationships for eager loading.
+     * Allowed relationships for eager loading via `?include=`.
      *
      * @var array<int, string>
      */
     protected array $allowableIncludes = [];
+
+    /**
+     * Fields allowed for selection via `?fields=`.
+     *
+     * @var array<int, string>
+     */
+    protected array $selectable = [];
 
     /**
      * Scope to apply API query filters.
@@ -58,14 +65,7 @@ trait Filterable
      */
     public function scopeFilter(Builder $builder, Request $request): Builder
     {
-        $config = [
-            'filterable' => $this->getFilterableFields(),
-            'sortable' => $this->getSortableFields(),
-            'searchable' => $this->getSearchableFields(),
-            'default_sort' => $this->getDefaultSort(),
-        ];
-
-        $queryBuilder = new QueryBuilder($request, $config);
+        $queryBuilder = new QueryBuilder($request, $this->queryConfig());
 
         return $queryBuilder->apply($builder);
     }
@@ -78,14 +78,7 @@ trait Filterable
      */
     public function scopeFilterPaginate(Builder $builder, Request $request): array
     {
-        $config = [
-            'filterable' => $this->getFilterableFields(),
-            'sortable' => $this->getSortableFields(),
-            'searchable' => $this->getSearchableFields(),
-            'default_sort' => $this->getDefaultSort(),
-        ];
-
-        $queryBuilder = new QueryBuilder($request, $config);
+        $queryBuilder = new QueryBuilder($request, $this->queryConfig());
 
         return $queryBuilder->paginate($builder);
     }
@@ -98,16 +91,46 @@ trait Filterable
      */
     public function scopeFilterGet(Builder $builder, Request $request): \Illuminate\Database\Eloquent\Collection
     {
-        $config = [
+        $queryBuilder = new QueryBuilder($request, $this->queryConfig());
+
+        return $queryBuilder->get($builder);
+    }
+
+    /**
+     * Allowlist configuration handed to QueryBuilder.
+     *
+     * @return array<string, mixed>
+     */
+    protected function queryConfig(): array
+    {
+        return [
             'filterable' => $this->getFilterableFields(),
             'sortable' => $this->getSortableFields(),
             'searchable' => $this->getSearchableFields(),
+            'includable' => $this->getIncludableFields(),
+            'selectable' => $this->getSelectableFields(),
             'default_sort' => $this->getDefaultSort(),
         ];
+    }
 
-        $queryBuilder = new QueryBuilder($request, $config);
+    /**
+     * Get relations allowed for eager loading.
+     *
+     * @return array<int, string>
+     */
+    protected function getIncludableFields(): array
+    {
+        return $this->allowableIncludes;
+    }
 
-        return $queryBuilder->get($builder);
+    /**
+     * Get fields allowed for selection.
+     *
+     * @return array<int, string>
+     */
+    protected function getSelectableFields(): array
+    {
+        return $this->selectable;
     }
 
     /**

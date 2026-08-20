@@ -35,7 +35,10 @@ final class SecurityHeadersMiddlewareTest extends TestCase
 
         $this->assertSame('DENY', $response->getHeaderLine('X-Frame-Options'));
         $this->assertSame('nosniff', $response->getHeaderLine('X-Content-Type-Options'));
-        $this->assertSame('1; mode=block', $response->getHeaderLine('X-XSS-Protection'));
+        $this->assertFalse(
+            $response->hasHeader('X-XSS-Protection'),
+            'The legacy XSS auditor header is obsolete and should not be sent.'
+        );
         $this->assertSame('strict-origin-when-cross-origin', $response->getHeaderLine('Referrer-Policy'));
         $this->assertSame('geolocation=(), microphone=(), camera=()', $response->getHeaderLine('Permissions-Policy'));
     }

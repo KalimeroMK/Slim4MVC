@@ -202,46 +202,4 @@ abstract class TestCase extends BaseTestCase
 
         return $permissionFactory->create($attributes);
     }
-
-    /**
-     * Make an API request and return the response.
-     *
-     * @param  string  $method  HTTP method
-     * @param  string  $uri  Request URI
-     * @param  array<string, mixed>  $data  Request data
-     * @param  array<string, string>  $headers  Request headers
-     * @return array{status: int, body: array<string, mixed>, headers: array<string, string>}
-     */
-    protected function apiRequest(
-        string $method,
-        string $uri,
-        array $data = [],
-        array $headers = []
-    ): array {
-        // This is a helper method structure - actual implementation would use Slim's App
-        // For now, it provides a consistent interface for API testing
-        return [
-            'status' => 200,
-            'body' => [],
-            'headers' => [],
-        ];
-    }
-
-    /**
-     * Assert API response structure.
-     */
-    protected function assertApiResponse(array $response, int $expectedStatus = 200): void
-    {
-        $this->assertEquals($expectedStatus, $response['status']);
-        $this->assertArrayHasKey('body', $response);
-    }
-
-    /**
-     * Assert API response contains data.
-     */
-    protected function assertApiResponseHasData(array $response, string $key): void
-    {
-        $this->assertArrayHasKey('body', $response);
-        $this->assertArrayHasKey($key, $response['body']);
-    }
 }

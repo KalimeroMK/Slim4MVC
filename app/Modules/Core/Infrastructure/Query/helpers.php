@@ -61,9 +61,7 @@ if (! function_exists('query_paginate')) {
     /**
      * Get paginated results with filters.
      *
-     * @template TModel of Model
-     *
-     * @param  class-string<TModel>|Builder<TModel>  $model
+     * @param  class-string<Model>|Builder<Model>  $model
      * @param  array<string, mixed>  $config
      * @return array{items: mixed, pagination: array<string, mixed>}
      */

@@ -52,7 +52,7 @@ final class NullCache implements CacheInterface
     /**
      * @phpstan-ignore return.unusedType
      */
-    public function increment(string $key, int $value = 1): int|false
+    public function increment(string $key, int $value = 1, ?int $ttl = null): int|false
     {
         return $value;
     }
@@ -60,7 +60,7 @@ final class NullCache implements CacheInterface
     /**
      * @phpstan-ignore return.unusedType
      */
-    public function decrement(string $key, int $value = 1): int|false
+    public function decrement(string $key, int $value = 1, ?int $ttl = null): int|false
     {
         return -$value;
     }

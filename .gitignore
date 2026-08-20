@@ -1,15 +1,32 @@
 /vendor/
 .idea
 .env
-/storage/cache/view/*
-!/storage/cache/view/.gitkeep
-/storage/logs/*
-!/storage/logs/.gitkeep
-/storage/queue/*
-!/storage/queue/.gitkeep
+
+# Runtime state — keep the directories, ignore their contents.
+# A parent directory cannot be re-included once excluded, so each level that holds
+# a .gitkeep is listed explicitly rather than swept with a single `**`.
+storage/cache/*
+!storage/cache/.gitkeep
+!storage/cache/view
+storage/cache/view/*
+!storage/cache/view/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+storage/queue/*
+!storage/queue/.gitkeep
+
+# Same state, but anywhere in the tree: a driver resolving its path inside app/
+# must not be able to slip runtime files past these rules again.
+**/storage/cache/data/
+**/storage/queue/jobs.json
+app/**/storage/
+
+# Tool caches
 .phpunit.cache/
-.env.example.backup
 .rector.cache/
+.phpstan.cache/
+
+# Editor / OS noise
 **/.DS_Store
 .phpstorm.meta.php
-.phpunit.cache
+.env.example.backup

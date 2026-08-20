@@ -10,6 +10,9 @@ use stdClass;
 
 interface AdvancedJwtServiceInterface
 {
+    /**
+     * @param  array<string, mixed>  $claims
+     */
     public function generateAccessToken(int|string $userId, array $claims = [], ?int $ttl = null): string;
 
     public function generateRefreshToken(int|string $userId): TokenPair;

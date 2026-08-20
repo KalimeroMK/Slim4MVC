@@ -76,13 +76,21 @@ interface CacheInterface
 
     /**
      * Increment a numeric value in the cache.
+     *
+     * @param  int|null  $ttl  Lifetime in seconds applied when this call creates the
+     *                         counter. Existing counters keep their current expiry, so
+     *                         a window is not extended by every hit.
+     * @return int|false the new value, or false when the key holds a non-numeric value
      */
-    public function increment(string $key, int $value = 1): int|false;
+    public function increment(string $key, int $value = 1, ?int $ttl = null): int|false;
 
     /**
      * Decrement a numeric value in the cache.
+     *
+     * @param  int|null  $ttl  Lifetime in seconds applied when this call creates the counter.
+     * @return int|false the new value, or false when the key holds a non-numeric value
      */
-    public function decrement(string $key, int $value = 1): int|false;
+    public function decrement(string $key, int $value = 1, ?int $ttl = null): int|false;
 
     /**
      * Get multiple items from the cache.

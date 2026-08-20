@@ -32,9 +32,9 @@ final class SessionAuth
         $this->session->migrate(true);
 
         $userData = [
-            'id'    => $user->id,
+            'id' => $user->id,
             'email' => $user->email,
-            'name'  => $user->name,
+            'name' => $user->name,
         ];
 
         $this->session->set('user', $userData);

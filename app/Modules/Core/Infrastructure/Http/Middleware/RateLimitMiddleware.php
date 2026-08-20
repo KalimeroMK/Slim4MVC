@@ -11,6 +11,13 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as Handler;
 use Slim\Psr7\Response as Psr7Response;
 
+/**
+ * Fixed-window rate limiter.
+ *
+ * The window is encoded in the cache key, and the counter is advanced with a single
+ * atomic increment. A read-then-write counter would let concurrent requests all
+ * observe the same pre-limit value and pass together.
+ */
 class RateLimitMiddleware implements MiddlewareInterface
 {
     private readonly CacheInterface $cache;
@@ -32,49 +39,51 @@ class RateLimitMiddleware implements MiddlewareInterface
 
     public function process(Request $request, Handler $handler): Response
     {
-        $identifier = $this->getIdentifier($request);
         $now = time();
-        $cacheKey = 'rate_limit:'.$identifier;
+        $window = intdiv($now, $this->windowSeconds);
+        $cacheKey = sprintf('rate_limit:%s:%d', $this->getIdentifier($request), $window);
 
-        // Get current request count from cache
-        $requestData = $this->cache->get($cacheKey, null);
+        // Keep the counter a little past the window so a clock skew between the
+        // increment and the expiry cannot drop it early.
+        $count = $this->cache->increment($cacheKey, 1, $this->windowSeconds * 2);
 
-        if (! is_array($requestData) || ! isset($requestData['count'], $requestData['start'])) {
-            $requestData = ['count' => 0, 'start' => $now];
+        if ($count === false) {
+            // The driver cannot count (no cache configured, or the key holds
+            // something else). Fail open rather than locking everyone out.
+            return $handler->handle($request);
         }
 
-        // Reset if window expired
-        if ($now - $requestData['start'] >= $this->windowSeconds) {
-            $requestData = ['count' => 0, 'start' => $now];
+        $resetsAt = ($window + 1) * $this->windowSeconds;
+        $remaining = max(0, $this->maxRequests - $count);
+
+        if ($count > $this->maxRequests) {
+            return $this->tooManyRequests(max(1, $resetsAt - $now), $resetsAt);
         }
 
-        // Check rate limit
-        if ($requestData['count'] >= $this->maxRequests) {
-            $response = new Psr7Response();
-            $json = json_encode([
-                'error' => 'Too Many Requests',
-                'message' => 'Rate limit exceeded. Please try again later.',
-            ]);
-            $response->getBody()->write($json !== false ? $json : '{}');
+        return $this->withRateLimitHeaders($handler->handle($request), $remaining, $resetsAt);
+    }
 
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withHeader('X-RateLimit-Limit', (string) $this->maxRequests)
-                ->withHeader('X-RateLimit-Remaining', '0')
-                ->withHeader('Retry-After', (string) $this->windowSeconds)
-                ->withStatus(429);
-        }
+    private function tooManyRequests(int $retryAfter, int $resetsAt): Response
+    {
+        $response = new Psr7Response();
+        $json = json_encode([
+            'error' => 'Too Many Requests',
+            'message' => 'Rate limit exceeded. Please try again later.',
+        ]);
+        $response->getBody()->write($json !== false ? $json : '{}');
 
-        // Increment request count
-        $requestData['count']++;
-        $this->cache->set($cacheKey, $requestData, $this->windowSeconds);
+        return $this->withRateLimitHeaders($response, 0, $resetsAt)
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Retry-After', (string) $retryAfter)
+            ->withStatus(429);
+    }
 
-        $response = $handler->handle($request);
-
-        $remaining = max(0, $this->maxRequests - $requestData['count']);
-
-        return $response->withHeader('X-RateLimit-Limit', (string) $this->maxRequests)
-            ->withHeader('X-RateLimit-Remaining', (string) $remaining);
+    private function withRateLimitHeaders(Response $response, int $remaining, int $resetsAt): Response
+    {
+        return $response
+            ->withHeader('X-RateLimit-Limit', (string) $this->maxRequests)
+            ->withHeader('X-RateLimit-Remaining', (string) $remaining)
+            ->withHeader('X-RateLimit-Reset', (string) $resetsAt);
     }
 
     private function getIdentifier(Request $request): string

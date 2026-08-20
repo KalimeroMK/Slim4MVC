@@ -37,7 +37,7 @@ final readonly class LoginAction implements LoginActionInterface
         $tokenPair = $this->jwtService->generateRefreshToken($user->id);
 
         return [
-            'user'       => $user,
+            'user' => $user,
             'token_pair' => $tokenPair,
         ];
     }

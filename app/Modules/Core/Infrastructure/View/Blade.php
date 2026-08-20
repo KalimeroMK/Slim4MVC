@@ -154,7 +154,7 @@ class Blade
     /**
      * Remove sensitive keys from session data before sharing with views.
      *
-     * @param  array<string, mixed>  $session
+     * @param  array<array-key, mixed>  $session
      * @return array<string, mixed>
      */
     private function sanitizeSessionData(array $session): array

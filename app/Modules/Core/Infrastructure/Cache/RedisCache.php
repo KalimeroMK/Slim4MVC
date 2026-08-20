@@ -124,31 +124,14 @@ final readonly class RedisCache implements CacheInterface
         return $this->remember($key, null, $callback);
     }
 
-    public function increment(string $key, int $value = 1): int|false
+    public function increment(string $key, int $value = 1, ?int $ttl = null): int|false
     {
-        $prefixedKey = $this->getPrefixedKey($key);
-
-        // Check if key exists and is numeric
-        $current = $this->client->get($prefixedKey);
-
-        if ($current !== null) {
-            $unserialized = $this->unserialize($current);
-
-            /** @phpstan-ignore-next-line */
-            if (! is_int($unserialized)) {
-                return false;
-            }
-        }
-
-        $newValue = $this->client->incrby($prefixedKey, $value);
-
-        /** @phpstan-ignore-next-line */
-        return is_int($newValue) ? $newValue : false;
+        return $this->applyDelta($key, $value, $ttl);
     }
 
-    public function decrement(string $key, int $value = 1): int|false
+    public function decrement(string $key, int $value = 1, ?int $ttl = null): int|false
     {
-        return $this->increment($key, -$value);
+        return $this->applyDelta($key, -$value, $ttl);
     }
 
     public function many(array $keys): array
@@ -259,6 +242,32 @@ final readonly class RedisCache implements CacheInterface
     }
 
     /**
+     * Apply a signed delta with a single atomic INCRBY.
+     *
+     * Counters are stored as plain Redis integers rather than serialized payloads,
+     * so INCRBY can operate on them. A key previously written by set() holds a
+     * serialized string, which Redis refuses to increment — that returns false.
+     */
+    private function applyDelta(string $key, int $delta, ?int $ttl): int|false
+    {
+        $prefixedKey = $this->getPrefixedKey($key);
+
+        try {
+            $newValue = $this->client->incrby($prefixedKey, $delta);
+        } catch (Throwable) {
+            return false;
+        }
+
+        // Equality means this call created the key, so it owns the expiry. Setting it
+        // on every hit would turn a fixed window into an ever-sliding one.
+        if ($ttl !== null && $newValue === $delta) {
+            $this->client->expire($prefixedKey, $ttl);
+        }
+
+        return $newValue;
+    }
+
+    /**
      * Create Redis client from environment configuration.
      */
     private function createClient(): Client
@@ -294,10 +303,18 @@ final readonly class RedisCache implements CacheInterface
      */
     private function unserialize(string $value): mixed
     {
-        try {
-            return @unserialize($value);
-        } catch (Throwable) {
-            return null;
+        $unserialized = @unserialize($value);
+
+        if ($unserialized !== false) {
+            return $unserialized;
         }
+
+        // false is ambiguous: either the stored value really is false, or the payload
+        // was never serialized — INCRBY writes plain integers.
+        if ($value === serialize(false)) {
+            return false;
+        }
+
+        return preg_match('/^-?\d+$/', $value) === 1 ? (int) $value : $value;
     }
 }

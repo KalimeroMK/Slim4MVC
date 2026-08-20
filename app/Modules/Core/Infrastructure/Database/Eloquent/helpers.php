@@ -69,6 +69,7 @@ function detect_lazy_loading(): void
  * Clear relation cache for a model or all models.
  *
  * @param  class-string<Model>|null  $modelClass
+ * @param  class-string|null  $modelClass  null clears every cached model
  */
 function clear_relation_cache(?string $modelClass = null): void
 {

@@ -34,17 +34,27 @@ return function ($app, DI\Container $container): void {
     App\Modules\Core\Infrastructure\Support\Logger::setContainer($container);
 
     // Add CORS middleware for API routes (using PSR-17 ResponseFactory)
+    // CORS_ORIGINS must be an explicit comma-separated allowlist whenever
+    // CORS_ALLOW_CREDENTIALS is on: `*` + credentials would let any site read
+    // authenticated responses, so CorsMiddleware drops credentials in that case.
     $cors = new CorsMiddleware(
         $container->get(ResponseFactoryInterface::class),
         [
-            'origin' => explode(',', $_ENV['CORS_ORIGINS'] ?? '*'),
+            'origin' => explode(',', $_ENV['CORS_ORIGINS'] ?? ''),
             'methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
             'headers.allow' => ['Content-Type', 'Authorization', 'X-Requested-With'],
             'headers.expose' => ['X-RateLimit-Limit', 'X-RateLimit-Remaining'],
-            'credentials' => true,
+            'credentials' => filter_var($_ENV['CORS_ALLOW_CREDENTIALS'] ?? 'false', FILTER_VALIDATE_BOOL),
             'cache' => 86400,
         ]
     );
+
+    if ($cors->credentialsWereDowngraded()) {
+        $logger->warning(
+            'CORS_ALLOW_CREDENTIALS is enabled but CORS_ORIGINS is "*". '
+            .'Credentials have been disabled — set CORS_ORIGINS to an explicit list of origins.'
+        );
+    }
 
     // Add middleware
     $app->addBodyParsingMiddleware();
@@ -52,11 +62,13 @@ return function ($app, DI\Container $container): void {
 
     // Global rate limiting for all /api/ routes (60 req/min per IP).
     // Auth endpoints apply an additional stricter limiter (5 req/min) on top.
-    $app->add(function (Request $request, Handler $handler) use ($container): \Psr\Http\Message\ResponseInterface {
+    $app->add(function (Request $request, Handler $handler) use ($container): Psr\Http\Message\ResponseInterface {
         if (str_starts_with($request->getUri()->getPath(), '/api/')) {
             $cache = $container->get(CacheInterface::class);
+
             return (new RateLimitMiddleware($cache, 60, 60))->process($request, $handler);
         }
+
         return $handler->handle($request);
     });
 

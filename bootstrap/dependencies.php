@@ -78,22 +78,22 @@ return [
 
     // Advanced JWT Service (access + refresh token pairs, rotation, revocation)
     AdvancedJwtService::class => factory(function (): AdvancedJwtService {
-        $secret    = $_ENV['JWT_SECRET'] ?? '';
+        $secret = $_ENV['JWT_SECRET'] ?? '';
         $algorithm = $_ENV['JWT_ALGORITHM'] ?? 'HS256';
-        $issuer    = $_ENV['JWT_ISSUER'] ?? null;
-        $audience  = $_ENV['JWT_AUDIENCE'] ?? null;
+        $issuer = $_ENV['JWT_ISSUER'] ?? null;
+        $audience = $_ENV['JWT_AUDIENCE'] ?? null;
 
         // Redis client is optional — refresh token rotation requires it
         $redisClient = null;
         if (($_ENV['REDIS_HOST'] ?? '') !== '') {
             try {
-                $redisClient = new \Predis\Client([
-                    'host'     => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-                    'port'     => (int) ($_ENV['REDIS_PORT'] ?? 6379),
+                $redisClient = new Predis\Client([
+                    'host' => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
+                    'port' => (int) ($_ENV['REDIS_PORT'] ?? 6379),
                     'password' => $_ENV['REDIS_PASSWORD'] ?? null,
                     'database' => (int) ($_ENV['REDIS_DATABASE'] ?? 0),
                 ]);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Redis unavailable — run without token rotation
             }
         }
@@ -110,4 +110,5 @@ return [
     AdvancedJwtServiceInterface::class => factory(fn (AdvancedJwtService $svc): AdvancedJwtServiceInterface => $svc),
     // Cache system
     CacheManager::class => autowire(CacheManager::class),
-    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),    UpdateItemActionInterface::class => \DI\autowire(UpdateItemAction::class),];
+    CacheInterface::class => factory(fn (CacheManager $cacheManager): CacheInterface => $cacheManager->driver()),
+];

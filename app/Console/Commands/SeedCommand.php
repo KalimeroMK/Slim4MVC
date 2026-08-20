@@ -10,7 +10,9 @@ class SeedCommand
 {
     public function execute(): void
     {
-        $databaseSeeder = new DatabaseSeeder();
+        $databaseSeeder = new DatabaseSeeder(static function (string $message): void {
+            echo $message.PHP_EOL;
+        });
         $databaseSeeder->run();
     }
 }

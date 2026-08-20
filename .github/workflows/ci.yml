@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 8.4 is the floor: the codebase uses mb_trim/mb_rtrim/array_any.
+        php: ['8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: fileinfo, mbstring, pdo_sqlite, redis
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Check code style
+        run: vendor/bin/pint --test
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+      - name: Tests
+        run: vendor/bin/phpunit
+
+      - name: Fail if the suite modified tracked files
+        run: |
+          if ! git diff --quiet; then
+            echo "::error::Running the test suite modified tracked files:"
+            git diff --stat
+            exit 1
+          fi
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: fileinfo, mbstring, pdo_sqlite
+          tools: composer:v2
+      - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: composer audit

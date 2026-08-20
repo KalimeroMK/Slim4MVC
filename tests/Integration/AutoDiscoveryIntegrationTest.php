@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Integration;
 
 use App\Modules\Core\Infrastructure\DI\OptimizedDiscovery;
+use App\Modules\Core\Infrastructure\Support\AdvancedJwtServiceInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,10 +52,18 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
         $this->assertIsArray($definitions);
         $this->assertNotEmpty($definitions);
-        array_any(array_keys($definitions), fn ($interface): bool => str_contains((string) $interface, 'User'));
 
-        // Note: This might be false if no User interfaces exist yet
-        $this->assertTrue(true); // Discovery completed successfully
+        // Every key discovery produces must be a real interface — a stale cache or a
+        // bad scan would surface here as a class name that no longer resolves.
+        foreach (array_keys($definitions) as $interface) {
+            $this->assertIsString($interface);
+            $this->assertTrue(
+                interface_exists((string) $interface),
+                sprintf('Discovered "%s" is not an existing interface.', (string) $interface)
+            );
+        }
+
+        $this->assertContains(AdvancedJwtServiceInterface::class, array_keys($definitions));
     }
 
     public function test_it_creates_readable_cache_file(): void

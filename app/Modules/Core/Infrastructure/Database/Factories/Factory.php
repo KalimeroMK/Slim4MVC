@@ -46,10 +46,6 @@ abstract class Factory
     final public function state(callable $callback): static
     {
         $newFactory = clone $this;
-        if (! isset($newFactory->stateCallbacks)) {
-            $newFactory->stateCallbacks = [];
-        }
-
         $newFactory->stateCallbacks[] = $callback;
 
         return $newFactory;
