@@ -19,27 +19,31 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 {
     private string $cacheFile;
 
+    private string $cacheDir;
+
     private array $originalEnv;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cacheFile = OptimizedDiscovery::getCacheFile();
         $this->originalEnv = $_ENV;
 
-        // Clear cache
-        if (file_exists($this->cacheFile)) {
-            unlink($this->cacheFile);
-        }
+        // A temporary cache path, so these tests never touch the project's own
+        // storage/cache directory — one of them used to delete it outright.
+        $this->cacheDir = sys_get_temp_dir().'/slim4mvc-discovery-'.bin2hex(random_bytes(6));
+        $this->cacheFile = $this->cacheDir.'/autowiring.php';
     }
 
     protected function tearDown(): void
     {
         $_ENV = $this->originalEnv;
 
-        // Clean up
         if (file_exists($this->cacheFile)) {
             unlink($this->cacheFile);
+        }
+
+        if (is_dir($this->cacheDir)) {
+            rmdir($this->cacheDir);
         }
 
         parent::tearDown();
@@ -47,7 +51,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_scans_real_application_modules(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $definitions = $optimizedDiscovery->buildDefinitions();
 
         $this->assertIsArray($definitions);
@@ -68,7 +72,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_creates_readable_cache_file(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->buildDefinitions();
 
         $this->assertFileExists($this->cacheFile);
@@ -80,7 +84,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_generates_valid_php_cache(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->buildDefinitions();
 
         // Cache should be valid PHP
@@ -90,7 +94,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_warms_cache_and_returns_stats(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         $this->assertFileDoesNotExist($this->cacheFile);
 
@@ -106,7 +110,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_clears_cache_properly(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         // Create cache
         $optimizedDiscovery->warmCache();
@@ -121,7 +125,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_generates_statistics(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->warmCache();
 
         $stats = $optimizedDiscovery->getStats();
@@ -143,7 +147,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'production';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->warmCache();
 
         $this->assertTrue($optimizedDiscovery->shouldUseCache());
@@ -153,7 +157,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'local';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->warmCache();
 
         // Fresh cache should be valid
@@ -168,7 +172,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_returns_same_definitions_from_cache(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         // Get fresh definitions
         $fresh = $optimizedDiscovery->buildDefinitions();
@@ -182,7 +186,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_refreshes_cache_correctly(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         // Create initial cache
         $optimizedDiscovery->warmCache();
@@ -202,7 +206,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_handles_empty_scan_paths(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery([]);
+        $optimizedDiscovery = new OptimizedDiscovery([], $this->cacheFile);
         $definitions = $optimizedDiscovery->buildDefinitions();
 
         $this->assertIsArray($definitions);
@@ -211,7 +215,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_handles_nonexistent_scan_paths(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery(['/nonexistent/path']);
+        $optimizedDiscovery = new OptimizedDiscovery(['/nonexistent/path'], $this->cacheFile);
         $definitions = $optimizedDiscovery->buildDefinitions();
 
         $this->assertIsArray($definitions);
@@ -220,18 +224,13 @@ final class AutoDiscoveryIntegrationTest extends TestCase
 
     public function test_it_creates_cache_directory_if_needed(): void
     {
-        // Remove cache directory
-        $cacheDir = dirname($this->cacheFile);
-        if (is_dir($cacheDir)) {
-            rmdir($cacheDir);
-        }
+        $this->assertDirectoryDoesNotExist($this->cacheDir);
 
-        $this->assertDirectoryDoesNotExist($cacheDir);
-
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->warmCache();
 
-        $this->assertDirectoryExists($cacheDir);
+        $this->assertDirectoryExists($this->cacheDir);
+        $this->assertFileExists($this->cacheFile);
     }
 
     public function test_it_returns_correct_cache_file_path(): void
@@ -247,7 +246,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'staging';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $stats = $optimizedDiscovery->getStats();
 
         $this->assertTrue($stats['cache_enabled']);
@@ -257,7 +256,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'local';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $stats = $optimizedDiscovery->getStats();
 
         $this->assertFalse($stats['cache_enabled']);
@@ -267,7 +266,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'development';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $stats = $optimizedDiscovery->getStats();
 
         $this->assertFalse($stats['cache_enabled']);
@@ -277,7 +276,7 @@ final class AutoDiscoveryIntegrationTest extends TestCase
     {
         $_ENV['APP_ENV'] = 'unknown';
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $stats = $optimizedDiscovery->getStats();
 
         $this->assertFalse($stats['cache_enabled']);

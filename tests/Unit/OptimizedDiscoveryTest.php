@@ -14,12 +14,18 @@ final class OptimizedDiscoveryTest extends TestCase
 {
     private string $cacheFile;
 
+    private string $cacheDir;
+
     private array $originalEnv;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->cacheFile = OptimizedDiscovery::getCacheFile();
+        // Temporary path: these tests write and delete the cache file, which must not
+        // be the one the application shares.
+        $this->cacheDir = sys_get_temp_dir().'/slim4mvc-discovery-unit-'.bin2hex(random_bytes(6));
+        mkdir($this->cacheDir, 0o755, true);
+        $this->cacheFile = $this->cacheDir.'/autowiring.php';
         $this->originalEnv = $_ENV;
 
         // Clear cache before each test
@@ -37,12 +43,16 @@ final class OptimizedDiscoveryTest extends TestCase
             unlink($this->cacheFile);
         }
 
+        if (is_dir($this->cacheDir)) {
+            rmdir($this->cacheDir);
+        }
+
         parent::tearDown();
     }
 
     public function test_build_definitions_returns_array(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $definitions = $optimizedDiscovery->buildDefinitions();
 
         $this->assertIsArray($definitions);
@@ -52,7 +62,7 @@ final class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $optimizedDiscovery->buildDefinitions();
 
         $this->assertFileExists($this->cacheFile);
@@ -62,7 +72,7 @@ final class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
@@ -73,7 +83,7 @@ final class OptimizedDiscoveryTest extends TestCase
         // Create cache file
         file_put_contents($this->cacheFile, '<?php return [];');
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $this->assertTrue($optimizedDiscovery->shouldUseCache());
     }
 
@@ -85,13 +95,13 @@ final class OptimizedDiscoveryTest extends TestCase
         file_put_contents($this->cacheFile, '<?php return [];');
         touch($this->cacheFile, time() - 7200); // 2 hours ago
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $this->assertFalse($optimizedDiscovery->shouldUseCache());
     }
 
     public function test_warm_cache_returns_stats(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $result = $optimizedDiscovery->warmCache();
 
         $this->assertArrayHasKey('count', $result);
@@ -107,7 +117,7 @@ final class OptimizedDiscoveryTest extends TestCase
         file_put_contents($this->cacheFile, '<?php return [];');
         $this->assertFileExists($this->cacheFile);
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $result = $optimizedDiscovery->clearCache();
 
         $this->assertTrue($result);
@@ -118,7 +128,7 @@ final class OptimizedDiscoveryTest extends TestCase
     {
         $this->assertFileDoesNotExist($this->cacheFile);
 
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $result = $optimizedDiscovery->clearCache();
 
         $this->assertFalse($result);
@@ -126,7 +136,7 @@ final class OptimizedDiscoveryTest extends TestCase
 
     public function test_get_stats_returns_expected_structure(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $stats = $optimizedDiscovery->getStats();
 
         $this->assertArrayHasKey('total_bindings', $stats);
@@ -147,7 +157,7 @@ final class OptimizedDiscoveryTest extends TestCase
 
     public function test_cached_definitions_is_array(): void
     {
-        $optimizedDiscovery = new OptimizedDiscovery();
+        $optimizedDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         // Build definitions (creates cache)
         $optimizedDiscovery->buildDefinitions();
@@ -163,11 +173,11 @@ final class OptimizedDiscoveryTest extends TestCase
         $_ENV['APP_ENV'] = 'production';
 
         // Create initial cache
-        $discovery = new OptimizedDiscovery();
+        $discovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
         $discovery->warmCache();
 
         // Get a new discovery instance
-        $newDiscovery = new OptimizedDiscovery();
+        $newDiscovery = new OptimizedDiscovery(cacheFile: $this->cacheFile);
 
         // Should use cache
         $this->assertTrue($newDiscovery->shouldUseCache());

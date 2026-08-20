@@ -22,7 +22,9 @@ use RegexIterator;
  */
 final readonly class OptimizedDiscovery
 {
-    private const string CACHE_FILE = __DIR__.'/../../../../storage/cache/autowiring.php';
+    // Five levels up is the project root; four would put this inside app/, which is
+    // source, is not shipped as a writable directory, and is not gitignored by default.
+    private const string DEFAULT_CACHE_FILE = __DIR__.'/../../../../../storage/cache/autowiring.php';
 
     private const int CACHE_TTL_DEV = 3600;
 
@@ -31,17 +33,34 @@ final readonly class OptimizedDiscovery
         __DIR__.'/../../../../../app/Modules',
     ];
 
+    private string $cacheFile;
+
     /**
      * @param  array<int, string>  $scanPaths
+     * @param  string|null  $cacheFile  Overridable so tests can point at a temporary
+     *                                  path instead of the project's shared cache.
      */
-    public function __construct(private array $scanPaths = self::DEFAULT_SCAN_PATHS) {}
+    public function __construct(
+        private array $scanPaths = self::DEFAULT_SCAN_PATHS,
+        ?string $cacheFile = null
+    ) {
+        $this->cacheFile = $cacheFile ?? self::DEFAULT_CACHE_FILE;
+    }
 
     /**
      * Get cache file path.
      */
     public static function getCacheFile(): string
     {
-        return self::CACHE_FILE;
+        return self::DEFAULT_CACHE_FILE;
+    }
+
+    /**
+     * Path this instance reads from and writes to.
+     */
+    public function cacheFilePath(): string
+    {
+        return $this->cacheFile;
     }
 
     /**
@@ -53,7 +72,7 @@ final readonly class OptimizedDiscovery
     {
         // Check cache first (production optimization)
         if ($this->shouldUseCache()) {
-            return require self::CACHE_FILE;
+            return require $this->cacheFile;
         }
 
         // Scan and build definitions
@@ -90,8 +109,8 @@ final readonly class OptimizedDiscovery
      */
     public function clearCache(): bool
     {
-        if (file_exists(self::CACHE_FILE)) {
-            return unlink(self::CACHE_FILE);
+        if (file_exists($this->cacheFile)) {
+            return unlink($this->cacheFile);
         }
 
         return false;
@@ -102,7 +121,7 @@ final readonly class OptimizedDiscovery
      */
     public function shouldUseCache(): bool
     {
-        if (! file_exists(self::CACHE_FILE)) {
+        if (! file_exists($this->cacheFile)) {
             return false;
         }
 
@@ -112,7 +131,7 @@ final readonly class OptimizedDiscovery
         }
 
         // In development: check TTL
-        $age = time() - filemtime(self::CACHE_FILE);
+        $age = time() - filemtime($this->cacheFile);
 
         return $age < self::CACHE_TTL_DEV;
     }
@@ -124,7 +143,7 @@ final readonly class OptimizedDiscovery
      */
     public function getStats(): array
     {
-        $isCached = file_exists(self::CACHE_FILE);
+        $isCached = file_exists($this->cacheFile);
 
         // Get bindings from scan (not definitions to avoid serialization issues)
         $bindings = [];
@@ -166,7 +185,7 @@ final readonly class OptimizedDiscovery
         return [
             'total_bindings' => count($bindings),
             'cache_enabled' => $this->isProduction(),
-            'cache_file' => self::CACHE_FILE,
+            'cache_file' => $this->cacheFile,
             'cache_exists' => $isCached,
             'cache_valid' => $this->shouldUseCache(),
             'environment' => $_ENV['APP_ENV'] ?? 'unknown',
@@ -371,7 +390,7 @@ final readonly class OptimizedDiscovery
      */
     private function writeCache(array $definitions): void
     {
-        $cacheDir = dirname(self::CACHE_FILE);
+        $cacheDir = dirname($this->cacheFile);
 
         if (! is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
@@ -402,7 +421,7 @@ final readonly class OptimizedDiscovery
 
         $code .= "];\n";
 
-        file_put_contents(self::CACHE_FILE, $code);
+        file_put_contents($this->cacheFile, $code);
     }
 
     /**
