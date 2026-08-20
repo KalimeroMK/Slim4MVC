@@ -63,6 +63,22 @@ jobs:
             exit 1
           fi
 
+  # Static auth/session/Eloquent state used to leak between tests, so results
+  # depended on execution order. Shuffling guards against that returning.
+  random-order:
+    name: Tests (random order)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: fileinfo, mbstring, pdo_sqlite, redis
+          tools: composer:v2
+      - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: vendor/bin/phpunit --order-by=random
+      - run: vendor/bin/phpunit --order-by=reverse
+
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest

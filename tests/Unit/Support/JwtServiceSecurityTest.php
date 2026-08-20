@@ -16,6 +16,25 @@ final class JwtServiceSecurityTest extends TestCase
 {
     private const VALID_SECRET = 'this-is-a-very-long-secret-key-that-is-32-chars!';
 
+    /** @var array<string, mixed> */
+    private array $originalEnv;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->originalEnv = $_ENV;
+    }
+
+    protected function tearDown(): void
+    {
+        // This class writes JWT_SECRET; leaving it behind would change how later
+        // tests build JwtService.
+        $_ENV = $this->originalEnv;
+
+        parent::tearDown();
+    }
+
     public function test_constructor_requires_explicit_secret(): void
     {
         $service = new JwtService(self::VALID_SECRET);

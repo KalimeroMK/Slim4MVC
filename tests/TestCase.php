@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig;
+use App\Modules\Core\Infrastructure\Database\Eloquent\RelationCache;
+use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use App\Modules\Core\Infrastructure\Support\Logger as AppLogger;
 use DI\Container;
 use DI\ContainerBuilder;
@@ -15,13 +18,30 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 abstract class TestCase extends BaseTestCase
 {
+    /**
+     * Secret used for JwtService in tests. Fixed rather than read from $_ENV: the
+     * container factory below is lazy, so it would otherwise pick up whatever a
+     * previously-run test left in the environment.
+     */
+    protected const string TEST_JWT_SECRET = 'test-secret-key-that-is-at-least-32-chars';
+
     protected Container $container;
 
     protected Capsule $capsule;
 
+    /** @var array<string, mixed> */
+    private array $originalEnv;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        // $_ENV is process-wide, and several tests overwrite it wholesale. Snapshot it
+        // so a test cannot change how later tests read configuration.
+        $this->originalEnv = $_ENV;
+
+        $this->resetAuthState();
+        $this->resetEloquentState();
 
         // Set up container
         $containerBuilder = new ContainerBuilder();
@@ -52,7 +72,7 @@ abstract class TestCase extends BaseTestCase
         $this->container->set(
             \App\Modules\Core\Infrastructure\Support\JwtService::class,
             fn (): \App\Modules\Core\Infrastructure\Support\JwtService => new \App\Modules\Core\Infrastructure\Support\JwtService(
-                $_ENV['JWT_SECRET'] ?? 'test-secret-key-that-is-at-least-32-chars'
+                self::TEST_JWT_SECRET
             )
         );
 
@@ -70,7 +90,40 @@ abstract class TestCase extends BaseTestCase
             $this->capsule->getConnection()->rollBack();
         }
 
+        // Also clear on the way out, so tests that do not extend this class are not
+        // handed a logged-in user either.
+        $this->resetAuthState();
+        $this->resetEloquentState();
+        $_ENV = $this->originalEnv;
+
         parent::tearDown();
+    }
+
+    /**
+     * Clear authentication state that outlives a single test.
+     *
+     * AuthHelper keeps the current user in a static property and mirrors it into
+     * $_SESSION, neither of which PHPUnit resets. Any test that logged in would
+     * otherwise leak that user into every test that ran after it, making results
+     * depend on execution order.
+     */
+    protected function resetAuthState(): void
+    {
+        $_SESSION = [];
+        AuthHelper::logout();
+    }
+
+    /**
+     * Clear Eloquent state that outlives a single test.
+     *
+     * Auto-eager-loading config, the detected-relation cache and Eloquent's global
+     * lazy-loading guard are all static. A test that enables lazy-loading detection
+     * would otherwise make every later test throw on the first lazy load.
+     */
+    protected function resetEloquentState(): void
+    {
+        AutoRelationConfig::reset();
+        RelationCache::clear();
     }
 
     /**

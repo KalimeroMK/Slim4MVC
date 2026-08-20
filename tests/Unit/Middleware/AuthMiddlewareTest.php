@@ -28,7 +28,6 @@ final class AuthMiddlewareTest extends TestCase
         $this->serverRequestFactory = new ServerRequestFactory();
         $this->auth = $this->createStub(Auth::class);
         $this->authMiddleware = new AuthMiddleware($this->auth);
-        $_ENV['JWT_SECRET'] = 'test-secret-key';
     }
 
     public function test_process_allows_request_when_user_is_authenticated(): void

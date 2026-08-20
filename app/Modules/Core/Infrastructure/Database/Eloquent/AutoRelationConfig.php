@@ -166,6 +166,10 @@ final class AutoRelationConfig
 
     /**
      * Reset all configuration to defaults.
+     *
+     * Includes Eloquent's global lazy-loading guard: enableLazyLoadingDetection()
+     * flips a static on Model itself, which would otherwise stay on for the rest of
+     * the process even though this class reports detection as disabled.
      */
     public static function reset(): void
     {
@@ -174,6 +178,8 @@ final class AutoRelationConfig
         self::$disabledModels = [];
         self::$lazyLoadingDetection = false;
         self::$maxAutoLoadRelations = 10;
+
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading(false);
     }
 
     /**
