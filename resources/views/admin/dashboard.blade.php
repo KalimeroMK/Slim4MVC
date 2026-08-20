@@ -129,7 +129,7 @@
                                         <small class="text-muted">{{ $role->permissions->pluck('name')->implode(', ') }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary">{{ $role->users->count() }} users</span>
+                                        <span class="badge bg-secondary">{{ $role->users_count }} users</span>
                                     </td>
                                 </tr>
                                 @empty

@@ -29,9 +29,11 @@ class DashboardController extends Controller
             return ApiResponse::forbidden('Admin access required');
         }
 
-        // Load paginated data for the dashboard to prevent memory issues
+        // Load paginated data for the dashboard to prevent memory issues.
+        // The view only needs the number of users per role, so count with an
+        // aggregate rather than hydrating every related user.
         $users = User::with('roles')->paginate(self::PER_PAGE);
-        $roles = Role::with(['permissions'])->paginate(self::PER_PAGE);
+        $roles = Role::with('permissions')->withCount('users')->paginate(self::PER_PAGE);
         $permissions = Permission::with('roles')->paginate(self::PER_PAGE);
 
         return view('admin.dashboard', $response, [
