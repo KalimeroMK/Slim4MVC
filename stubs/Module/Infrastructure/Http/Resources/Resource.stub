@@ -7,20 +7,20 @@ namespace {{namespace}}\Infrastructure\Http\Resources;
 use App\Modules\Core\Infrastructure\Http\Resources\Resource;
 use {{namespace}}\Infrastructure\Models\{{modelName}};
 
+/**
+ * @extends Resource<{{modelName}}>
+ */
 class {{modelName}}Resource extends Resource
 {
     /**
      * Transform the {{lowerModelName}} into an array.
      *
-     * @param mixed $resource
+     * @param  {{modelName}}  $resource
      * @return array<string, mixed>
      */
     public static function make(mixed $resource): array
     {
-        if (! ($resource instanceof {{modelName}})) {
-            return [];
-        }
-
+        /** @var {{modelName}} ${{lowerModelName}} */
         ${{lowerModelName}} = $resource;
 
         return [
@@ -32,4 +32,3 @@ class {{modelName}}Resource extends Resource
         ];
     }
 }
-

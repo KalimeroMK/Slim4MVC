@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-use {{namespace}}\Infrastructure\Http\Controllers\{{modelName}}Controller;
 use App\Modules\Core\Infrastructure\Http\Middleware\AuthMiddleware;
 use App\Modules\Core\Infrastructure\Support\Auth;
+use {{namespace}}\Infrastructure\Http\Controllers\{{modelName}}Controller;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 
 return function (App $app): void {
     $container = $app->getContainer();
-    
-    if (!$container instanceof ContainerInterface) {
+
+    if (! $container instanceof ContainerInterface) {
         return;
     }
-    
+
     $auth = $container->get(Auth::class);
     $authMiddleware = new AuthMiddleware($auth);
-    
+
     $app->group('/api/v1/{{lowerModuleName}}', function ($group) {
         $group->get('', [{{modelName}}Controller::class, 'index']);
         $group->post('', [{{modelName}}Controller::class, 'store']);
@@ -26,4 +26,3 @@ return function (App $app): void {
         $group->delete('/{id}', [{{modelName}}Controller::class, 'destroy']);
     })->add($authMiddleware);
 };
-

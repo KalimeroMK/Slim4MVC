@@ -5,9 +5,17 @@ declare(strict_types=1);
 namespace {{namespace}}\Infrastructure\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * {{modelName}} model.
+ *
+ * Declare each column here as you add it — Eloquent's attributes are magic, so
+ * static analysis cannot see them otherwise.
+ *
+ * @property int $id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class {{modelName}} extends Model
 {
@@ -45,10 +53,9 @@ class {{modelName}} extends Model
      */
     protected $casts = [
         // Add casts here
-        // Example: 
+        // Example:
         // 'created_at' => 'datetime',
         // 'updated_at' => 'datetime',
         // 'is_active' => 'boolean',
     ];
 }
-

@@ -14,13 +14,9 @@ final class Delete{{modelName}}Action
 
     /**
      * Execute {{modelName}} deletion.
-     *
-     * @param int $id
-     * @return void
      */
     public function execute(int $id): void
     {
         $this->repository->delete($id);
     }
 }
-

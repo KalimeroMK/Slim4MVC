@@ -29,4 +29,3 @@ final class Create{{modelName}}Request extends FormRequest
         ];
     }
 }
-

@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Tests\Unit\Console;
 
 use App\Console\Commands\MakeModuleCommand;
+use FilesystemIterator;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileInfo;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -105,6 +109,59 @@ final class MakeModuleCommandTest extends TestCase
             $content,
             'A generated entry must not share a line with the preceding entry.'
         );
+    }
+
+    public function test_every_generated_file_is_valid_php(): void
+    {
+        // Three stubs used to reference {{lowerModelName}} without it being in their
+        // replacement map, so the placeholder survived as `${{lowerModelName}}` — which
+        // PHP reads as the start of a variable-variable.
+        $this->runMakeModule(['name' => 'TestModule']);
+
+        $files = $this->generatedFiles();
+        $this->assertNotEmpty($files);
+
+        foreach ($files as $file) {
+            $this->assertSame(
+                0,
+                $this->lint($file),
+                sprintf('%s does not parse.', str_replace($this->projectRoot.'/', '', $file))
+            );
+        }
+    }
+
+    public function test_no_placeholder_survives_into_generated_output(): void
+    {
+        $this->runMakeModule(['name' => 'TestModule']);
+
+        foreach ($this->generatedFiles() as $file) {
+            $this->assertDoesNotMatchRegularExpression(
+                '/\{\{[a-zA-Z]+\}\}/',
+                (string) file_get_contents($file),
+                sprintf('%s still contains a template placeholder.', str_replace($this->projectRoot.'/', '', $file))
+            );
+        }
+    }
+
+    public function test_generated_module_passes_the_project_code_style(): void
+    {
+        // A module that fails `composer lint` the moment it is created is not usable,
+        // so the command formats its own output.
+        $this->runMakeModule(['name' => 'TestModule']);
+
+        $pint = $this->projectRoot.'/vendor/bin/pint';
+
+        if (! is_executable($pint)) {
+            $this->markTestSkipped('Pint is not installed.');
+        }
+
+        exec(
+            sprintf('%s --test %s 2>&1', escapeshellarg($pint), escapeshellarg($this->testModulePath)),
+            $output,
+            $exitCode
+        );
+
+        $this->assertSame(0, $exitCode, 'Generated module is not Pint-clean: '.implode("\n", $output));
     }
 
     public function test_repeated_runs_do_not_accumulate_duplicate_entries(): void
@@ -357,6 +414,27 @@ final class MakeModuleCommandTest extends TestCase
         $commandTester->execute($input);
 
         return $commandTester;
+    }
+
+    /**
+     * @return list<string> absolute paths of every generated PHP file
+     */
+    private function generatedFiles(): array
+    {
+        $files = [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->testModulePath, FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file instanceof SplFileInfo && $file->getExtension() === 'php') {
+                $files[] = $file->getPathname();
+            }
+        }
+
+        sort($files);
+
+        return $files;
     }
 
     private function lint(string $file): int

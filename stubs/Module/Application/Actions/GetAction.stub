@@ -15,17 +15,14 @@ final readonly class Get{{modelName}}Action
 
     /**
      * Execute getting {{modelName}} by ID.
-     *
-     * @param int $id
-     * @return {{modelName}}
      */
     public function execute(int $id): {{modelName}}
     {
         ${{lowerModelName}} = $this->repository->findOrFail($id);
-        
+
         // Load relations if needed
         // Example: ${{lowerModelName}}->load(['roles', 'permissions']);
-        
+
         return ${{lowerModelName}};
     }
 }

@@ -17,20 +17,17 @@ final readonly class Update{{modelName}}Action implements Update{{modelName}}Act
 
     /**
      * Execute {{modelName}} update.
-     *
-     * @param Update{{modelName}}DTO $dto
-     * @return {{modelName}}
      */
     public function execute(Update{{modelName}}DTO $dto): {{modelName}}
     {
         $attributes = [];
-        
+
         // Map DTO properties to model attributes (only non-null values)
         // Example:
         // if ($dto->name !== null) {
         //     $attributes['name'] = $dto->name;
         // }
-        
+
         ${{lowerModelName}} = $this->repository->update($dto->id, $attributes);
 
         // Handle relations if needed (e.g., sync roles, permissions)

@@ -13,9 +13,6 @@ class {{moduleName}}ServiceProvider
 {
     /**
      * Register module services in the container.
-     *
-     * @param ContainerInterface $container
-     * @return void
      */
     public function register(ContainerInterface $container): void
     {
@@ -31,16 +28,14 @@ class {{moduleName}}ServiceProvider
     /**
      * Boot module routes and any other boot-time logic.
      *
-     * @param App $app
-     * @return void
+     * @param  App<ContainerInterface>  $app
      */
     public function boot(App $app): void
     {
         $routesPath = __DIR__.'/../Routes/api.php';
-        
+
         if (file_exists($routesPath)) {
             (require $routesPath)($app);
         }
     }
 }
-

@@ -46,12 +46,19 @@ class MakeModuleCommand extends Command
         $this->createDirectories($modulePath, $output);
 
         // Create files from stubs
-        $this->createFiles($moduleName, $modelName, $modulePath, $stubPath, $output);
+        if (! $this->createFiles($moduleName, $modelName, $modulePath, $stubPath, $output)) {
+            $output->writeln('<error>Module generation failed; see the errors above.</error>');
+
+            return Command::FAILURE;
+        }
 
         // Create migration if requested
         if ($createMigration) {
             $this->createMigration($modelName, $output, $projectRoot);
         }
+
+        // Format what was generated
+        $this->formatModule($modulePath, $projectRoot, $output);
 
         // Create service provider registration
         $this->registerModule($moduleName, $output, $projectRoot);
@@ -64,6 +71,35 @@ class MakeModuleCommand extends Command
         $output->writeln('<comment>Dependencies have been automatically registered in bootstrap/dependencies.php</comment>');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Run Pint over the generated module.
+     *
+     * Import order depends on the module's own namespace — App\Modules\Core sorts
+     * before App\Modules\Gadgetry but after App\Modules\Aardvark — so no fixed order
+     * in a stub is correct for every module. Formatting the output instead means a new
+     * module always passes `composer lint`.
+     *
+     * Skipped silently when Pint is absent, as it is on --no-dev installs.
+     */
+    private function formatModule(string $modulePath, string $projectRoot, OutputInterface $output): void
+    {
+        $pint = $projectRoot.'/vendor/bin/pint';
+
+        if (! is_executable($pint)) {
+            return;
+        }
+
+        exec(
+            sprintf('%s %s 2>&1', escapeshellarg($pint), escapeshellarg($modulePath)),
+            $ignored,
+            $exitCode
+        );
+
+        $output->writeln($exitCode === 0
+            ? '<info>Formatted with Pint</info>'
+            : '<comment>Pint could not format the module; run it manually.</comment>');
     }
 
     private function createDirectories(string $modulePath, OutputInterface $output): void
@@ -95,116 +131,118 @@ class MakeModuleCommand extends Command
         }
     }
 
+    /**
+     * Render every module stub.
+     *
+     * One replacement map is applied to all stubs. Per-stub maps used to be
+     * maintained by hand, and three of them omitted {{lowerModelName}} — the
+     * placeholder survived into the output as `${{lowerModelName}}`, which PHP reads
+     * as the start of a variable-variable, so the generated actions did not parse.
+     *
+     * @return bool false when a stub could not be rendered
+     */
     private function createFiles(
         string $moduleName,
         string $modelName,
         string $modulePath,
         string $stubPath,
         OutputInterface $output
-    ): void {
+    ): bool {
         $namespace = 'App\Modules\\'.$moduleName;
-        $lowerModuleName = mb_strtolower($moduleName);
-        $lowerModelName = mb_strtolower($modelName);
+
+        $replacements = [
+            '{{namespace}}' => $namespace,
+            '{{moduleName}}' => $moduleName,
+            '{{modelName}}' => $modelName,
+            '{{lowerModuleName}}' => mb_strtolower($moduleName),
+            '{{lowerModelName}}' => mb_strtolower($modelName),
+            '{{tableName}}' => mb_strtolower($modelName).'s',
+        ];
 
         $files = [
             // Application Layer
             [
                 'stub' => $stubPath.'/Application/Actions/CreateAction.stub',
                 'dest' => sprintf('%s/Application/Actions/Create%sAction.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
                 'stub' => $stubPath.'/Application/Actions/UpdateAction.stub',
                 'dest' => sprintf('%s/Application/Actions/Update%sAction.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
                 'stub' => $stubPath.'/Application/Actions/DeleteAction.stub',
                 'dest' => sprintf('%s/Application/Actions/Delete%sAction.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
                 'stub' => $stubPath.'/Application/Actions/GetAction.stub',
                 'dest' => sprintf('%s/Application/Actions/Get%sAction.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
                 'stub' => $stubPath.'/Application/Actions/ListAction.stub',
                 'dest' => sprintf('%s/Application/Actions/List%sAction.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName],
             ],
             [
                 'stub' => $stubPath.'/Application/DTOs/CreateDTO.stub',
                 'dest' => sprintf('%s/Application/DTOs/Create%sDTO.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
                 'stub' => $stubPath.'/Application/DTOs/UpdateDTO.stub',
                 'dest' => sprintf('%s/Application/DTOs/Update%sDTO.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             // Interfaces
             [
                 'stub' => $stubPath.'/Application/Interfaces/CreateActionInterface.stub',
                 'dest' => sprintf('%s/Application/Interfaces/Create%sActionInterface.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
                 'stub' => $stubPath.'/Application/Interfaces/UpdateActionInterface.stub',
                 'dest' => sprintf('%s/Application/Interfaces/Update%sActionInterface.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             // Infrastructure Layer
             [
                 'stub' => $stubPath.'/Infrastructure/Models/Model.stub',
                 'dest' => sprintf('%s/Infrastructure/Models/%s.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{tableName}}' => $lowerModelName.'s'],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Repositories/Repository.stub',
                 'dest' => sprintf('%s/Infrastructure/Repositories/%sRepository.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Controllers/Controller.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Controllers/%sController.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Requests/CreateRequest.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Requests/Create%sRequest.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Requests/UpdateRequest.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Requests/Update%sRequest.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Http/Resources/Resource.stub',
                 'dest' => sprintf('%s/Infrastructure/Http/Resources/%sResource.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Providers/ServiceProvider.stub',
                 'dest' => sprintf('%s/Infrastructure/Providers/%sServiceProvider.php', $modulePath, $moduleName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModuleName}}' => $lowerModuleName],
             ],
             [
                 'stub' => $stubPath.'/Infrastructure/Routes/api.stub',
                 'dest' => $modulePath.'/Infrastructure/Routes/api.php',
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{moduleName}}' => $moduleName, '{{lowerModuleName}}' => $lowerModuleName, '{{lowerModelName}}' => $lowerModelName],
             ],
             [
                 'stub' => $stubPath.'/Policies/Policy.stub',
                 'dest' => sprintf('%s/Policies/%sPolicy.php', $modulePath, $modelName),
-                'vars' => ['{{namespace}}' => $namespace, '{{modelName}}' => $modelName, '{{lowerModelName}}' => $lowerModelName],
             ],
         ];
+
+        $success = true;
 
         foreach ($files as $file) {
             if (! file_exists($file['stub'])) {
                 $output->writeln(sprintf('<error>Stub not found: %s</error>', $file['stub']));
+                $success = false;
 
                 continue;
             }
@@ -212,18 +250,33 @@ class MakeModuleCommand extends Command
             $stubContent = file_get_contents($file['stub']);
             if ($stubContent === false) {
                 $output->writeln(sprintf('<error>Failed to read stub: %s</error>', $file['stub']));
+                $success = false;
 
                 continue;
             }
 
-            $content = $stubContent;
-            foreach ($file['vars'] as $key => $value) {
-                $content = str_replace($key, $value, $content);
+            $content = str_replace(array_keys($replacements), array_values($replacements), $stubContent);
+
+            // Never emit a file that still carries a placeholder: it would not parse,
+            // and the module would look like it generated cleanly.
+            preg_match_all('/\{\{[a-zA-Z]+\}\}/', $content, $leftovers);
+
+            if ($leftovers[0] !== []) {
+                $output->writeln(sprintf(
+                    '<error>Unresolved placeholder(s) %s in %s — not written.</error>',
+                    implode(', ', array_unique($leftovers[0])),
+                    basename((string) $file['stub'])
+                ));
+                $success = false;
+
+                continue;
             }
 
             file_put_contents($file['dest'], $content);
             $output->writeln(sprintf('<info>Created: %s</info>', $file['dest']));
         }
+
+        return $success;
     }
 
     private function createMigration(string $modelName, OutputInterface $output, string $projectRoot): void

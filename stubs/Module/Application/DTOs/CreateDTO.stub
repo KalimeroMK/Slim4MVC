@@ -11,7 +11,7 @@ final class Create{{modelName}}DTO
 {
     public function __construct(
         // Add properties here
-        // Example: 
+        // Example:
         // public readonly string $name,
         // public readonly string $email,
         // public readonly array $roles = [], // For relation support
@@ -20,7 +20,7 @@ final class Create{{modelName}}DTO
     /**
      * Create DTO from validated request data.
      *
-     * @param array<string, mixed> $validated
+     * @param  array<string, mixed>  $validated
      */
     public static function fromRequest(array $validated): self
     {
