@@ -24,7 +24,7 @@ A modern, production-ready starter kit for building web applications with Slim F
 - **Caching Layer** - Multi-driver cache system (File, Redis, Null) with helper functions
 - **Cookie Helper** - Encrypted cookie management with AES-256-CBC
 - **API Query Builder** - Filter, sort, search with operators and pagination
-- **Testing Suite** - 695 PHPUnit tests, 0 skipped; PHPStan level 8 clean and Pint-formatted
+- **Testing Suite** - 707 PHPUnit tests, 0 skipped; PHPStan level 8 clean and Pint-formatted
 - **CLI Commands** - Artisan-like commands for scaffolding (modules, models, controllers, requests)
 - **Modular Architecture** - Feature-based module organization for better scalability
 - **Automatic Dependency Registration** - Dependencies automatically registered when creating modules
@@ -709,7 +709,7 @@ The project includes a comprehensive test suite covering:
 
 | Suite | Tests | Description |
 |-------|-------|-------------|
-| **Unit** | 588 | Isolated component tests |
+| **Unit** | 600 | Isolated component tests |
 | **Integration** | 75 | Database and service integration |
 | **Feature** | 15 | End-to-end API tests |
 | **Edge Cases** | 17 | Boundary and unusual scenarios |
@@ -760,7 +760,7 @@ composer test
 
 ### Test Coverage
 
-- ✅ 695 tests, 1661 assertions
+- ✅ 707 tests, 1675 assertions
 - ✅ 0 skipped, 0 deprecations, 0 notices
 - ✅ PHPStan level 8: 0 errors
 - ✅ PHP 8.5 compatible (no deprecated patterns)
@@ -805,9 +805,16 @@ composer lint          # pint --test
 composer lint:fix      # pint
 composer analyse       # phpstan, level 8
 composer test          # phpunit
+composer test:isolation# phpunit, failing if it writes into app/ or beside the repo
 composer test:coverage # phpunit --coverage-text
-composer check         # lint + analyse + test, what CI runs
+composer check         # lint + analyse + test:isolation, what CI runs
 ```
+
+Runtime paths all resolve through `App\Modules\Core\Infrastructure\Support\Paths`,
+which is the only place that knows how deep it sits relative to the project root.
+Building such a path by counting `../` or `dirname()` levels at the call site is
+what put the queue in `app/Modules/Core/storage` and the cache next to the
+checkout instead of inside it; `RuntimePathsTest` fails on any reintroduction.
 
 ## 🔧 Configuration
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Cache;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use RuntimeException;
 use Throwable;
 
@@ -20,7 +21,7 @@ final readonly class FileCache implements CacheInterface
         ?string $cachePath = null,
         ?string $prefix = null
     ) {
-        $this->cachePath = $cachePath ?? __DIR__.'/../../../../../../storage/cache/data';
+        $this->cachePath = $cachePath ?? Paths::storage('cache/data');
         $this->prefix = $prefix ?? ($_ENV['CACHE_PREFIX'] ?? 'slim_cache');
 
         $this->ensureDirectoryExists();

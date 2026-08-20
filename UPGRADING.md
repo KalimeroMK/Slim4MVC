@@ -99,6 +99,40 @@ Passing an empty filter array still just paginates.
 **Action:** repositories that do not extend `EloquentRepository` need a
 `paginateBy(array $criteria, int $page, int $perPage)` method.
 
+### Filesystem paths resolve through `Paths`
+
+`App\Modules\Core\Infrastructure\Support\Paths` is now the only place that knows how
+deep it sits relative to the project root. Every runtime path derives from it, and
+`RuntimePathsTest` fails if any file under `app/` walks up to the root by hand again.
+
+The counts had drifted apart, so several paths pointed at directories that did not
+exist or sat outside the checkout:
+
+- `db:seed` required `bootstrap/database.php` from one level *above* the project and
+  died with a fatal before seeding anything.
+- `swagger:generate` defaulted its source and output paths outside the project, so it
+  reported `Source directory not found!` and never generated documentation.
+- `make:request --model=X` looked for `bootstrap/database.php` under `app/`, silently
+  found nothing, and emitted a request class with no validation rules. It now warns and
+  still writes the class when no database is reachable.
+- `make:request` also built its destination from `app/` and corrected it afterwards with
+  a `str_ends_with($projectRoot, '/app')` branch; both are gone.
+- `jwt:key:generate` used to try `../.env` as a second candidate, which could write the
+  generated secret into a sibling project. Only the project's own `.env` is considered.
+- `FileCache` and `CacheManager` defaulted to a `storage/cache/data` directory *beside*
+  the checkout. `SendEmailJob` resolved views to `app/Modules/resources/views`, so a
+  queued email could never render.
+
+`OptimizedDiscovery::__construct()` takes `?array $scanPaths = null` instead of defaulting
+to a constant; passing an explicit array is unchanged. `MakeModelCommand::createModel()`
+renamed its third parameter from `$projectRoot` to `$appDir`, which is what it always was.
+
+### `composer test:isolation`
+
+Runs the suite and fails if it wrote anything under `app/` or beside the repository.
+`composer check` uses it in place of `composer test`, and CI wraps both the normal and
+the randomised runs with it. The script is `scripts/assert-no-source-writes.sh`.
+
 ### Smaller changes
 
 - `X-XSS-Protection` is no longer sent. The legacy auditor it enabled is gone from current

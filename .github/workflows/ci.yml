@@ -52,8 +52,10 @@ jobs:
       - name: Static analysis
         run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
+      # Wrapped so a runtime path that resolves into app/ or beside the checkout
+      # fails here instead of being noticed once it is committed.
       - name: Tests
-        run: vendor/bin/phpunit
+        run: scripts/assert-no-source-writes.sh vendor/bin/phpunit
 
       - name: Fail if the suite modified tracked files
         run: |
@@ -76,8 +78,8 @@ jobs:
           extensions: fileinfo, mbstring, pdo_sqlite, redis
           tools: composer:v2
       - run: composer install --prefer-dist --no-interaction --no-progress
-      - run: vendor/bin/phpunit --order-by=random
-      - run: vendor/bin/phpunit --order-by=reverse
+      - run: scripts/assert-no-source-writes.sh vendor/bin/phpunit --order-by=random
+      - run: scripts/assert-no-source-writes.sh vendor/bin/phpunit --order-by=reverse
 
   audit:
     name: Dependency audit

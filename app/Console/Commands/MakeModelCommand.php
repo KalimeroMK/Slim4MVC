@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,11 +27,8 @@ class MakeModelCommand extends Command
         $modelName = ucfirst((string) $input->getArgument('name'));
         $createMigration = $input->getOption('migration');
 
-        // Base project directory
-        $projectRoot = dirname(__DIR__, 2);
-
-        // Generate Model
-        $this->createModel($modelName, $output, $projectRoot);
+        // This legacy generator writes to app/Models, not into a module.
+        $this->createModel($modelName, $output, Paths::root().'/app');
 
         // Generate Migration if -m is passed
         if ($createMigration) {
@@ -42,16 +40,16 @@ class MakeModelCommand extends Command
         return Command::SUCCESS;
     }
 
-    protected function createModel(string $modelName, OutputInterface $output, string $projectRoot): void
+    protected function createModel(string $modelName, OutputInterface $output, string $appDir): void
     {
-        $modelDir = $projectRoot.'/Models/';
+        $modelDir = $appDir.'/Models/';
         $modelPath = $modelDir.$modelName.'.php';
 
         if (! is_dir($modelDir)) {
             mkdir($modelDir, 0777, true);
         }
 
-        $projectRoot = dirname(__DIR__, 3);
+        $projectRoot = Paths::root();
 
         // Load stub and replace placeholder
         $stubPath = $projectRoot.'/stubs/model.stub';
@@ -76,7 +74,7 @@ class MakeModelCommand extends Command
 
     protected function createMigration(string $modelName, OutputInterface $output): void
     {
-        $projectRoot = dirname(__DIR__, 3);
+        $projectRoot = Paths::root();
 
         $migrationDir = $projectRoot.'/database/migrations/';
         $className = 'Create'.ucfirst($modelName).'Table';

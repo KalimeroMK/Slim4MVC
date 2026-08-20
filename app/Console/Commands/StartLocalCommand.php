@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -454,7 +455,7 @@ final class StartLocalCommand extends Command
 
     private function getProjectRoot(): string
     {
-        return dirname(__DIR__, 3);
+        return Paths::root();
     }
 
     private function findComposer(): ?string

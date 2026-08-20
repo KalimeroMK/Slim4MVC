@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,7 +23,7 @@ class CreateControllerCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $name = $input->getArgument('name');
-        $projectRoot = dirname(__DIR__, 3);
+        $projectRoot = Paths::root();
         $stubRoot = $projectRoot.'/stubs';
 
         $map = [

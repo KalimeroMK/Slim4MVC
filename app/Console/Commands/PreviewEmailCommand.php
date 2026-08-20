@@ -8,6 +8,7 @@ use App\Modules\Core\Infrastructure\Mail\Mailable;
 use App\Modules\Core\Infrastructure\Mail\PasswordResetEmail;
 use App\Modules\Core\Infrastructure\Mail\WelcomeEmail;
 use App\Modules\Core\Infrastructure\Support\Mailer;
+use App\Modules\Core\Infrastructure\Support\Paths;
 use App\Modules\Core\Infrastructure\View\Blade;
 use App\Modules\User\Infrastructure\Database\Factories\UserFactory;
 use App\Modules\User\Infrastructure\Models\User;
@@ -37,8 +38,8 @@ class PreviewEmailCommand extends Command
         $outputPath = $input->getArgument('output');
 
         // Setup Blade
-        $viewsPath = dirname(__DIR__, 3).'/resources/views';
-        $cachePath = dirname(__DIR__, 3).'/storage/cache/view';
+        $viewsPath = Paths::resources('views');
+        $cachePath = Paths::storage('cache/view');
         $blade = new Blade($viewsPath, $cachePath);
 
         // Setup Mailer (not used for preview, but required for Mailable)

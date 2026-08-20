@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use ReflectionClass;
@@ -12,6 +13,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class MakeRequestCommand extends Command
 {
@@ -31,13 +33,7 @@ class MakeRequestCommand extends Command
         $modelName = $input->getOption('model');
         $type = $input->getOption('type');
 
-        $projectRoot = dirname(__DIR__, 2);
-        $stubPath = $projectRoot.'/stubs/Request/'.ucfirst((string) $type).'Request';
-
-        // Check if stub exists, if not try alternative path
-        if (! file_exists($stubPath)) {
-            $stubPath = __DIR__.'/../../../stubs/Request/'.ucfirst((string) $type).'Request';
-        }
+        $stubPath = Paths::root().'/stubs/Request/'.ucfirst((string) $type).'Request';
 
         if (! file_exists($stubPath)) {
             $output->writeln(sprintf('<error>Stub file not found: %s</error>', $stubPath));
@@ -62,13 +58,12 @@ class MakeRequestCommand extends Command
             $className = $name;
         }
 
-        // Fix path - projectRoot already points to root, not app directory
-        $destination = sprintf('%s/app/Http/Requests/%s/%s.php', $projectRoot, $namespace, $className);
-
-        // If projectRoot already contains app, adjust
-        if (str_ends_with($projectRoot, '/app')) {
-            $destination = dirname($projectRoot).sprintf('/app/Http/Requests/%s/%s.php', $namespace, $className);
-        }
+        $destination = sprintf(
+            '%s/app/Http/Requests/%s/%s.php',
+            Paths::root(),
+            $namespace,
+            $className
+        );
 
         if (file_exists($destination)) {
             $output->writeln(sprintf('<error>Request already exists: %s</error>', $destination));
@@ -115,11 +110,21 @@ class MakeRequestCommand extends Command
      */
     private function generateRulesFromModel(string $modelName, OutputInterface $output, bool $isUpdate = false): ?array
     {
-        // Load database configuration for Eloquent
-        $projectRoot = dirname(__DIR__, 2);
-        $dbPath = $projectRoot.'/bootstrap/database.php';
+        // Rules are derived by introspecting the table, which needs a booted
+        // connection. Bootstrapping reads .env, so this is unavailable in a fresh
+        // checkout — warn and emit the request without rules rather than failing.
+        $dbPath = Paths::root().'/bootstrap/database.php';
         if (file_exists($dbPath)) {
-            require $dbPath;
+            try {
+                require $dbPath;
+            } catch (Throwable $e) {
+                $output->writeln(sprintf(
+                    '<comment>Warning: could not connect to the database (%s). Skipping auto-generation.</comment>',
+                    $e->getMessage()
+                ));
+
+                return null;
+            }
         }
 
         $modelClass = 'App\Models\\'.$modelName;

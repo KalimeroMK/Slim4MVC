@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\DI;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -22,18 +23,14 @@ use RegexIterator;
  */
 final readonly class OptimizedDiscovery
 {
-    // Five levels up is the project root; four would put this inside app/, which is
-    // source, is not shipped as a writable directory, and is not gitignored by default.
-    private const string DEFAULT_CACHE_FILE = __DIR__.'/../../../../../storage/cache/autowiring.php';
-
     private const int CACHE_TTL_DEV = 3600;
 
-    // 1 hour in development
-    private const array DEFAULT_SCAN_PATHS = [
-        __DIR__.'/../../../../../app/Modules',
-    ];
-
     private string $cacheFile;
+
+    /**
+     * @var array<int, string>
+     */
+    private array $scanPaths;
 
     /**
      * @param  array<int, string>  $scanPaths
@@ -41,10 +38,11 @@ final readonly class OptimizedDiscovery
      *                                  path instead of the project's shared cache.
      */
     public function __construct(
-        private array $scanPaths = self::DEFAULT_SCAN_PATHS,
+        ?array $scanPaths = null,
         ?string $cacheFile = null
     ) {
-        $this->cacheFile = $cacheFile ?? self::DEFAULT_CACHE_FILE;
+        $this->scanPaths = $scanPaths ?? [Paths::root().'/app/Modules'];
+        $this->cacheFile = $cacheFile ?? self::defaultCacheFile();
     }
 
     /**
@@ -52,7 +50,7 @@ final readonly class OptimizedDiscovery
      */
     public static function getCacheFile(): string
     {
-        return self::DEFAULT_CACHE_FILE;
+        return self::defaultCacheFile();
     }
 
     /**
@@ -191,6 +189,11 @@ final readonly class OptimizedDiscovery
             'environment' => $_ENV['APP_ENV'] ?? 'unknown',
             'sample_bindings' => array_slice($bindings, 0, 20, true),
         ];
+    }
+
+    private static function defaultCacheFile(): string
+    {
+        return Paths::storage('cache/autowiring.php');
     }
 
     /**

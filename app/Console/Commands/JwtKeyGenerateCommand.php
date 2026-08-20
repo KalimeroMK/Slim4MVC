@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -123,17 +124,10 @@ final class JwtKeyGenerateCommand extends Command
 
     private function findEnvFile(): ?string
     {
-        $candidates = [
-            dirname(__DIR__, 3).'/.env',
-            dirname(__DIR__, 4).'/.env',
-        ];
+        // Only ever the project's own .env. A second candidate one level higher
+        // used to be tried, which could write this secret into a sibling project.
+        $path = Paths::root().'/.env';
 
-        foreach ($candidates as $path) {
-            if (file_exists($path)) {
-                return $path;
-            }
-        }
-
-        return null;
+        return file_exists($path) ? $path : null;
     }
 }

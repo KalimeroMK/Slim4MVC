@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Core\Infrastructure\Queue;
 
 use App\Modules\Core\Infrastructure\Jobs\Job;
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Exception;
 
 class FileQueue implements Queue
@@ -13,10 +14,7 @@ class FileQueue implements Queue
 
     public function __construct(?string $queuePath = null)
     {
-        // Five levels up from app/Modules/Core/Infrastructure/Queue is the project root.
-        // This used to resolve to app/Modules/Core/storage, writing queue state into the
-        // source tree where it escaped .gitignore and got committed.
-        $queuePath ??= $_ENV['QUEUE_PATH'] ?? dirname(__DIR__, 5).'/storage/queue/jobs.json';
+        $queuePath ??= $_ENV['QUEUE_PATH'] ?? Paths::storage('queue/jobs.json');
         $this->queueFile = $queuePath;
 
         // Ensure directory exists

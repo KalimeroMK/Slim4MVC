@@ -80,13 +80,14 @@
   "scripts": {
     "test": "phpunit",
     "test:coverage": "phpunit --coverage-text",
+    "test:isolation": "scripts/assert-no-source-writes.sh vendor/bin/phpunit",
     "analyse": "phpstan analyse --memory-limit=1G",
     "lint": "pint --test",
     "lint:fix": "pint",
     "check": [
       "@lint",
       "@analyse",
-      "@test"
+      "@test:isolation"
     ]
   }
 }

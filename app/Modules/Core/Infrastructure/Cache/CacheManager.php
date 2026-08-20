@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Cache;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use InvalidArgumentException;
 use Predis\Client;
 
@@ -160,7 +161,7 @@ final class CacheManager
      */
     private function createFileDriver(): CacheInterface
     {
-        $cachePath = $_ENV['CACHE_PATH'] ?? __DIR__.'/../../../../../../storage/cache/data';
+        $cachePath = $_ENV['CACHE_PATH'] ?? Paths::storage('cache/data');
 
         return new FileCache($cachePath, $this->prefix);
     }

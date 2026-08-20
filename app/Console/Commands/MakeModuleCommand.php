@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,7 +30,7 @@ class MakeModuleCommand extends Command
         $createMigration = $input->getOption('migration');
 
         // Get project root (3 levels up from app/Console/Commands)
-        $projectRoot = dirname(__DIR__, 3);
+        $projectRoot = Paths::root();
         $modulePath = sprintf('%s/app/Modules/%s', $projectRoot, $moduleName);
         $stubPath = $projectRoot.'/stubs/Module';
 

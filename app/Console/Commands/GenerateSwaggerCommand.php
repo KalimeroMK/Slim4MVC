@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use Exception;
 use OpenApi\Annotations\Info;
 use OpenApi\Annotations\SecurityScheme;
@@ -29,14 +30,14 @@ class GenerateSwaggerCommand extends Command
                 'o',
                 InputOption::VALUE_OPTIONAL,
                 'Output file path',
-                __DIR__.'/../../../../public/swagger.json'
+                Paths::root().'/public/swagger.json'
             )
             ->addOption(
                 'source',
                 's',
                 InputOption::VALUE_OPTIONAL,
                 'Source directory to scan',
-                __DIR__.'/../../../../app'
+                Paths::root().'/app'
             );
     }
 

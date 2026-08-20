@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Modules\Core\Infrastructure\Support\Paths;
 use App\Modules\Core\Infrastructure\View\Blade;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -19,9 +20,7 @@ if (! function_exists('view')) {
         if ($app instanceof ContainerInterface && $app->has(Blade::class)) {
             $blade = $app->get(Blade::class);
         } else {
-            $cache = __DIR__.'/../../../../../storage/cache/view';
-            $views = __DIR__.'/../../../../../resources/views';
-            $blade = new Blade($views, $cache);
+            $blade = new Blade(Paths::resources('views'), Paths::storage('cache/view'));
         }
 
         $response->getBody()->write($blade->make($template, $with));
