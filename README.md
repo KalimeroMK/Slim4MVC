@@ -1,5 +1,7 @@
 # Slim 4 MVC Starter Kit
 
+[![CI](https://github.com/KalimeroMK/Slim4MVC/actions/workflows/ci.yml/badge.svg)](https://github.com/KalimeroMK/Slim4MVC/actions/workflows/ci.yml)
+
 A modern, production-ready starter kit for building web applications with Slim Framework 4, featuring Eloquent ORM, Blade templating, comprehensive authentication, and a robust testing suite.
 
 ## 🚀 Features
@@ -219,9 +221,13 @@ The project uses a **modular architecture** where each feature is organized as a
 │   ├── logs/                 # Application logs
 │   ├── queue/                # Queue storage (file driver)
 │   └── sessions/             # Session storage (file driver)
-└── tests/                    # PHPUnit tests
-    ├── Unit/                  # Unit tests
-    └── Feature/               # Feature tests
+├── tests/                    # PHPUnit tests
+│   ├── Unit/                  # Unit tests
+│   ├── Integration/           # Database and service integration
+│   ├── Feature/               # End-to-end tests
+│   └── EdgeCases/             # Boundary scenarios
+├── .github/workflows/         # CI (tests on 8.4/8.5, pint, phpstan, audit)
+└── UPGRADING.md               # Breaking changes between versions
 ```
 
 ### Module Structure
@@ -413,11 +419,21 @@ The Auth module (`app/Modules/Auth/`) provides:
 
 ### API Authentication (JWT)
 
-The API uses JWT tokens for authentication. After successful login, include the token in requests:
+The API uses JWT tokens for authentication. After successful login, include the token
+in requests:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" http://localhost:81/api/v1/users
 ```
+
+`AuthMiddleware` accepts **only** a Bearer token. A browser session cookie does not
+authenticate an `/api/` request, because CSRF validation is skipped for those paths —
+accepting the cookie would leave every API endpoint reachable from any other site.
+Guard cookie-authenticated routes with `AuthWebMiddleware` instead.
+
+Tokens must carry an `exp` claim; one minted without it would never expire, so
+`JwtDecoder` rejects it. `JwtService::encode()` always sets one, falling back to
+`JWT_TTL`.
 
 ### Web Authentication (Session)
 
@@ -482,7 +498,10 @@ public function update(Request $request, Response $response, int $id): Response
 
 ## ⚡ Rate Limiting
 
-Rate limiting uses a distributed cache backend (Redis recommended, File fallback) so limits are shared across all PHP-FPM workers. Applied automatically to auth endpoints (5 requests per minute). You can apply it to any route:
+Rate limiting uses a distributed cache backend (Redis recommended, File fallback) so
+limits are shared across all PHP-FPM workers. Two limiters ship by default: every
+`/api/` route gets 60 requests per minute, and auth endpoints add a stricter 5 per
+minute on top. You can apply it to any route:
 
 ```php
 use App\Modules\Core\Infrastructure\Http\Middleware\RateLimitMiddleware;
@@ -503,7 +522,15 @@ When running behind a load balancer or reverse proxy, set `TRUSTED_PROXIES` in `
 TRUSTED_PROXIES=10.0.0.1,10.0.0.2
 ```
 
-`X-Forwarded-For` is only trusted when `REMOTE_ADDR` matches a listed proxy, and the extracted IP is validated before use.
+`X-Forwarded-For` is only trusted when `REMOTE_ADDR` matches a listed proxy, and the
+extracted IP is validated before use.
+
+Every response carries `X-RateLimit-Limit`, `X-RateLimit-Remaining` and
+`X-RateLimit-Reset`; a rejection adds `Retry-After` and returns 429. The window is
+encoded in the cache key and advanced with a single atomic increment, so concurrent
+requests cannot all read the same pre-limit count and pass together. If the cache
+cannot count at all, requests are allowed through rather than everyone being locked
+out.
 
 ## 🌐 CORS Configuration
 
@@ -682,39 +709,31 @@ The project includes a comprehensive test suite covering:
 
 | Suite | Tests | Description |
 |-------|-------|-------------|
-| **Unit** | 500+ | Isolated component tests |
-| **Integration** | 63+ | Database and service integration |
-| **Feature** | 21+ | End-to-end API tests |
-| **Edge Cases** | 18+ | Boundary and unusual scenarios |
+| **Unit** | 541 | Isolated component tests |
+| **Integration** | 75 | Database and service integration |
+| **Feature** | 15 | End-to-end API tests |
+| **Edge Cases** | 17 | Boundary and unusual scenarios |
 
-### New in v2.0 (173 additional tests)
+### What the suite covers
 
-#### Environment Validation Tests (48 tests)
-- Production environment validation
-- Local/development environment validation
-- Weak secret detection
-- Missing configuration detection
-- Edge cases (unicode, special chars, boundary values)
+Per-area counts are deliberately not listed here — they go stale. Run
+`composer test:coverage` for current figures.
 
-#### JWT Service Tests (51 tests)
-- Token generation and validation
-- Refresh token rotation
-- Fingerprint-based security
-- Token theft detection
-- Multiple algorithms (HS256, HS384, HS512)
-- Edge cases (expired tokens, tampered tokens)
-
-#### Auto-Discovery Tests (35 tests)
-- Module scanning
-- Cache warming and clearing
-- Production vs development behavior
-- Statistics generation
-
-#### Generic CRUD Tests (39 tests)
-- Create, Read, Update, Delete operations
-- Pagination
-- Action factory
-- Integration with real database
+- **Environment validation** — production vs local rules, weak-secret detection,
+  missing configuration, unicode and boundary values
+- **JWT** — signing and verification, refresh-token rotation, revocation on logout,
+  and the rejections that matter: expired tokens, tampered payloads, `alg: none`,
+  a missing `exp` claim
+- **Auth boundary** — a session cookie must not authenticate an `/api/` request,
+  while a Bearer token must
+- **CORS** — exact-match origins, no header for unknown origins, wildcard and
+  credentials never combined
+- **Query allowlists** — fail-closed filtering, sorting, searching, includes and
+  field selection; SQL-shaped field names rejected
+- **Rate limiting** — window boundaries, per-identifier counters, spoofed
+  `X-Forwarded-For`, and failing open when the cache cannot count
+- **Generic CRUD** — the actions, the factory, pagination, and real filtering
+  against a database
 
 ### Running Tests
 
@@ -733,6 +752,10 @@ composer test
 
 # Run specific test file
 ./vendor/bin/phpunit tests/Unit/EnvironmentValidatorTest.php
+
+# Shuffle to catch tests that depend on execution order (CI does this too)
+./vendor/bin/phpunit --order-by=random
+./vendor/bin/phpunit --order-by=reverse
 ```
 
 ### Test Coverage
@@ -759,6 +782,13 @@ rather than assuming the whole codebase is exercised.
 ./vendor/bin/pint
 ```
 
+**PHPStan** (Static analysis, level 8 — currently 0 errors):
+```bash
+composer analyse
+# needs the memory limit; the default 128M is not enough for this codebase
+./vendor/bin/phpstan analyse --memory-limit=1G
+```
+
 **Rector** (Automated refactoring):
 ```bash
 # Check what would be changed
@@ -768,9 +798,14 @@ rather than assuming the whole codebase is exercised.
 ./vendor/bin/rector process
 ```
 
-**Combined (CI/CD ready):**
+**Composer scripts:**
 ```bash
-./vendor/bin/pint && ./vendor/bin/rector process && ./vendor/bin/phpunit
+composer lint          # pint --test
+composer lint:fix      # pint
+composer analyse       # phpstan, level 8
+composer test          # phpunit
+composer test:coverage # phpunit --coverage-text
+composer check         # lint + analyse + test, what CI runs
 ```
 
 ## 🔧 Configuration
@@ -792,8 +827,10 @@ DB_DATABASE=slim
 DB_USERNAME=slim
 DB_PASSWORD=secret
 
-# JWT
-JWT_SECRET=your-secret-key-here
+# JWT — at least 32 characters, else EnvironmentValidator refuses to boot.
+# Generate one with: php slim jwt:key:generate
+JWT_SECRET=
+JWT_TTL=3600
 
 # Mail
 MAIL_HOST=smtp.example.com
@@ -804,8 +841,9 @@ MAIL_FROM_ADDRESS=noreply@example.com
 MAIL_FROM_NAME="Your App Name"
 MAIL_ENCRYPTION=tls
 
-# CORS
-CORS_ORIGINS=*
+# CORS — explicit allowlist. `*` forces CORS_ALLOW_CREDENTIALS off.
+CORS_ORIGINS=http://localhost
+CORS_ALLOW_CREDENTIALS=false
 
 # Trusted Proxies (comma-separated IPs — set when behind a load balancer/reverse proxy)
 TRUSTED_PROXIES=
@@ -819,6 +857,7 @@ REDIS_CACHE_DATABASE=1
 # Queue
 QUEUE_DRIVER=redis
 QUEUE_RETRY_AFTER=90
+QUEUE_PATH=/var/www/html/storage/queue/jobs.json
 
 # Session
 SESSION_DRIVER=redis
@@ -1280,8 +1319,12 @@ See [Migration Guide](docs/MIGRATION_GUIDE.md) for detailed migration instructio
 - ✅ JWT token authentication (API) with minimum 32-char secret validation
 - ✅ Refresh token rotation with JTI-based revocation on logout
 - ✅ Password reset token expiry (1-hour TTL, SHA-256 hashed in DB)
-- ✅ Session-based authentication (Web)
+- ✅ Session-based authentication (Web); API routes are token-only
 - ✅ CSRF protection for web routes
+- ✅ CORS echoes an origin back only on an exact allowlist match; wildcard and
+  credentials are never combined
+- ✅ Query allowlists are fail-closed — an unlisted field never reaches the database
+  as a column name
 - ✅ Distributed rate limiting via Cache (Redis/File) — shared across all workers
 - ✅ Request body size limiting (10MB default, 413 on exceed)
 - ✅ Content Security Policy (CSP) headers
