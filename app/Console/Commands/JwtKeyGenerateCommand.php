@@ -15,6 +15,55 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class JwtKeyGenerateCommand extends Command
 {
+    /**
+     * Returns $content with JWT_SECRET set to $key.
+     *
+     * Pure string work, kept separate from the command so it can be tested without
+     * writing to a real .env.
+     */
+    public static function withSecret(string $content, string $key): string
+    {
+        $line = 'JWT_SECRET='.$key;
+        $lines = explode("\n", $content);
+        $seen = false;
+
+        foreach ($lines as $i => $text) {
+            // Presence of the key decides this, not whether it carries a value. Testing for
+            // `=.+` treated .env.example's empty `JWT_SECRET=` placeholder as absent, so the
+            // key was appended and the file ended up with two JWT_SECRET lines - the empty
+            // one winning with the loader, and every fresh clone failing config validation.
+            if (! str_starts_with($text, 'JWT_SECRET=')) {
+                continue;
+            }
+
+            if ($seen) {
+                unset($lines[$i]); // repair a file that already went wrong
+
+                continue;
+            }
+
+            $lines[$i] = $line;
+            $seen = true;
+        }
+
+        if ($seen) {
+            return implode("\n", $lines);
+        }
+
+        // No line at all: put one under the JWT header when there is one. The previous
+        // pattern also consumed the line after the header, which silently deleted the
+        // explanatory comment .env.example keeps there.
+        foreach ($lines as $i => $text) {
+            if (str_starts_with($text, '# JWT Configuration')) {
+                array_splice($lines, $i + 1, 0, [$line]);
+
+                return implode("\n", $lines);
+            }
+        }
+
+        return rtrim($content)."\n\n# JWT Configuration\n".$line."\n";
+    }
+
     protected function configure(): void
     {
         $this
@@ -78,9 +127,12 @@ final class JwtKeyGenerateCommand extends Command
             return Command::FAILURE;
         }
 
-        $hasExisting = (bool) preg_match('/^JWT_SECRET=.+$/m', $content);
+        // Only a secret that already carries a value is worth confirming; overwriting
+        // .env.example's empty placeholder loses nothing. withSecret() decides
+        // replace-vs-append separately, on whether the line is there at all.
+        $hasValue = (bool) preg_match('/^JWT_SECRET=.+$/m', $content);
 
-        if ($hasExisting && ! $force) {
+        if ($hasValue && ! $force) {
             /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
             $helper = $this->getHelper('question');
             $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
@@ -95,22 +147,9 @@ final class JwtKeyGenerateCommand extends Command
             }
         }
 
-        if ($hasExisting) {
-            $updated = preg_replace('/^JWT_SECRET=.*$/m', 'JWT_SECRET='.$key, $content);
-        } else {
-            // Append after [JWT Configuration] section or at end of file
-            if (str_contains($content, '# JWT Configuration')) {
-                $updated = preg_replace(
-                    '/(# JWT Configuration\s*\n)([^\n]*\n)?/',
-                    "$1JWT_SECRET={$key}\n",
-                    $content
-                );
-            } else {
-                $updated = rtrim($content)."\n\n# JWT Configuration\nJWT_SECRET={$key}\n";
-            }
-        }
+        $updated = self::withSecret($content, $key);
 
-        if ($updated === null || file_put_contents($envPath, $updated) === false) {
+        if (file_put_contents($envPath, $updated) === false) {
             $output->writeln('<error>Failed to write to .env file. Check file permissions.</error>');
 
             return Command::FAILURE;
