@@ -31,10 +31,17 @@ final class SessionAuth
 
         $this->session->migrate(true);
 
+        // AuthHelper::setUser() reads 'roles' and 'permissions' out of this array to fill
+        // $_SESSION, which is what hasRole() and can() consult. Leaving them out did not
+        // fail anywhere visible - it just made every role check answer false for a user
+        // who holds the role, so any page behind a role guard returned 403 after a web
+        // login. JWT logins were unaffected, which is why it went unnoticed.
         $userData = [
             'id' => $user->id,
             'email' => $user->email,
             'name' => $user->name,
+            'roles' => $user->roles()->pluck('name')->all(),
+            'permissions' => $user->permissions()->pluck('name')->unique()->values()->all(),
         ];
 
         $this->session->set('user', $userData);
