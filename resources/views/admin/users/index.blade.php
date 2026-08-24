@@ -59,7 +59,7 @@
                                         <i class="bi bi-key"></i>
                                     </a>
                                     <form method="POST" action="/admin/users/{{ $user->id }}/delete" class="d-inline" 
-                                          onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                          data-confirm="Are you sure you want to delete this user?">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete User">

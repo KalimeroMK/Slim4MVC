@@ -189,21 +189,7 @@
         </div>
 
 
-<script>
-function showSection(sectionName, element) {
-    // Hide all sections
-    document.querySelectorAll('.content-section').forEach(section => {
-        section.style.display = 'none';
-    });
-    
-    // Show selected section
-    document.getElementById('section-' + sectionName).style.display = 'block';
-    
-    // Update active nav link
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    element.classList.add('active');
-}
-</script>
+{{-- An inline <script> defining showSection() stood here. Nothing ever called it - the
+     sidebar navigates with real links to /admin/users and friends - and script-src
+     'self' would have refused to run it anyway. --}}
 @endsection

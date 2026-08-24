@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Admin') - Slim4MVC</title>
 
-    <!-- Bootstrap 5 CSS CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    {{-- Served from here, not a CDN: the Content-Security-Policy is default-src 'self',
+         so the cdn.jsdelivr.net links these replace were blocked outright. This layout
+         linked no local stylesheet at all, which left the admin with none of Bootstrap
+         and none of its 59 icons - only the inline rules below. app.css is Bootstrap
+         5.0.2; the blocked link claimed 5.3.2. --}}
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
     
     <style>
         /* Admin Layout with Sidebar */
@@ -459,7 +462,7 @@ $currentPath = $_SERVER['REQUEST_URI'] ?? '/';
 
         <!-- User Dropdown -->
         <div class="sidebar-user-dropdown">
-            <div class="user-toggle" onclick="toggleUserMenu()">
+            <div class="user-toggle" data-user-toggle>
                 <div class="d-flex align-items-center">
                     <div class="avatar-sm">{{ substr(AuthHelper::user()['name'] ?? 'U', 0, 1) }}</div>
                     <div class="user-info ms-2">
@@ -491,17 +494,13 @@ $currentPath = $_SERVER['REQUEST_URI'] ?? '/';
     </main>
 </div>
 
-<!-- Bootstrap 5 JS Bundle with Popper -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
-<script>
-function toggleUserMenu() {
-    const menu = document.getElementById('user-menu');
-    const chevron = document.getElementById('user-chevron');
-    menu.classList.toggle('show');
-    chevron.classList.toggle('rotate');
-}
-</script>
+{{-- The user-menu toggle was an inline <script> reached through an onclick attribute.
+     script-src 'self' allows neither, so the menu never opened. Same behaviour, moved
+     into a file. --}}
+<script src="{{ asset('js/admin.js') }}"></script>
+<script src="{{ asset('js/confirm-submit.js') }}"></script>
 
 @stack('scripts')
 </body>

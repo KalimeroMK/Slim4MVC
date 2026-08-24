@@ -65,7 +65,7 @@ $permissionRoleIds = $permission->roles->pluck('id')->toArray();
                 </div>
                 <div class="card-body p-4">
                     <p class="text-muted">Deleting this permission will remove it from all roles. This action cannot be undone.</p>
-                    <form method="POST" action="/admin/permissions/{{ $permission->id }}/delete" onsubmit="return confirm('Are you sure you want to delete this permission? This action cannot be undone.');">
+                    <form method="POST" action="/admin/permissions/{{ $permission->id }}/delete" data-confirm="Are you sure you want to delete this permission? This action cannot be undone.">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">

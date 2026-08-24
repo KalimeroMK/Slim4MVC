@@ -46,7 +46,7 @@
                                 <a href="/admin/permissions/{{ $permission->id }}/edit" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="POST" action="/admin/permissions/{{ $permission->id }}/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this permission?');">
+                                <form method="POST" action="/admin/permissions/{{ $permission->id }}/delete" class="d-inline" data-confirm="Are you sure you want to delete this permission?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">

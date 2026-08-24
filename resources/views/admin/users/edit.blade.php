@@ -102,7 +102,7 @@ $userRoleIds = $user->roles->pluck('id')->toArray();
                 </div>
                 <div class="card-body p-4">
                     <p class="text-muted">Deleting this user will remove all their data. This action cannot be undone.</p>
-                    <form method="POST" action="/admin/users/{{ $user->id }}/delete" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                    <form method="POST" action="/admin/users/{{ $user->id }}/delete" data-confirm="Are you sure you want to delete this user? This action cannot be undone.">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="btn btn-danger">

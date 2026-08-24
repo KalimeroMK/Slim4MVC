@@ -86,6 +86,30 @@ final class SecurityHeadersMiddlewareTest extends TestCase
         $this->assertFalse($response->hasHeader('Strict-Transport-Security'));
     }
 
+    public function test_leaves_a_policy_the_route_set_for_itself(): void
+    {
+        // A route that serves someone else's content has to be able to say so. The
+        // default policy below suits pages this application renders; imposing it on a
+        // response that already carries one - a page embedding third-party images, say -
+        // silently breaks that page, and the route has no way to object.
+        $own = "default-src 'none'; img-src *";
+        $handler = $this->createStub(RequestHandlerInterface::class);
+        $handler->method('handle')->willReturn(
+            (new Response(200))->withHeader('Content-Security-Policy', $own)
+        );
+
+        $response = $this->middleware->process(
+            $this->requestFactory->createServerRequest('GET', '/'),
+            $handler
+        );
+
+        $this->assertSame($own, $response->getHeaderLine('Content-Security-Policy'));
+
+        // The rest are still applied: only the policy is deferred to.
+        $this->assertSame('DENY', $response->getHeaderLine('X-Frame-Options'));
+        $this->assertSame('nosniff', $response->getHeaderLine('X-Content-Type-Options'));
+    }
+
     private function createHandler(): RequestHandlerInterface
     {
         $handler = $this->createStub(RequestHandlerInterface::class);
