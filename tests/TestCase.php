@@ -8,6 +8,7 @@ use App\Modules\Core\Infrastructure\Database\Eloquent\AutoRelationConfig;
 use App\Modules\Core\Infrastructure\Database\Eloquent\RelationCache;
 use App\Modules\Core\Infrastructure\Support\AuthHelper;
 use App\Modules\Core\Infrastructure\Support\Logger as AppLogger;
+use App\Modules\Core\Infrastructure\Support\Paths;
 use DI\Container;
 use DI\ContainerBuilder;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -95,6 +96,7 @@ abstract class TestCase extends BaseTestCase
         $this->resetAuthState();
         $this->resetEloquentState();
         $_ENV = $this->originalEnv;
+        Paths::useRoot(null);
 
         parent::tearDown();
     }
