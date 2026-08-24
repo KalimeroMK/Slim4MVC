@@ -6,7 +6,6 @@ namespace App\Modules\User\Infrastructure\Models;
 
 use App\Modules\Core\Infrastructure\Database\Eloquent\AutoEloquentRelations;
 use App\Modules\Role\Infrastructure\Models\Role;
-use App\Modules\User\Infrastructure\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -121,7 +120,14 @@ class User extends Model
     }
 
     /**
-     * Override save method to auto-assign user role if no roles assigned.
+     * Override save method to auto-assign the default role if none was assigned.
+     *
+     * This is deliberately not an observer. Eloquent's event dispatcher is never set
+     * anywhere in the kit - Capsule is booted without one - so a `created` hook cannot
+     * fire, and the UserObserver that used to sit beside this could never run. It named
+     * 'client' where this names 'user', which made it look like new accounts got a role
+     * they never had. Wiring the dispatcher would turn on model events across the whole
+     * application, so that is a change of its own rather than part of removing dead code.
      *
      * @param  array<string, mixed>  $options
      */
@@ -132,7 +138,7 @@ class User extends Model
 
         $saved = parent::save($options);
 
-        // If new user was created, assign client role
+        // If a new user was created, give it the default role
         if ($saved && $isNew) {
             // Use the connection directly instead of DB facade
             $connection = $this->getConnection();
@@ -156,14 +162,5 @@ class User extends Model
         }
 
         return $saved;
-    }
-
-    /**
-     * Boot the model and register observers.
-     */
-    #[Override]
-    protected static function booted(): void
-    {
-        static::observe(UserObserver::class);
     }
 }
