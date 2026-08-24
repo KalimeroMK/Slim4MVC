@@ -66,7 +66,7 @@
                                 <a href="/admin/roles/{{ $role->id }}/edit" class="btn btn-sm btn-outline-primary me-1">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="POST" action="/admin/roles/{{ $role->id }}/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                <form method="POST" action="/admin/roles/{{ $role->id }}/delete" class="d-inline" data-confirm="Are you sure you want to delete this role?">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
