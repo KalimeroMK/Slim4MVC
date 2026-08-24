@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Modules\Core\Infrastructure\Http\Middleware;
 
+use App\Modules\Core\Infrastructure\Http\Exceptions\HttpTokenMismatchException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Random\RandomException;
-use RuntimeException;
+use Slim\Exception\HttpBadRequestException;
 
 class CsrfMiddleware implements MiddlewareInterface
 {
@@ -36,13 +37,13 @@ class CsrfMiddleware implements MiddlewareInterface
             /** @var array<string, mixed>|object|null $data */
             $data = $request->getParsedBody();
             if (! is_array($data)) {
-                throw new RuntimeException('Invalid request body', 400);
+                throw new HttpBadRequestException($request, 'Invalid request body.');
             }
 
             $token = $data['_token'] ?? null;
 
             if (! is_string($token) || ! isset($_SESSION['csrf_token']) || ! hash_equals($_SESSION['csrf_token'], $token)) {
-                throw new RuntimeException('CSRF token mismatch', 419);
+                throw new HttpTokenMismatchException($request);
             }
         }
 
