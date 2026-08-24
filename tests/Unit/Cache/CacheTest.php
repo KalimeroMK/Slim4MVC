@@ -19,6 +19,14 @@ final class CacheTest extends TestCase
         parent::setUp();
         $this->testCachePath = __DIR__.'/../../../storage/cache/test';
 
+        // CacheManager::createFileDriver() reads $_ENV['CACHE_PATH'], so without this the
+        // file driver lands wherever the developer's .env points - which is the in-container
+        // /var/www/html path, unwritable on the host. That made
+        // test_cache_manager_creates_different_drivers fail depending on execution order,
+        // and never in CI, which runs with no .env at all. Point it at the directory this
+        // class already creates and cleans. TestCase::tearDown restores $_ENV afterwards.
+        $_ENV['CACHE_PATH'] = $this->testCachePath;
+
         // Clean up test cache directory
         if (is_dir($this->testCachePath)) {
             $files = glob($this->testCachePath.'/*.cache');
